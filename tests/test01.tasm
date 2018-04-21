@@ -1,0 +1,14 @@
+; Test file for GoAsm65816 
+; Scot W. Stevenson <scot.stevenson@gmail.com>
+; First version: 21. Apr 2018
+; This version: 21. Apr 2018
+
+        .mpu 65816
+        .origin 8000
+        .native         ; it gets serious
+
+start
+        nop             ; this really does nothing
+        bra start       
+
+        .end        
