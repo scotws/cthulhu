@@ -1,0 +1,7 @@
+TODO for GoAsm65816 
+Scot W. Stevenson <scot.stevenson@gmail.com>
+First version: 21. Apr 2018
+This version: 21. Apr 2018
+
+- Write primitive lexer
+
