@@ -11,7 +11,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	//	"unicode"
+	"strings"
+	"unicode"
 )
 
 type token struct {
@@ -57,14 +58,19 @@ var (
 	tokenNames = make(map[int]string)
 )
 
+// printToken is a temporary routine for testing
 func printToken(t token) {
-	fmt.Print("<", tokenNames[t.Type], ">")
+	fmt.Print("<", tokenNames[t.Type], "> ", t.Text, "\n")
 }
 
 func main() {
 	flag.Parse()
 
 	tokenNames[EOL] = "EOL"
+	tokenNames[WS] = "WS"
+	tokenNames[LABEL] = "LABEL"
+	tokenNames[COMMENT] = "COMMENT"
+	tokenNames[ANON_LABEL] = "ANON_LABEL"
 
 	// *** LOAD SOURCE FILE ***
 
@@ -87,6 +93,49 @@ func main() {
 	// *** LEXER ***
 
 	for line_number, line := range raw {
+
+		// Deal with empty lines
+		if len(line) == 0 || strings.TrimSpace(line) == "" {
+			tokens = append(tokens, token{EOL, ""})
+			continue
+		}
+
+		// Move stuff to runes because we want to be able
+		// to deal with Unicode
+		chars := []rune(line)
+
+		// Do stuff with first character
+		c0 := chars[0]
+		if !unicode.IsSpace(c0) {
+			switch c0 {
+
+			case ';':
+				tokens = append(tokens, token{COMMENT, line})
+				tokens = append(tokens, token{EOL, ""})
+				continue
+
+			case '@':
+				tokens = append(tokens, token{ANON_LABEL, "@"})
+				line = line[1:len(line)]
+
+			// This must then be a label
+			default:
+				w0 := strings.SplitN(line, " ", 2)
+				tokens = append(tokens, token{LABEL, w0[0]})
+
+				// If there was just the label in the line,
+				// we're done
+				if len(w0) == 1 {
+					tokens = append(tokens, token{EOL, ""})
+					continue
+				}
+
+				// Otherwise, move past the label and continue
+				line = w0[1]
+			}
+		}
+
+		// HIER HIER HIER TODO
 
 		// At the end of the line, add a EOL token
 		fmt.Println(line_number, "-->", line)
