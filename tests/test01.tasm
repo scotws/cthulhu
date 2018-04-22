@@ -9,6 +9,15 @@
 
 start
         nop             ; this really does nothing
+
+        ldx.# &0010
+@
+        lda.# 'a'
+        sta.x 2000
+        dex
+        bne -
+
         bra start       
+stuff   .byte 0, 1, 2, 2+1 ; just a test
 
         .end        
