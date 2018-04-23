@@ -1,0 +1,9 @@
+Manifesto for GoAsm65816 
+Scot W. Stevenson <scot.stevenson@gmail.com>
+First version: 23. Apr 2018
+This version: 23. Apr 2018
+
+This is the original document that sets out the vision for the GoAsm65816
+assembler for the 65816 MPU. 
+
+

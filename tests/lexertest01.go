@@ -3,6 +3,8 @@
 // First version: 21. April 2018
 // This version: 22. April 2018
 
+// This is a lexer test based on the original version of TAN
+
 package main
 
 import (
