@@ -1,7 +1,7 @@
 # Manual for the Simpler Assembler Notation (SAN)
 Scot W. Stevenson <scot.stevenson@gmail.com> 
 First version: 23. April 2018
-This version: 23. April 2018
+This version: 24. April 2018
 
 Simpler Assembler Notation (SAN) is a, well, not so complicated way of
 writing assembler code for the 65816 MPU. 
@@ -116,13 +116,9 @@ This is especially useful for the bank bytes of the 65816.
 
 ### Single Characters and Strings
 
-Single characters are marked in single quotes (`lda.# 'a'`). Because of the way
-Python 3 handles characters, the Unicode value is used, but might not fit into
-the register. Strings are marked in double quotes (`.byte "Kaylee"`). 
-
-(The
-assembler enforces not using double quotes for single characters (`"a"`) to
-prevent errors.)
+Single characters that are to be converted to ASCII values are in double quotes
+just like strings (`lda.# "a"`). Note that though the code can be in Unicode
+(labels, etc), strings for the 65816 themselves are currently still only ASCII.
 
 
 ### Modifiers and Math
@@ -309,7 +305,9 @@ consist of math terms (`{ home + 2 }`).  For longer terms, you can use the
 
 ## Internals 
 
-## TOOLS
+
+
+
 
 ### Tinkfmt Source Code Formatter
 
