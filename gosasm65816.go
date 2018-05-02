@@ -13,6 +13,7 @@ import (
 	"os"
 
 	"goasm65816/lexer"
+	"goasm65816/parser"
 	"goasm65816/token"
 )
 
@@ -64,8 +65,9 @@ func main() {
 
 	// *** PARSER ***
 
-	// TEST OUTPUT
-	for _, t := range tokens {
-		fmt.Println(t.Text)
+	ok := paser.Paser(tokens)
+	if !ok {
+		log.Fatal("FATAL: Parser failed.")
 	}
+
 }
