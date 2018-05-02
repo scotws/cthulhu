@@ -97,4 +97,68 @@ Note that `yes!`, `wtf?`, and `oh-no-no` are all legal symbols and (with colons
 and underscores at the beginning) legal labels. 
 
 
+## Math Syntax
 
+GoAsm65816 uses a form of Reverse Polish Notation (RPN) for math, which is
+appropriate because it was first built for a Forth system called Liara Forth. It
+is introduced by a left bracket and followed by a stack notation with numbers --
+binary, hex, and decimal -- and mathematical operation, along with some special
+functions. Examples:
+
+```
+        .equ target $2000
+
+                lda.# [40 10 +]
+                sta.zi target           ; STA (target)
+                sta.zi [target 1+]      ; STA (target+1)
+```
+Note `1+` is a special operation to add one to the number.
+
+It is an error if there is more than one element on the math stack when the
+operation is finished. 
+
+## List of Directives
+
+This is a complete list of available and planned directives. A "(n/a)" signals
+that this word is not yet available.
+
+- **.a16** (n/a) No parameters.
+
+- **.a8** (n/a)
+- **.advance** (n/a) 
+
+- **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
+  assembly to make sure that the given parameter is true. Aborts with an error
+  message if not. 
+
+- **.axy16** (n/a) 
+- **.axy8** (n/a) 
+- **.bank** (n/a) 
+- **.byte** (n/a) 
+- **.else** (n/a) 
+- **.emulate** (n/a) 
+
+- **.end** (n/a) No parameters. Marks end of assembly program.
+
+- **.equ** (n/a) Required paramters: **<SYMBOL> <NUMBER>**. Defines a symbol.
+
+- **.if** (n/a) 
+- **.include** (n/a) 
+- **.invoke** (n/a) 
+- **.long** (n/a) 
+- **.lsb** (n/a) 
+- **.macro** (n/a) 
+- **.mend** (n/a) 
+- **.msb** (n/a) 
+- **.native** (n/a) 
+- **.origin** (n/a) 
+- **.print** (n/a) 
+- **.ram** (n/a) 
+- **.rom** (n/a) 
+- **.scend** (n/a) 
+- **.scope** (n/a) 
+- **.status** (n/a) 
+- **.then** (n/a) 
+- **.word** (n/a) 
+- **.xy16** (n/a) 
+- **.xy8** (n/a) 
