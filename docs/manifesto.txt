@@ -1,9 +1,23 @@
 Manifesto for GoAsm65816 
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 23. Apr 2018
+This version: 02. May 2018
 
 This is the original document that sets out the vision for the GoAsm65816
-assembler for the 65816 MPU. 
+assembler for the 65816 MPU. It is mostly included for historical reasons
+and is superceded by the manual and other documents. 
 
 
+GOAL
+
+The primary goal is to write a powerful assembler for the Simpler Assembler
+Nation (SAN) for the 65816 MPU for my own use. Secondary goals are learning how
+to create a lexer and parser, and deeping the understanding of Go (golang). 
+
+
+WHY GO?
+
+Python would be a better choice for a project that others are going to use.
+However, realistically, not many other people will be using SAN. This
+creates a good chance to deeping Go knowledge. Also, Go is fast, of
+low complexity, and has a strong type system. Concurrency is secondary.
