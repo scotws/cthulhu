@@ -1,7 +1,7 @@
 // The GoAsm65816 Assember for the 65816 MPU
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 02. May 2018
+// This version: 03. May 2018
 
 package main
 
@@ -13,6 +13,7 @@ import (
 	"os"
 
 	"goasm65816/lexer"
+	"goasm65816/lister"
 	"goasm65816/parser"
 	"goasm65816/token"
 )
@@ -20,6 +21,7 @@ import (
 var (
 	input     = flag.String("i", "", "Input file (REQUIRED)")
 	f_verbose = flag.Bool("v", false, "Give verbose messages")
+	f_listing = flag.Bool("l", false, "Print listing and label files")
 
 	raw    []string
 	tokens []token.Token
@@ -72,4 +74,11 @@ func main() {
 	}
 
 	verbose("Parser run successful.")
+
+	// *** LISTER ***
+
+	if *f_listing {
+		lister.Lister()
+	}
+
 }
