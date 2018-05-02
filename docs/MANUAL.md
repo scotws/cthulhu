@@ -1,73 +1,100 @@
 # Manual for the GoAsm65816 Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 23. Apr 2018
+This version: 02. May 2018
 
 
 
+The assembler is built with the stengths and special characteristics of the
+65816 MPU in mind. 
 
 
 
-## Internals
+## Assembler Syntax
 
-Without going into the formal grammar, the rules for elements are as follows:
+The syntax for GoAsm65816 should be quick to write and easy to parse to allow
+automatic formatting. Mostly, the type of a word can be determined by its 
+**first character**. The following list has the informal definitions, a formal
+grammar will be included in the doc folder at a later point.
 
-**COMMENTS** - Comments start with a ';' semicolon. If the formatted output
-should recognize a comment as a whole-line comment, use ';;' two semicolons. In
-both cases, the whole rest of the line is ignored.
+- **Comments** start with a semi-colon (`;`) and run to the end of the line. A
+  double semi-colon (`;;`) forces a whole-lime comment regardless of where it
+  begins. 
 
-**NUMBERS** - SAN distingishes three types of numbers:
+- **Directives** start with a dot (`.`) and consist of lower-case letters and
+  numbers. The can have parameters. 
 
-- **Decimal** - The usual, built of the digits 0 to 9
-- **Hexadecimal** - Prefixed with either `$` (traditional) or `0x` (preferred)
-  and followed by a hex number. The digits a to f can be either upper or
-  lowercase, though upper case is recommended to make it easier to distingish
-  them from symbols.
-- **Binary** - Prefixed by `%` and either `0` or `1`
+- **Hex numbers** start with the traditional dollar sign (`$`). It can contain
+  dots and colons as separators for easier reading.
 
-Note that octals are not supported.
+- **Binary numbers** start with the traditional percent sign (`%`). It can contain
+  dots and colons as separators for easier reading.
+
+- **Decimal numbers** are, well, decimal numbers.
+
+- Octal number are not supported. 
+
+- **Strings** and **single characters** are enclosed by quotation marks (`\"`).
+  This means that single characters are not enclosed in single quotes.
+
+- **Mnemonics** belong to a fixed set of 256 words. They consist of lower case
+  letters and dots, with a few special characters such as `#` for immediate
+  values.
+
+- **Symbols** start with upper- or lowercase (unicode) letter, not a number or a
+  special character. They can then contain futher upper- or lowercase letters,
+  numbers, or special charaters out of the list `#?!_.+-*/\\'@~^&=|`. Note that
+  the square braces `[` and `]`, as well as curly brances `{` `}`, the comma
+  `,`, semi-colon `;` and parens `(` and `)` are not legal characters for
+  symbols.  They cannot be the same as mnemonics.
+
+- **Labels** start with a colon (`:`) if the are global, and an underscore (`_`)
+  if they are local must be inside a local scope, enclosed by `.scope` and
+  `.scend`. After that, they follow the same rules as symbols.
+
+- **Math terms** are handled inside square braces and follow reverse polish
+  notation (RPN). See below for a further description.
 
 
-**LABELS** - A label must start with an upper or lower case letter, or the `_`
-(underscore) sign for local labels inside a `.scope` region. They must end with
-a colon `:`. Between the first and last letter, they can contain letters,
-numbers or any of the characters `_?!&#`. These are legal labels:
-```
-fire&ice:
-wtf?:
-_keep_it_local:
-b:
-```
-The colon *must* appear at the end of the label, but that's the only place it is
-allowed to appear. There must be whitespace after the colon or an end of the
-line.
+## Indentation
 
-**DIRECTIVES** - Directives start with a period `.` and are followed by letters,
-numbers, and special characters. They always appear before their parameters.
+The assembler can provide automatically formatted code following the model of
+the `gofmt` tool. Simplified, **labels** should start at the beginning of the
+line and by on a line by themselves, **directives** should be indented by eight
+spaces (one tab), and **mnenomics** by 16 spaces (two tabs). Though there is no
+artificial limit to the line length, lines beyond 80 characters are discouraged.
 
-```
-        .equ company 3
-        .equ bore 3+1           ; 3+1 is calculated
-```
-
-Directives are indented one tab's worth of spaces. There must be whitespace or
-the end of the line after a directive.
-
-**SYMBOLS** - A symbol must start with an upper or lowercase letter, or the `_`
-underscore sign for local labels inside a `.scope` region. For obvious reasons,
-they can contain the same special characters as labels.
-
-```
-        lda.# company
-        jmp wtf?
-        jmp fire&ice+2
-        
-```
-Internally, a string is defined as a symbol when all other
-alternatives are exhausted -- that is, the string is not a number, not a label,
-and not a directive. There must be whitespace, a math operation (see below) 
-or the end of the line after a symbol.after a symbol.
-
+### Example Code
 
 ```
+        .ram $0000 $7FFF
+        .rom $8000 $FFFF
+
+        .org $00:8000
+
+        .equ target $2000
+
+        .native
+        .a16
+        .xy8
+
+;; This are getting serious
+:start
+        .scope
+                lda.# 0000
+                ldx.# $FF
+_loop
+                sta.x target
+                dex             ; remember two bytes per A at 16 bit
+                dex
+                bne _loop
+        .scend
+
+                stp
 ```
+
+Note that `yes!`, `wtf?`, and `oh-no-no` are all legal symbols and (with colons
+and underscores at the beginning) legal labels. 
+
+
+

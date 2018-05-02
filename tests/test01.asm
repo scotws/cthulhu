@@ -1,17 +1,21 @@
 ;; Test file for GoAsm65816 
 ;; Scot W. Stevenson <scot.stevenson@gmail.com>
 ;; First version: 21. Apr 2018
-;; This version: 21. Apr 2018
+;; This version: 02. May 2018
 
 ;; Code is in Simpler Assember Notation
 
-        .mpu 65816
-        .origin $8000
+        .ram $0000 $7FFF
+        .rom $8000 $FFFF
+
+        .origin $00:8000
+
         .native         ; it gets serious
+        .axy16
 
         .equ target1 $00:2fff
         .equ target2 $0030aa
-start:
+:start
                 nop             ; this really does nothing
 
                 ldx.# 0010
@@ -22,17 +26,17 @@ start:
                 dex
                 bne -
 
-                lda.# %11110000
+                lda.# %0000.0000.1111.0000
 
                 jmp start       
 
 ;; Silly subroutine. Call with char value in A
-.scope
-got_a?:
+        .scope
+:got_a?
         .axy8
                 ldy.# 00        ; false
-                ldx.# 00
-        _loop:
+                tyx
+_loop
                 lda.x check_a
                 beq _done
                 cmp.# "a"
@@ -40,15 +44,16 @@ got_a?:
                 inx
                 bra _loop
 
-_found!:
+_found!
                 dey             ; to $ff
-_done:
+_done
         .axy16
                 rts
-.scend
+        .scend
 
-stuff:  .byte 0, $01, 2, 2+1, "4", %0000:1111 ; just a test
+:stuff
+        .byte 0, $0A, 2, [2 1 +], "4", %0000:1111 ; just a test
 
-check_a:
+:check_a
         .byte "This is a string", 0
         .end        
