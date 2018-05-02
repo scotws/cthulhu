@@ -20,8 +20,9 @@ import (
 var (
 	input     = flag.String("i", "", "Input file (REQUIRED)")
 	f_verbose = flag.Bool("v", false, "Give verbose messages")
-	raw       []string
-	tokens    []token.Token
+
+	raw    []string
+	tokens []token.Token
 )
 
 // Verbose prints the given string if the verbose flag is set
@@ -65,9 +66,10 @@ func main() {
 
 	// *** PARSER ***
 
-	ok := paser.Paser(tokens)
+	ok = parser.Parser(tokens)
 	if !ok {
 		log.Fatal("FATAL: Parser failed.")
 	}
 
+	verbose("Parser run successful.")
 }
