@@ -1,7 +1,27 @@
 TODO for GoAsm65816 
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 21. Apr 2018
+This version: 04. May 2018
 
-- Write primitive lexer
+- Write first primitive lexer
+- Write first primitive formatter
+- Write first primitive parser
+
+
+PARSER TRICKS
+
+- Define .ram and .rom regions and make sure there are no attempts to (say)
+  write outside of ROM or read outside of RAM or ROM. Formats:
+
+        .ram $0000-$7FFF
+        .ram $FF00
+        .ram $FF00, $FF01
+
+- Allow asserting if MPU is in a native or emulated state
+
+- Support "linear mode" where the whole address space can by used by
+  figuring out where the blocks end and a jmp.l takes us to the next
+  block
+
+- Support "relocation" mode where everything is branches and no jumps
 
