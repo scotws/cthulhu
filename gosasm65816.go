@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 
+	"goasm65816/formatter"
 	"goasm65816/lexer"
 	"goasm65816/lister"
 	"goasm65816/parser"
@@ -20,6 +21,7 @@ import (
 
 var (
 	input     = flag.String("i", "", "Input file (REQUIRED)")
+	f_format  = flag.Bool("f", false, "Return formatted version of source")
 	f_verbose = flag.Bool("v", false, "Give verbose messages")
 	f_listing = flag.Bool("l", false, "Print listing and label files")
 
@@ -66,6 +68,13 @@ func main() {
 
 	verbose("Lexer run successful.")
 
+	// *** FORMATTER ***
+	if *f_format {
+		formatter.Formatter()
+	}
+
+	verbose("Formatter run successful.")
+
 	// *** PARSER ***
 
 	ok = parser.Parser(tokens)
@@ -81,4 +90,5 @@ func main() {
 		lister.Lister()
 	}
 
+	verbose("Lister run successful.")
 }

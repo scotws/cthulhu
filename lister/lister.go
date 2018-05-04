@@ -3,6 +3,10 @@
 // First version: 02. May 2018
 // This version: 02. May 2018
 
+/* The lister produces two text files for the user: A cleanly formatted
+   listing of source code, and a list of the labels used.
+*/
+
 package lister
 
 import (
@@ -11,5 +15,4 @@ import (
 
 func Lister() {
 	fmt.Println("(At lister)")
-
 }
