@@ -11,13 +11,20 @@ import (
 	"goasm65816/token"
 )
 
-func Parser(tl []token.Token) bool {
+func Parser(tl *[]token.Token) bool {
 
 	ok := true
 
-	// TODO Test
-	for _, t := range tl {
-		fmt.Println(t.Text)
+	// TODO Test routines
+
+	for _, t := range *(tl) {
+		t.PrintLine()
+	}
+
+	fmt.Println("------------")
+
+	for _, t := range *(tl) {
+		t.Print()
 	}
 
 	return ok

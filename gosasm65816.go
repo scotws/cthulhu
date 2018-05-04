@@ -69,6 +69,7 @@ func main() {
 	verbose("Lexer run successful.")
 
 	// *** FORMATTER ***
+
 	if *f_format {
 		formatter.Formatter()
 	}
