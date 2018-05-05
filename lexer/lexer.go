@@ -130,10 +130,10 @@ func findHexEOW(rs []rune) int {
 	return e
 }
 
-// findLabelEOW takes an array of runes and returns the index of the
-// first rune that doesn't belong in a label. If there is none, it
-// returns the length of the rune array
-func findLabelEOW(rs []rune) int {
+// findSymbolEOW takes an array of runes and returns the index of the first rune
+// that doesn't belong in a label or a symbol. If there is none, it returns the
+// length of the rune array
+func findSymbolEOW(rs []rune) int {
 	e := len(rs)
 
 	// Start one character in to skip '_' and ':'
@@ -214,10 +214,17 @@ func isEmpty(s string) bool {
 }
 
 // isLegalSymbolChar takes a rune and returns a bool depending if it is a legal
-// character for a symbol or a list
+// character for a symbol or a label. Note that this doesn't mean that a symbol
+// or label may begin with these runes, they just are allowed after the
+// initial character
 func isLegalSymbolChar(r rune) bool {
 
-	lsc := map[rune](bool){'?': true}
+	lsc := map[rune](bool){
+		'?': true, '_': true, '-': true, '!': true,
+		'&': true, '\'': true, '*': true,
+		'+': true, '~': true, '#': true, '|': true,
+		'.': true,
+	}
 	f := false
 	_, ok := lsc[r]
 
@@ -297,7 +304,8 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 				e := findDecEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
 				addToken(token.T_decimal, string(word), ln, i)
-				break
+				i = i + e - 1 // continue adds one
+				continue
 			}
 
 			switch cs[i] {
@@ -317,7 +325,7 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 				continue
 			case ':':
 				i += 1 // skip ':' symbol
-				e := findLabelEOW(cs[i:len(cs)])
+				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include colon
 				addToken(token.T_label, string(word), ln, i)
 				i = i + e - 1 // continue adds one
@@ -329,6 +337,9 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 				addToken(token.T_binary, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
+
+			// Hex number. We allow uppercase and lowercase heximal
+			// digits
 			case '$':
 				i += 1 // skip '$' symbol
 				e := findHexEOW(cs[i:len(cs)])
@@ -336,12 +347,25 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 				addToken(token.T_hex, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
+
+			// Local label. First character after the underscore
+			// must be a letter
 			case '_':
-				addToken(token.T_localLabel, l, ln, i)
-				break
+				i += 1 // skip '_' symbol
+				//
+				e := findSymbolEOW(cs[i:len(cs)])
+				word := cs[i-1 : i+e] // Include underscore
+				addToken(token.T_localLabel, string(word), ln, i)
+				i = i + e - 1 // continue adds one
+				continue
+
+			// String. Use double quote instead of single quote.
+			// Note we currently don't allow backslashes to get the
+			// quotation mark itself
 			case '"':
 				i += 1 // skip leading quote
 				e, ok := findStringEOW(cs[i:len(cs)])
+
 				if !ok {
 					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): No closing quote")
 				}
@@ -353,7 +377,6 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 			}
 
 			// See if we are dealing with a mnemonic
-			// TODO condense
 			if unicode.IsLetter(cs[i]) {
 				e := findMneEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
@@ -371,8 +394,17 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 						addToken(token.T_opcode2, string(word), ln, i)
 						i = i + e - 1 // continue adds one
 					}
+					continue
+				} else {
+					// If this is not some opcode and none
+					// of the above, it has to be some stort
+					// of a symbol
+					e := findSymbolEOW(cs[i:len(cs)])
+					word := cs[i : i+e]
+					addToken(token.T_symbol, string(word), ln, i)
+					i = i + e - 1 // continue adds one
+					continue
 				}
-				continue
 			}
 
 		}

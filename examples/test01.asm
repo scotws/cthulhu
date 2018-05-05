@@ -15,7 +15,7 @@
         .axy16
 
         .equ target1 $00:2fff
-        .equ target2 $0030aa
+        .equ target2 $00.30aa
 :start
                 nop             ; this really does nothing
 
@@ -39,11 +39,11 @@
                 tyx
 _loop
                 lda.x check_a
-                beq _done
+                beq done
                 cmp.# "a"
-                beq _found!
+                beq found!
                 inx
-                bra _loop
+                bra loop
 
 _found!
                 dey             ; to $ff

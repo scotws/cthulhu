@@ -31,6 +31,7 @@ const (
 	T_slash                 // /
 	T_star                  // *
 	T_string                // not a list of runes
+	T_symbol                // any symbol
 )
 
 var name = map[int](string){
@@ -56,6 +57,7 @@ var name = map[int](string){
 	T_slash:      "SLASH",
 	T_star:       "STAR",
 	T_string:     "STRING",
+	T_symbol:     "SYMBOL",
 }
 
 type Token struct {
