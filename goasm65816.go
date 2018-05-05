@@ -71,7 +71,7 @@ func main() {
 	// *** FORMATTER ***
 
 	if *f_format {
-		formatter.Formatter()
+		formatter.Formatter(tokens)
 	}
 
 	verbose("Formatter run successful.")

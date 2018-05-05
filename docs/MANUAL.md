@@ -48,10 +48,11 @@ grammar will be included in the doc folder at a later point.
   `,`, semi-colon `;` and parens `(` and `)` are not legal characters for
   symbols.  They cannot be the same as mnemonics.
 
-- **Labels** start with a colon (`:`) if the are global, and an underscore (`_`)
-  if they are local must be inside a local scope, enclosed by `.scope` and
-  `.scend`. After that, they follow the same rules as symbols, except that
-  the first character after the colon may be a number.
+- **Labels** are basically symbols with are defined a special way: They mark
+  their position on the far beginning of the line with a colon (`:`) if they
+  are global, and an underscore (`_`) if they are local. Local labels are only
+  valid inside a scope marked by  `.scope` and `.scend`. Apart from that, they
+  follow the same rules as symbols.
 
 - **Math terms** are handled inside square braces and follow reverse polish
   notation (RPN). See below for a further description.

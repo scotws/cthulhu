@@ -70,11 +70,12 @@ type Token struct {
 // Print just prints the token name without a final line feed. It is mainly
 // used for testing
 func (t *Token) Print() {
-	fmt.Print("<", name[t.Type], ">")
+	fmt.Printf("<%s>", name[t.Type])
 }
 
 // PrintLine displays longform information from the token. It is used mainly
 // for testing
 func (t *Token) PrintLine() {
-	fmt.Print("<", name[t.Type], "> (", t.Line, ",", t.Index, "): \t", t.Text, "\n")
+	ts := fmt.Sprintf("<%s>", name[t.Type])
+	fmt.Printf("%13s (%02d,%02d): \t%s\n", ts, t.Line, t.Index, t.Text)
 }

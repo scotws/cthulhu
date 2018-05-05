@@ -223,7 +223,7 @@ func isLegalSymbolChar(r rune) bool {
 		'?': true, '_': true, '-': true, '!': true,
 		'&': true, '\'': true, '*': true,
 		'+': true, '~': true, '#': true, '|': true,
-		'.': true,
+		'.': true, '/': true, '=': true, '^': true,
 	}
 	f := false
 	_, ok := lsc[r]
@@ -280,6 +280,7 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 
 		if isCommentLine(l) {
 			addToken(token.T_comment, l, ln, 0)
+			addToken(token.T_eol, "\n", ln, 0)
 			continue
 		}
 
@@ -323,13 +324,24 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 					i = i + e - 1 // continue adds one
 				}
 				continue
+
+			// Global label. The first character after the colon
+			// must be an uppercase or lowercase letter
 			case ':':
 				i += 1 // skip ':' symbol
+
+				// First character after the colon must be an
+				// upper- or lowercase letter because a label is
+				// basically just a symbol
+				if !unicode.IsLetter(cs[i]) {
+					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): First char after colon must be a letter")
+				}
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include colon
 				addToken(token.T_label, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
+
 			case '%':
 				i += 1 // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
@@ -352,7 +364,14 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 			// must be a letter
 			case '_':
 				i += 1 // skip '_' symbol
-				//
+
+				// First character after the underscore must be an
+				// upper- or lowercase letter because a label is
+				// basically just a symbol
+				if !unicode.IsLetter(cs[i]) {
+					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): First char after underscore must be a letter")
+				}
+
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include underscore
 				addToken(token.T_localLabel, string(word), ln, i)
@@ -397,7 +416,7 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 					continue
 				} else {
 					// If this is not some opcode and none
-					// of the above, it has to be some stort
+					// of the above, it has to be some sort
 					// of a symbol
 					e := findSymbolEOW(cs[i:len(cs)])
 					word := cs[i : i+e]
@@ -408,6 +427,8 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 			}
 
 		}
+
+		addToken(token.T_eol, "\n", ln, len(cs))
 
 	}
 
