@@ -1,12 +1,13 @@
 ;; Test file for GoAsm65816 
 ;; Scot W. Stevenson <scot.stevenson@gmail.com>
 ;; First version: 21. Apr 2018
-;; This version: 02. May 2018
+;; This version: 05. May 2018
 
 ;; Code is in Simpler Assember Notation
 
-        .ram $0000 $7FFF
-        .rom $8000 $FFFF
+        .ram $0000-$7FFF
+        .rom $8000-$FFFF
+        .ram $FFF0, $FF01
 
         .origin $00:8000
 

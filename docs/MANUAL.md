@@ -1,7 +1,7 @@
 # Manual for the GoAsm65816 Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 02. May 2018
+This version: 05. May 2018
 
 
 
@@ -50,7 +50,8 @@ grammar will be included in the doc folder at a later point.
 
 - **Labels** start with a colon (`:`) if the are global, and an underscore (`_`)
   if they are local must be inside a local scope, enclosed by `.scope` and
-  `.scend`. After that, they follow the same rules as symbols.
+  `.scend`. After that, they follow the same rules as symbols, except that
+  the first character after the colon may be a number.
 
 - **Math terms** are handled inside square braces and follow reverse polish
   notation (RPN). See below for a further description.

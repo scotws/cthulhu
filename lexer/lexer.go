@@ -1,7 +1,7 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 04. May 2018 ("May the Force be with you")
+// This version: 05. May 2018  (Happy Cino de Mayo!)
 
 package lexer
 
@@ -31,6 +31,15 @@ var (
 		token.T_rightStack,
 	}
 )
+
+// addToken takes the token identifier, the actual text of the token from the
+// source code, the row and index the token was found in, and adds it to the
+// token stream.
+func addToken(ti int, s string, r int, i int) {
+	s0 := strings.TrimSpace(s)
+	r0 := r + 1 // computers count row from 0, we from one
+	tokens = append(tokens, token.Token{ti, s0, r0, i})
+}
 
 // findBinEOW takes an array of runes and returns the index of the first
 // non-binary number character (0 and 1). If there is none, it returns the
@@ -121,6 +130,25 @@ func findHexEOW(rs []rune) int {
 	return e
 }
 
+// findLabelEOW takes an array of runes and returns the index of the
+// first rune that doesn't belong in a label. If there is none, it
+// returns the length of the rune array
+func findLabelEOW(rs []rune) int {
+	e := len(rs)
+
+	// Start one character in to skip '_' and ':'
+	for i := 1; i < len(rs); i++ {
+
+		if !unicode.IsLetter(rs[i]) &&
+			!unicode.IsNumber(rs[i]) &&
+			!isLegalSymbolChar(rs[i]) {
+			e = i
+			break
+		}
+	}
+	return e
+}
+
 // findMneEOW takes an array of runes and returns the index of the
 // the first rune that doesn't belong in a SAN mnemonic. If there is none,
 // returns the length of the rune array
@@ -146,7 +174,6 @@ func findMneEOW(rs []rune) int {
 func findStringEOW(rs []rune) (int, bool) {
 	f := false
 	t := 0
-
 	for i, c := range rs {
 		if c == '"' {
 			t = i // don't include the closing quote itself
@@ -161,7 +188,6 @@ func findStringEOW(rs []rune) (int, bool) {
 func isCommentLine(s string) bool {
 	f := false
 	s0 := strings.TrimSpace(s)
-
 	if s0[0] == ';' {
 		f = true
 	}
@@ -187,6 +213,22 @@ func isEmpty(s string) bool {
 	return f
 }
 
+// isLegalSymbolChar takes a rune and returns a bool depending if it is a legal
+// character for a symbol or a list
+func isLegalSymbolChar(r rune) bool {
+
+	lsc := map[rune](bool){'?': true}
+	f := false
+	_, ok := lsc[r]
+
+	if unicode.IsLetter(r) ||
+		unicode.IsNumber(r) ||
+		ok {
+		f = true
+	}
+	return f
+}
+
 // isSingleCharToken takes a rune and checks if it is one of the characters we
 // consider a single-rune token. Returns a bool as a sign of success, and if
 // true, the corresponding int as the token type.
@@ -201,15 +243,6 @@ func isSingleCharToken(r rune) (int, bool) {
 		}
 	}
 	return t, f
-}
-
-// addToken takes the token identifier, the actual text of the token from the
-// source code, the row and index the token was found in, and adds it to the
-// token stream.
-func addToken(ti int, s string, r int, i int) {
-	s0 := strings.TrimSpace(s)
-	r0 := r + 1 // computers count row from 0, we from one
-	tokens = append(tokens, token.Token{ti, s0, r0, i})
 }
 
 // whichMnemonic takes an array of runes and returns a int signaling the number
@@ -282,10 +315,13 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 					i = i + e - 1 // continue adds one
 				}
 				continue
-
 			case ':':
-				addToken(token.T_label, l, ln, i)
-				break
+				i += 1 // skip ':' symbol
+				e := findLabelEOW(cs[i:len(cs)])
+				word := cs[i-1 : i+e] // Include colon
+				addToken(token.T_label, string(word), ln, i)
+				i = i + e - 1 // continue adds one
+				continue
 			case '%':
 				i += 1 // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
@@ -303,10 +339,6 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 			case '_':
 				addToken(token.T_localLabel, l, ln, i)
 				break
-
-			case '@':
-				addToken(token.T_anonLabel, "@", ln, i)
-				continue
 			case '"':
 				i += 1 // skip leading quote
 				e, ok := findStringEOW(cs[i:len(cs)])
@@ -321,6 +353,7 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 			}
 
 			// See if we are dealing with a mnemonic
+			// TODO condense
 			if unicode.IsLetter(cs[i]) {
 				e := findMneEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
@@ -330,8 +363,10 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 					switch mt {
 					case 0:
 						addToken(token.T_opcode0, string(word), ln, i)
+						i = i + e - 1 // continue adds one
 					case 1:
 						addToken(token.T_opcode1, string(word), ln, i)
+						i = i + e - 1 // continue adds one
 					case 2:
 						addToken(token.T_opcode2, string(word), ln, i)
 						i = i + e - 1 // continue adds one

@@ -21,3 +21,9 @@ Python would be a better choice for a project that others are going to use.
 However, realistically, not many other people will be using SAN. This
 creates a good chance to deeping Go knowledge. Also, Go is fast, of
 low complexity, and has a strong type system. Concurrency is secondary.
+
+
+HIGH LEVEL
+
+Allows libraries for different mnemonics ("front ends") with a common 
+Intermediate Representation (IR)

@@ -1,7 +1,7 @@
 TODO for GoAsm65816 
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 04. May 2018
+This version: 05. May 2018
 
 - Write first primitive lexer
 - Write first primitive formatter
@@ -24,4 +24,9 @@ PARSER TRICKS
   block
 
 - Support "relocation" mode where everything is branches and no jumps
+
+
+PSEUDOINSTRUCTIONS
+
+- Built-in pseudo-instruction / macros for movement: .invoke mov count source -> destination
 
