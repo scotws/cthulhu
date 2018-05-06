@@ -257,7 +257,7 @@ func isSingleCharToken(r rune) (int, bool) {
 // a mnemonic
 func whichMnemonic(rs []rune) (int, bool) {
 	ok := false
-	oc, ok := data.Opcodes[string(rs)]
+	oc, ok := data.Opcodes65816[string(rs)]
 	return oc.Operands, ok
 }
 
