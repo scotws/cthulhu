@@ -1,15 +1,15 @@
 ;; Test file for GoAsm65816 
 ;; Scot W. Stevenson <scot.stevenson@gmail.com>
 ;; First version: 21. Apr 2018
-;; This version: 05. May 2018
-
-;; Code is in Simpler Assember Notation
+;; This version: 06. May 2018
 
         .ram $0000-$7FFF
         .rom $8000-$FFFF
         .ram $FFF0, $FF01
 
+        .notation san
         .origin $00:8000
+        .mpu 65816
 
         .native         ; it gets serious
         .axy16
@@ -24,6 +24,7 @@
                 lda.# "a"
                 sta.x target1   ; note bank byte separator
                 sta.x target2
+                sta.x target1+1
                 dex
                 bne -
 
@@ -53,7 +54,7 @@ _done
         .scend
 
 :stuff
-        .byte 0, $0A, 2, [2 1 +], "4", %0000:1111 ; just a test
+        .byte 0, $0A, 2, 2+1, "4", %0000:1111 ; just a test
 
 :check_a
         .byte "This is a string", 0

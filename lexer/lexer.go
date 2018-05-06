@@ -19,7 +19,10 @@ var (
 	tokens []token.Token
 
 	// We can handle single-character tokens with this table and a loop
-	singleChars      = []rune{',', '-', '+', '@', '/', '*', '[', ']'}
+	singleChars = []rune{
+		',', '-', '+', '@', '/', '*', '[', ']', '(', ')', '>', '<',
+		'#', '{', '}',
+	}
 	singleCharTokens = []int{
 		token.T_comma,
 		token.T_minus,
@@ -27,8 +30,15 @@ var (
 		token.T_anonLabel,
 		token.T_slash,
 		token.T_star,
-		token.T_leftStack,
-		token.T_rightStack,
+		token.T_leftSquare,
+		token.T_rightSquare,
+		token.T_leftParens,
+		token.T_rightParens,
+		token.T_greater,
+		token.T_less,
+		token.T_hash,
+		token.T_leftCurly,  // UNUSED
+		token.T_rightCurly, // UNUSED
 	}
 )
 
@@ -220,10 +230,8 @@ func isEmpty(s string) bool {
 func isLegalSymbolChar(r rune) bool {
 
 	lsc := map[rune](bool){
-		'?': true, '_': true, '-': true, '!': true,
-		'&': true, '\'': true, '*': true,
-		'+': true, '~': true, '#': true, '|': true,
-		'.': true, '/': true, '=': true, '^': true,
+		'?': true, '_': true, '!': true, '&': true, '\'': true,
+		'~': true, '#': true, '|': true, '.': true, '=': true, '^': true,
 	}
 	f := false
 	_, ok := lsc[r]
