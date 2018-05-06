@@ -15,6 +15,18 @@ type Opcode struct {
 	Embiggens bool   // if the opcode changes length with 8/16 switch
 }
 
+var OpcodesSAN = map[string]map[string](Opcode){
+	"6502":  Opcodes6502,
+	"65c02": Opcodes65c02,
+	"65816": Opcodes65816,
+}
+
+var OpcodesWDC = map[string]map[string](bool){
+	"6502":  MneWDC6502,
+	"65c02": MneWDC65c02,
+	"65816": MneWDC65816,
+}
+
 var Directives = map[string](bool){
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".native": true, ".emulated": true, ".end": true,

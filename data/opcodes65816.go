@@ -5,18 +5,18 @@
 package data
 
 // Map (actually set) of legal WDC mnemonics for the 65816
-// TODO missing jml, pei, rtl, etc
-var MnemonicsWDC65816 = map[string](bool){
+var MneWDC65816 = map[string](bool){
 	"adc": true, "and": true, "asl": true, "bcc": true, "bcs": true, "beq": true,
 	"bit": true, "bmi": true, "bne": true, "bpl": true, "bra": true, "brk": true,
-	"bvc": true, "bvs": true, "clc": true, "cld": true, "cli": true, "clv": true,
-	"cmp": true, "cop": true, "cpx": true, "cpy": true, "dec": true, "dex": true,
-	"dey": true, "eor": true, "inc": true, "inx": true, "iny": true, "jmp": true,
-	"jsr": true, "lda": true, "ldx": true, "ldy": true, "lsr": true, "mvn": true,
-	"mvp": true, "nop": true, "ora": true, "pha": true, "phb": true, "phd": true,
-	"phe": true, "phk": true, "php": true, "phx": true, "phy": true, "pla": true,
-	"plb": true, "pld": true, "plp": true, "plx": true, "ply": true, "rep": true,
-	"rol": true, "ror": true, "rti": true, "rts": true, "sbc": true, "sec": true,
+	"brl": true, "bvc": true, "bvs": true, "clc": true, "cld": true, "cli": true,
+	"clv": true, "cmp": true, "cop": true, "cpx": true, "cpy": true, "dec": true,
+	"dex": true, "dey": true, "eor": true, "inc": true, "inx": true, "iny": true,
+	"jml": true, "jmp": true, "jsl": true, "jsr": true, "lda": true, "ldx": true,
+	"ldy": true, "lsr": true, "mvn": true, "mvp": true, "nop": true, "ora": true,
+	"pea": true, "pei": true, "per": true, "pha": true, "phb": true, "phd": true,
+	"phk": true, "php": true, "phx": true, "phy": true, "pla": true, "plb": true,
+	"pld": true, "plp": true, "plx": true, "ply": true, "rep": true, "rol": true,
+	"ror": true, "rti": true, "rtl": true, "rts": true, "sbc": true, "sec": true,
 	"sed": true, "sei": true, "sep": true, "sta": true, "stp": true, "stx": true,
 	"sty": true, "stz": true, "tax": true, "tay": true, "tcd": true, "tcs": true,
 	"tdc": true, "trb": true, "tsb": true, "tsc": true, "tsx": true, "txa": true,

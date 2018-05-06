@@ -73,7 +73,9 @@ func main() {
 
 	// *** LEXER ***
 
-	tokens, ok := lexer.Lexer(raw)
+	// The lexer doesn't care about the MPU we are using, just about
+	// the notation
+	tokens, ok := lexer.Lexer(raw, *notation, *mpu)
 	if !ok {
 		log.Fatal("FATAL: Lexer failed.")
 	}

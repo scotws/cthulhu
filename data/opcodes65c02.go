@@ -4,10 +4,10 @@
 
 package data
 
-// TODO pare down from 65816
+// TODO pare down to 65c02
 
 // Map (actually set) of legal WDC mnemonics for the 65c02
-var MnemonicsWDC65c02 = map[string](bool){
+var MneWDC65c02 = map[string](bool){
 	"adc": true, "and": true, "asl": true, "bcc": true, "bcs": true, "beq": true,
 	"bit": true, "bmi": true, "bne": true, "bpl": true, "bra": true, "brk": true,
 	"bvc": true, "bvs": true, "clc": true, "cld": true, "cli": true, "clv": true,

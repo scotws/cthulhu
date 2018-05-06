@@ -1,11 +1,12 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 05. May 2018  (Happy Cino de Mayo!)
+// This version: 06. May 2018
 
 package lexer
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -140,6 +141,25 @@ func findHexEOW(rs []rune) int {
 	return e
 }
 
+// findSANMneEOW takes an array of runes and returns the index of the
+// the first rune that doesn't belong in a SAN mnemonic. If there is none,
+// returns the length of the rune array
+func findSANMneEOW(rs []rune) int {
+	e := len(rs)
+
+	// Start one character in to skip '.'
+	for i := 1; i < len(rs); i++ {
+
+		if !unicode.IsLetter(rs[i]) &&
+			rs[i] != '.' &&
+			rs[i] != '#' {
+			e = i
+			break
+		}
+	}
+	return e
+}
+
 // findSymbolEOW takes an array of runes and returns the index of the first rune
 // that doesn't belong in a label or a symbol. If there is none, it returns the
 // length of the rune array
@@ -152,25 +172,6 @@ func findSymbolEOW(rs []rune) int {
 		if !unicode.IsLetter(rs[i]) &&
 			!unicode.IsNumber(rs[i]) &&
 			!isLegalSymbolChar(rs[i]) {
-			e = i
-			break
-		}
-	}
-	return e
-}
-
-// findMneEOW takes an array of runes and returns the index of the
-// the first rune that doesn't belong in a SAN mnemonic. If there is none,
-// returns the length of the rune array
-func findMneEOW(rs []rune) int {
-	e := len(rs)
-
-	// Start one character in to skip '.'
-	for i := 1; i < len(rs); i++ {
-
-		if !unicode.IsLetter(rs[i]) &&
-			rs[i] != '.' &&
-			rs[i] != '#' {
 			e = i
 			break
 		}
@@ -260,19 +261,81 @@ func isSingleCharToken(r rune) (int, bool) {
 	return t, f
 }
 
-// whichMnemonic takes an array of runes and returns a int signaling the number
-// of operands the mnemonic takes (0, 1, or 2) and a flag if this is in fact
-// a mnemonic
-func whichMnemonic(rs []rune) (int, bool) {
+// proSANMne takes a list of runes and checks to see if it contains a legal
+// mnemonic for the Simpler Assembler Notation (SAN). If yes, it returns a
+// token, the index of the first rune past the mnemonic and a bool to designate
+// success or failure
+func procSANMne(rs []rune, mpu string) (int, int, bool) {
+
+	var o int
+
+	f := false
+
+	e := findSANMneEOW(rs)
+	r := rs[0:e]
+
+	mt, ok := whichSANMne(r, mpu)
+
+	if ok {
+		f = true
+
+		// SAN lets us already know which opcode we have and how many
+		// operands it has just from the mnenomic, so we might as well
+		// use that information
+		switch mt {
+		case 0:
+			o = token.T_opcode0
+		case 1:
+			o = token.T_opcode1
+		case 2:
+			o = token.T_opcode2
+		}
+	}
+	return o, e, f
+}
+
+// proWDCMne takes a list of runes and checks to see if it contains a legal
+// mnemonic for the traditional WDC notation. If yes, it returns a token, the
+// index of the first rune past the mnemonic and a bool to designate success or
+// failure
+func procWDCMne(rs []rune, mpu string) (int, int, bool) {
+	var o int
+
+	f := false
+
+	// We allow uppercase letters for mnenomics because we are nice that
+	// way, but internally all is lower case
+	s0 := strings.ToLower(string(rs))
+
+	// Any WDC opcode must be three characters long exactly
+	if len(s0) >= 3 {
+		s1 := s0[0:3]
+		fmt.Print(">>", s1, "<<\n")
+
+		_, ok := data.OpcodesWDC[mpu][s1]
+
+		if ok {
+			o = token.T_opcode
+			f = true
+		}
+	}
+	return o, 3, f
+}
+
+// whichSANMne takes an array of runes and returns a int signaling the number
+// of operands the SAN mnemonic takes (0, 1, or 2) and a flag if this is in fact
+// a mnemonic. We can't do this yet for the WDC mnemonics because we'd have to
+// figure out the operand which can be tricky
+func whichSANMne(rs []rune, mpu string) (int, bool) {
 	ok := false
-	oc, ok := data.Opcodes65816[string(rs)]
+	oc, ok := data.OpcodesSAN[mpu][string(rs)]
 	return oc.Operands, ok
 }
 
 // Lexer takes a list of raw code lines and returns a list of tokens and a flag
 // indicating if the conversion was successful or not. Error are handled by the
 // main function.
-func Lexer(ls []string) (*[]token.Token, bool) {
+func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 
 	ok := true
 
@@ -403,41 +466,45 @@ func Lexer(ls []string) (*[]token.Token, bool) {
 				continue
 			}
 
-			// See if we are dealing with a mnemonic
+			// See if we are dealing with a mnemonic. This step is
+			// more complicated because we accept more than one
+			// notation
 			if unicode.IsLetter(cs[i]) {
-				e := findMneEOW(cs[i:len(cs)])
-				word := cs[i : i+e]
-				mt, ok := whichMnemonic(word)
+
+				var e, tt int
+
+				// WDC and SAN give us totally different types
+				// of tokens because SAN allows us to immediatey
+				// say how many operands an instruction has.
+				// This means we let the specialized routines
+				// take care of the token
+				switch notation {
+
+				case "wdc":
+					tt, e, ok = procWDCMne(cs[i:len(cs)], mpu)
+				case "san":
+					tt, e, ok = procSANMne(cs[i:len(cs)], mpu)
+				default:
+					log.Fatalf("LEXER FATAL: Received illegal notation '%s'\n")
+				}
 
 				if ok {
-					switch mt {
-					case 0:
-						addToken(token.T_opcode0, string(word), ln, i)
-						i = i + e - 1 // continue adds one
-					case 1:
-						addToken(token.T_opcode1, string(word), ln, i)
-						i = i + e - 1 // continue adds one
-					case 2:
-						addToken(token.T_opcode2, string(word), ln, i)
-						i = i + e - 1 // continue adds one
-					}
-					continue
+					addToken(tt, string(cs[i:i+e]), ln, i)
+					i = i + e - 1 // continue adds one
 				} else {
+
 					// If this is not some opcode and none
 					// of the above, it has to be some sort
 					// of a symbol
-					e := findSymbolEOW(cs[i:len(cs)])
+					e = findSymbolEOW(cs[i:len(cs)])
 					word := cs[i : i+e]
 					addToken(token.T_symbol, string(word), ln, i)
 					i = i + e - 1 // continue adds one
-					continue
 				}
+				continue
 			}
-
 		}
-
 		addToken(token.T_eol, "\n", ln, len(cs))
-
 	}
 
 	addToken(token.T_eof, "That's all, folks!", len(ls), 0)
