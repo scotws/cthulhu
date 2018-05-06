@@ -1,7 +1,7 @@
-TODO for GoAsm65816 
+TODO for goasm65
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 05. May 2018
+This version: 06. May 2018
 
 - Write first primitive lexer
 - Write first primitive formatter
@@ -17,16 +17,16 @@ PARSER TRICKS
         .ram $FF00
         .ram $FF00, $FF01
 
-- Allow asserting if MPU is in a native or emulated state
+- Allow asserting if MPU is in a native or emulated state (65816)
 
 - Support "linear mode" where the whole address space can by used by
   figuring out where the blocks end and a jmp.l takes us to the next
-  block
+  block (65816)
 
 - Support "relocation" mode where everything is branches and no jumps
 
 
 PSEUDOINSTRUCTIONS
 
-- Built-in pseudo-instruction / macros for movement: .invoke mov count source -> destination
+- Built-in pseudo-instruction / macros for movement: move count source -> destination (65816)
 

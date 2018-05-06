@@ -1,13 +1,22 @@
-# Manual for the GoAsm65816 Assembler
+# Manual for the Goasm65 Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
 This version: 05. May 2018
 
 
 
-The assembler is built with the stengths and special characteristics of the
-65816 MPU in mind. 
+## Command Line Options
 
+- **-d** Debugging mode.
+- **-f** Format output. 
+- **-i <FILE>** Input file (required).
+- **-l** Generate listing file.
+- **-m <STRING>** MPU. Currently supported are `6502`, `65c02`, and `65816`
+- **-n <STRING>** Assembler notation. Currently supported are `wdc` for
+  traditional Western Design Center notation and `san` for Simpler Assember
+  Notation. 
+- **-s** Generate symbol table.
+- **-v** Verbose mode. 
 
 
 ## Assembler Syntax
@@ -37,13 +46,13 @@ grammar will be included in the doc folder at a later point.
 - **Strings** and **single characters** are enclosed by quotation marks (`\"`).
   This means that single characters are not enclosed in single quotes.
 
-- **Mnemonics** belong to a fixed set of 256 words. They consist of lower case
-  letters and dots, with a few special characters such as `#` for immediate
-  values.
+- **Mnemonics** belong to a fixed set of 256 words. Goasm65816 will accept
+  various notations, currently "WDC" for the traditional Western Design Center
+  and "SAN" for the Simpler Assembler Notation. 
 
 - **Symbols** start with upper- or lowercase (unicode) letter, not a number or a
   special character. They can then contain futher upper- or lowercase letters,
-  numbers, or special charaters out of the list `#?!_.+-*/\\'@~^&=|`. Note that
+  numbers, or special charaters out of the list `#?!_.\\'@~^&=|`. Note that
   the square braces `[` and `]`, as well as curly brances `{` `}`, the comma
   `,`, semi-colon `;` and parens `(` and `)` are not legal characters for
   symbols.  They cannot be the same as mnemonics.
@@ -66,12 +75,13 @@ line and by on a line by themselves, **directives** should be indented by eight
 spaces (one tab), and **mnenomics** by 16 spaces (two tabs). Though there is no
 artificial limit to the line length, lines beyond 80 characters are discouraged.
 
-### Example Code
+### Example Code (SAN)
 
 ```
-        .ram $0000 $7FFF
-        .rom $8000 $FFFF
+        .ram $0000-$7FFF
+        .rom $8000-$FFFF
 
+        .mpu 65816
         .org $00:8000
 
         .equ target $2000
@@ -89,7 +99,7 @@ _loop
                 sta.x target
                 dex             ; remember two bytes per A at 16 bit
                 dex
-                bne _loop
+                bne loop        ; note no underscore
         .scend
 
                 stp
@@ -101,7 +111,7 @@ and underscores at the beginning) legal labels.
 
 ## Math Syntax
 
-GoAsm65816 uses a form of Reverse Polish Notation (RPN) for math, which is
+GoAsm65816 allows a form of Reverse Polish Notation (RPN) for math, which is
 appropriate because it was first built for a Forth system called Liara Forth. It
 is introduced by a left bracket and followed by a stack notation with numbers --
 binary, hex, and decimal -- and mathematical operation, along with some special
@@ -128,7 +138,7 @@ that this word is not yet available.
 
 - **.a8** (n/a)
 - **.advance** (n/a) 
-
+- **.and** (n/a) 
 - **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
   assembly to make sure that the given parameter is true. Aborts with an error
   message if not. 
@@ -153,6 +163,8 @@ that this word is not yet available.
 - **.mend** (n/a) 
 - **.msb** (n/a) 
 - **.native** (n/a) 
+- **.not** (n/a)
+- **.or** (n/a)
 - **.origin** (n/a) 
 - **.print** (n/a) 
 - **.ram** (n/a) 
@@ -162,5 +174,11 @@ that this word is not yet available.
 - **.status** (n/a) 
 - **.then** (n/a) 
 - **.word** (n/a) 
+- **.xor** (n/a)
 - **.xy16** (n/a) 
 - **.xy8** (n/a) 
+
+## PSEUDOINSTRUCTIONS
+
+- **move** <NUMBER> <SOURCE> <DESTINATION> For non-overlapping moves, this
+  will generate the MVP/MVN code

@@ -1,7 +1,7 @@
-// The GoAsm65816 Assember for the 65816 MPU
+// The goasm65 Assember
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 03. May 2018
+// This version: 06. May 2018
 
 package main
 
@@ -20,10 +20,14 @@ import (
 )
 
 var (
+	f_debut   = flag.Bool("d", false, "Print lots and lots of debugging information")
 	input     = flag.String("i", "", "Input file (REQUIRED)")
 	f_format  = flag.Bool("f", false, "Return formatted version of source")
 	f_verbose = flag.Bool("v", false, "Give verbose messages")
-	f_listing = flag.Bool("l", false, "Print listing and label files")
+	f_listing = flag.Bool("l", false, "Generate listing file")
+	mpu       = flag.String("m", "65c02", "MPU (default 65c02)")
+	notation  = flag.String("n", "wdc", "Assembler notation (wdc or san)")
+	f_symbols = flag.Bool("s", false, "Generate symbol table file")
 
 	raw    []string
 	tokens []token.Token
@@ -39,6 +43,14 @@ func verbose(s string) {
 func main() {
 
 	flag.Parse()
+
+	if *notation != "wdc" && *notation != "san" {
+		log.Fatalf("FATAL: Notation '%s' not supported", *notation)
+	}
+
+	if *mpu != "6502" && *mpu != "65c02" && *mpu != "65816" {
+		log.Fatalf("FATAL: MPU '%s' not supported", *mpu)
+	}
 
 	// *** LOAD SOURCE FILE ***
 
