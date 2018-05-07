@@ -1,7 +1,7 @@
-;; Test file for GoAsm65816 
-;; Scot W. Stevenson <scot.stevenson@gmail.com>
-;; First version: 21. Apr 2018
-;; This version: 06. May 2018
+; Test file for GoAsm65816 
+; Scot W. Stevenson <scot.stevenson@gmail.com>
+; First version: 21. Apr 2018
+; This version: 06. May 2018
 
         .ram $0000-$7FFF
         .rom $8000-$FFFF
@@ -32,7 +32,7 @@
 
                 jml start       
 
-;; Silly subroutine. Call with char value in A
+; Silly subroutine. Call with char value in A
         .scope
 :got_a?
         .axy8

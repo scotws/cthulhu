@@ -71,6 +71,8 @@ func main() {
 		raw = append(raw, scanner.Text())
 	}
 
+	verbose("Source file loaded.")
+
 	// *** LEXER ***
 
 	// The lexer doesn't care about the MPU we are using, just about
@@ -80,7 +82,7 @@ func main() {
 		log.Fatal("FATAL: Lexer failed.")
 	}
 
-	verbose("Lexer run successful.")
+	verbose("Lexer run.")
 
 	// *** FORMATTER ***
 
@@ -88,22 +90,23 @@ func main() {
 		formatter.Formatter(tokens)
 	}
 
-	verbose("Formatter run successful.")
+	verbose("Formatter run.")
 
 	// *** PARSER ***
 
-	ok = parser.Parser(tokens)
-	if !ok {
-		log.Fatal("FATAL: Parser failed.")
-	}
+	AST := parser.Parser(tokens)
 
-	verbose("Parser run successful.")
+	verbose("Parser run.")
 
 	// *** LISTER ***
 
 	if *f_listing {
-		lister.Lister()
+		lister.Lister(AST)
 	}
 
-	verbose("Lister run successful.")
+	verbose("Lister run.")
+
+	// *** ANALYZER ***
+
+	// *** GENERATOR ***
 }

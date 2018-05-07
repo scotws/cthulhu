@@ -1,7 +1,7 @@
 // Token structure for goasm65816
 // Scot W. Stevenson
 // First version: 02. May 2018
-// This version: 06. May 2018
+// This version: 07. May 2018
 package token
 
 import (
@@ -40,6 +40,7 @@ const (
 	T_hash                   // #
 	T_string                 // not a list of runes
 	T_symbol                 // any symbol
+	T_start                  // start of file
 )
 
 var name = map[int](string){
@@ -74,6 +75,7 @@ var name = map[int](string){
 	T_hash:        "HASH",
 	T_string:      "STRING",
 	T_symbol:      "SYMBOL",
+	T_start:       "START",
 }
 
 type Token struct {
