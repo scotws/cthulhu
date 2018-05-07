@@ -1,7 +1,7 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 06. May 2018
+// This version: 07. May 2018
 
 package lexer
 
