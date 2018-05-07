@@ -50,7 +50,7 @@ grammar can be found in /docs/grammar.txt
 
 - **Symbols** start with upper- or lowercase (unicode) letter, not a number or a
   special character. They can then contain futher upper- or lowercase letters,
-  numbers, or special charaters out of the list `#?!_.\\'@~^&=|`. Note that
+  numbers, or special charaters out of the list `#?!_.'@~^&=|`. Note that
   the square braces `[` and `]`, as well as curly brances `{` `}`, the comma
   `,`, semi-colon `;` and parens `(` and `)` are not legal characters for
   symbols.  They cannot be the same as mnemonics.
@@ -136,7 +136,6 @@ that this word is not yet available.
 
 - **.a8** (n/a)
 - **.advance** (n/a) 
-- **.and** (n/a) 
 - **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
   assembly to make sure that the given parameter is true. Aborts with an error
   message if not. 
@@ -145,36 +144,36 @@ that this word is not yet available.
 - **.axy8** (n/a) 
 - **.bank** (n/a) 
 - **.byte** (n/a) 
-- **.else** (n/a) 
 - **.emulate** (n/a) 
 
 - **.end** (n/a) No parameters. Marks end of assembly program.
 
 - **.equ** (n/a) Required paramters: **<SYMBOL> <NUMBER>**. Defines a symbol.
 
-- **.if** (n/a) 
 - **.include** (n/a) 
-- **.invoke** (n/a) 
 - **.long** (n/a) 
 - **.lsb** (n/a) 
-- **.macro** (n/a) 
-- **.mend** (n/a) 
 - **.msb** (n/a) 
 - **.native** (n/a) 
-- **.not** (n/a)
-- **.or** (n/a)
 - **.origin** (n/a) 
-- **.print** (n/a) 
 - **.ram** (n/a) 
 - **.rom** (n/a) 
-- **.scend** (n/a) 
-- **.scope** (n/a) 
 - **.status** (n/a) 
-- **.then** (n/a) 
 - **.word** (n/a) 
-- **.xor** (n/a)
 - **.xy16** (n/a) 
 - **.xy8** (n/a) 
+
+## Reserved for future use
+
+- **.if** (n/a) 
+- **.else** (n/a) 
+- **.invoke** (n/a) 
+- **.macro** (n/a) 
+- **.mend** (n/a) 
+- **.print** (n/a) 
+- **.scope** (n/a) 
+- **.scend** (n/a) 
+- **.then** (n/a) 
 
 ## PSEUDOINSTRUCTIONS
 

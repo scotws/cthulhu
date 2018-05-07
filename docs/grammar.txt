@@ -1,0 +1,78 @@
+Grammar for the goasm65816 
+Scot W. Stevenson <scot.stevenson@gmail.com>
+First version: 07. Mai 2018
+This version: 07. Mai 2018
+
+We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
+http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
+our language description.
+
+        
+statement = comment directive | label | opcode 
+
+comment = ";" any_unicode <EOL>
+
+opcode = opcode_wdc | opcode_san
+opcode_wdc = "brk" | ... | "adc" operand | ... | "tay"
+opcode_san = "brk" | ... | "adc" operand | ... | "xce"
+
+operand = ( number | symbol ) [ "{" { number | symbol | operation }  "}" ]
+
+directive = "." { letter | dec_number | "!" } for one of:
+
+        ".a8"
+        ".a16"
+        ".axy16"
+        ".advance" expr
+        ".assert" "a8" | "a16" | "xy8" | "xy16" | "native" | "emulated"
+        ".bank" expr
+        ".byte" expr { "," expr }
+        ".emulate"
+        ".end"
+        ".equ" symbol expr
+        ".include" string
+        ".long" expr { "," expr }
+        ".lsb" expr
+        ".msb" expr
+        ".mpu" "6502" | "65c02" | "65816"
+        ".native"
+        ".origin" expr
+        ".ram" expr [ { "," expr } | "-" expr ] 
+        ".rom" expr [ { "," expr } | "-" expr ] 
+        ".status"
+        ".word" expr { "," expr }
+        ".xy16"
+        ".xy8"
+        
+// HIER HIER HIER 
+expr = string | number | symbol 
+
+label = local_label | global_label
+local_label = "_" symbol
+global_label = ":" symbol
+
+symbol = letter { letter | digit | sym_special }
+sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "@" | "~" | "^" | "&" | "=" | "|"
+
+number = bin_number | dec_number | hex_number | 
+
+binary_op = "||" | "&&" | add_op | mul_op | rel_op
+add_op = "+" | "-" 
+mul_op = "*" | "/" | "%" | "<<" | ">>" 
+rel_op = "==" | "!=" | "<" | ">" | "<=" | ">=" 
+
+bin_number = '%' bin_digit { bin_digit | bin_special }
+hex_number = '$' hex_digit { hex_digit | hex_special }
+dec_number = dec_digit { dec_digit }
+
+hex_special = ":" | "." 
+bin_special = ":" | "." 
+
+hex_digit = dec_digit | "a" ... "f" | "A" ... "F"
+dec_digit = "0" ... "9"
+bin_digit = "0" | "1"
+
+string = "\"" { any_unicode } "\""
+
+letter = "a" ... "z" | "A" ... "Z"
+
