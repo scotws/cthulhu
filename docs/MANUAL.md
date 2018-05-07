@@ -1,7 +1,7 @@
 # Manual for the Goasm65 Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 05. May 2018
+This version: 07. May 2018
 
 
 
@@ -24,14 +24,12 @@ This version: 05. May 2018
 The syntax for GoAsm65816 should be quick to write and easy to parse to allow
 automatic formatting. Mostly, the type of a word can be determined by its 
 **first character**. The following list has the informal definitions, a formal
-grammar will be included in the doc folder at a later point.
+grammar can be found in /docs/grammar.txt
 
-- **Comments** start with a semi-colon (`;`) and run to the end of the line. A
-  double semi-colon (`;;`) forces a whole-lime comment regardless of where it
-  begins. 
+- **Comments** start with a semi-colon (`;`) and run to the end of the line
 
-- **Directives** start with a dot (`.`) and consist of lower-case letters and
-  numbers. The can have parameters. 
+- **Directives** start with a dot (`.`) and consist of lower-case letters, 
+  numbers, and the exclamation mark `!`. They can have parameters. 
 
 - **Hex numbers** start with the traditional dollar sign (`$`). It can contain
   dots and colons as separators for easier reading.
