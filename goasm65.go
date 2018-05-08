@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	f_debut   = flag.Bool("d", false, "Print lots and lots of debugging information")
+	f_debug   = flag.Bool("d", false, "Print lots and lots of debugging information")
 	input     = flag.String("i", "", "Input file (REQUIRED)")
 	f_format  = flag.Bool("f", false, "Return formatted version of source")
 	f_verbose = flag.Bool("v", false, "Give verbose messages")
@@ -106,6 +106,13 @@ func main() {
 
 	AST := parser.Parser(tokens)
 
+	// Part of the debugging information is a Lisp-like list of elements of
+	// the AST
+	if *f_debug {
+		fmt.Println("AST after initial parsing:")
+		parser.Lisplister(&AST)
+	}
+
 	verbose("Parser run.")
 
 	// *** ANALYZER ***
@@ -116,6 +123,8 @@ func main() {
 
 	verbose("(Analyzer not written yet.)")
 
+	// TODO print Lisp tree if debugging enabled
+
 	// *** GENERATOR ***
 
 	// The generator takes the assembler instructions and other information
@@ -123,6 +132,8 @@ func main() {
 	// TODO
 
 	verbose("(Generator not written yet.)")
+
+	// TODO print Lisp tree if debugging enabled
 
 	// *** LISTER ***
 

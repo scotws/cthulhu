@@ -1,7 +1,10 @@
 // Lister Package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 07. May 2018
+// This version: 08. May 2018
+
+// The lister will produce a detailed listing of the final
+// binary file with source code, comments and whatnot
 
 package lister
 
@@ -31,6 +34,8 @@ func Walk(AST *node.Node) {
 		fmt.Print("$", AST.Text, " ")
 	case token.T_binary:
 		fmt.Print("%", AST.Text, " ")
+	case token.T_opcodeWDC:
+		fmt.Print(indent, indent, AST.Text, " ")
 	case token.T_opcode0:
 		fmt.Print(indent, indent, AST.Text, " ")
 	case token.T_opcode1:

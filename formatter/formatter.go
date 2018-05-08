@@ -1,11 +1,10 @@
 // Formatter Package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 04. May 2018
-// This version: 06. May 2018
+// This version: 08. May 2018
 
-/* The formatter produces a standardized formatted source
-   listing, following the example of gofmt
-*/
+// The formatter produces a cleanly formatted source file, following
+// the example of gofmt
 
 package formatter
 
