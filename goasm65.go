@@ -1,7 +1,7 @@
 // The goasm65 Assember
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 07. May 2018
+// This version: 08. May 2018
 
 package main
 
@@ -45,17 +45,17 @@ func main() {
 	flag.Parse()
 
 	if *notation != "wdc" && *notation != "san" {
-		log.Fatalf("FATAL: Notation '%s' not supported", *notation)
+		log.Fatalf("FATAL Notation '%s' not supported", *notation)
 	}
 
 	if *mpu != "6502" && *mpu != "65c02" && *mpu != "65816" {
-		log.Fatalf("FATAL: MPU '%s' not supported", *mpu)
+		log.Fatalf("FATAL MPU '%s' not supported", *mpu)
 	}
 
 	// *** LOAD SOURCE FILE ***
 
 	if *input == "" {
-		log.Fatal("FATAL: No input file provided.")
+		log.Fatal("FATAL No input file provided")
 	}
 
 	inputFile, err := os.Open(*input)
@@ -75,38 +75,64 @@ func main() {
 
 	// *** LEXER ***
 
-	// The lexer doesn't care about the MPU we are using, just about
-	// the notation
 	tokens, ok := lexer.Lexer(raw, *notation, *mpu)
 	if !ok {
-		log.Fatal("FATAL: Lexer failed.")
+		log.Fatal("FATAL Lexer failed")
 	}
+
+	// TODO include .INCLUDE files and lex them
+	// Remember to add information on the file in the tokens for error
+	// purposes
+	verbose("(Includer not written yet.)")
 
 	verbose("Lexer run.")
 
 	// *** FORMATTER ***
 
+	// The formatter produces a cleanly indented version of the source code,
+	// much like the gofmt program included with Go. See the file itself for
+	// more detail
+
 	if *f_format {
 		formatter.Formatter(tokens)
+		verbose("Formatter run.")
 	}
 
-	verbose("Formatter run.")
-
 	// *** PARSER ***
+
+	// The parser takes a slice of tokens and returns an Abstract Syntax
+	// Tree (AST) built of node.Node elements. This AST is used as the basis
+	// for all other work
 
 	AST := parser.Parser(tokens)
 
 	verbose("Parser run.")
 
+	// *** ANALYZER ***
+
+	// The analyzer examens the AST provided by the parser and runs various
+	// processes on it to convert numbers,
+	// TODO
+
+	verbose("(Analyzer not written yet.)")
+
+	// *** GENERATOR ***
+
+	// The generator takes the assembler instructions and other information
+	// and produces the actual bytes that will be saved in the final file.
+	// TODO
+
+	verbose("(Generator not written yet.)")
+
 	// *** LISTER ***
+
+	// The lister produces a detailed listing of the code with useful
+	// information such as the actual byte stored for each instruction and
+	// the modes the 65816 was in during each instruction
 
 	if *f_listing {
 		lister.Lister(AST)
+		verbose("Lister run.")
 	}
 
-	verbose("Lister run.")
-
-	// *** ANALYZER ***
-
-	// *** GENERATOR ***
 }

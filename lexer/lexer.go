@@ -1,7 +1,7 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 07. May 2018
+// This version: 08. May 2018
 
 package lexer
 
@@ -315,7 +315,7 @@ func procWDCMne(rs []rune, mpu string) (int, int, bool) {
 		_, ok := data.OpcodesWDC[mpu][s1]
 
 		if ok {
-			o = token.T_opcode
+			o = token.T_opcodeWDC
 			f = true
 		}
 	}

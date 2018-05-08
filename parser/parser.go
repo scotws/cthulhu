@@ -1,7 +1,7 @@
 // Token Package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 07. May 2018
+// This version: 08. May 2018
 
 package parser
 
@@ -12,7 +12,10 @@ import (
 	"goasm65816/token"
 )
 
-var AST = node.Node{token.Token{token.T_start, "START", 1, 0}, nil, nil}
+// TODO rewrite with channels?
+
+// Root node starts first line, index zero
+var AST = node.Node{token.Token{token.T_start, "ROOT", 1, 0}, nil, nil}
 
 func Parser(tl *[]token.Token) node.Node {
 
@@ -42,8 +45,8 @@ func Parser(tl *[]token.Token) node.Node {
 				dir.Add(&node.Node{op, nil, nil})
 				i += 1
 
-			// Directives with guarantied two parameter
-			case ".equ", ".rom", ".ram":
+			// Directives with guarantied two parameters
+			case ".equ":
 				dir := node.Node{t, nil, nil}
 				n.Add(&dir)
 				op1 := (*tl)[i+1]
@@ -63,7 +66,8 @@ func Parser(tl *[]token.Token) node.Node {
 			nn.Add(&node.Node{next, nil, nil})
 			i += 1
 
-		// Most of our tokens are really easy to handle
+		// Most of our tokens are really easy to handle because they
+		// don't have a parameter at all
 		default:
 			n.Add(&node.Node{t, nil, nil})
 		}

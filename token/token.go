@@ -13,10 +13,10 @@ const (
 	T_comment                // starts with ;
 	T_directive              // starts with .
 	T_eol                    // added for formatting
-	T_opcode                 // opcode (used for WDC)
-	T_opcode0                // opcode without an operand
-	T_opcode1                // opcode without one operand
-	T_opcode2                // opcode without two operands (mvn, mvp)
+	T_opcodeWDC              // opcode for WDC
+	T_opcode0                // SAN opcode without an operand
+	T_opcode1                // SAN opcode without one operand
+	T_opcode2                // SAN opcode without two operands (mvn, mvp)
 	T_whitespace             // tabs and spaces
 	T_binary                 // starts with %
 	T_hex                    // starts with $
@@ -48,10 +48,10 @@ var name = map[int](string){
 	T_comment:     "COMMENT",
 	T_directive:   "DIRECTIVE",
 	T_eol:         "EOL",
-	T_opcode:      "OPCODE",
-	T_opcode0:     "OPCODE_0",
-	T_opcode1:     "OPCODE_1",
-	T_opcode2:     "OPCODE_2",
+	T_opcodeWDC:   "OPC_WDC",
+	T_opcode0:     "OPC_SAN_0",
+	T_opcode1:     "OPC_SAN_1",
+	T_opcode2:     "OPC_SAN_2",
 	T_whitespace:  "WHITESPACE",
 	T_binary:      "BINARY",
 	T_hex:         "HEX",

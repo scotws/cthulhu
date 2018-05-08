@@ -25,26 +25,18 @@ func Walk(AST *node.Node) {
 
 	case token.T_eol:
 		fmt.Print("\n")
-	case token.T_label:
-		fmt.Print(AST.Text)
 	case token.T_directive:
 		fmt.Print(indent, AST.Text, " ")
-	case token.T_localLabel:
-		fmt.Print(AST.Text)
-	case token.T_comment:
-		fmt.Print(AST.Text)
 	case token.T_hex:
 		fmt.Print("$", AST.Text, " ")
-	case token.T_decimal:
-		fmt.Print(AST.Text, " ")
-	case token.T_symbol:
-		fmt.Print(AST.Text, " ")
 	case token.T_binary:
 		fmt.Print("%", AST.Text, " ")
 	case token.T_opcode0:
 		fmt.Print(indent, indent, AST.Text, " ")
 	case token.T_opcode1:
 		fmt.Print(indent, indent, AST.Text, " ")
+	default:
+		fmt.Print(AST.Text, " ")
 	}
 
 	if len(AST.Kids) == 0 {
