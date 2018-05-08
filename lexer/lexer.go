@@ -310,8 +310,6 @@ func procWDCMne(rs []rune, mpu string) (int, int, bool) {
 	// Any WDC opcode must be three characters long exactly
 	if len(s0) >= 3 {
 		s1 := s0[0:3]
-		fmt.Print(">>", s1, "<<\n")
-
 		_, ok := data.OpcodesWDC[mpu][s1]
 
 		if ok {
