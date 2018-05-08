@@ -6,7 +6,6 @@
 package lexer
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
