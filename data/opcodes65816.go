@@ -1,6 +1,6 @@
 // Opcode tables for the 65816
 // First version: 06. May 2018
-// This version: 06. May 2018
+// This version: 09. May 2018
 
 package data
 
@@ -22,6 +22,19 @@ var MneWDC65816 = map[string](bool){
 	"tdc": true, "trb": true, "tsb": true, "tsc": true, "tsx": true, "txa": true,
 	"txs": true, "txy": true, "tya": true, "tyx": true, "wai": true, "wdm": true,
 	"xba": true, "xce": true,
+}
+
+// Map (actually set) of legal WDC mnemonics for the 65816 that definitely
+// don't take parameters
+var MneWDC65816NoPara = map[string](bool){
+	"brk": true, "clc": true, "cld": true, "cli": true, "clv": true, "cop": true,
+	"dex": true, "dey": true, "inx": true, "iny": true, "nop": true, "pha": true,
+	"phb": true, "phd": true, "phk": true, "php": true, "phx": true, "phy": true,
+	"pla": true, "plb": true, "pld": true, "plp": true, "plx": true, "ply": true,
+	"rti": true, "rtl": true, "rts": true, "sec": true, "sed": true, "sei": true,
+	"stp": true, "tax": true, "tay": true, "tcd": true, "tcs": true, "tdc": true,
+	"tsc": true, "tsx": true, "txa": true, "txs": true, "txy": true, "tya": true,
+	"tyx": true, "wai": true, "xba": true, "xce": true,
 }
 
 // Data bank of opcodes, with mnemonics (SAN and WDC), length in bytes, number

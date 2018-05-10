@@ -7,8 +7,8 @@
         .rom $8000-$FFFF
         .ram $FFF0, $FF01
 
-        .notation wdc
-        .mpu 65816
+        .mpu "65816"
+        .notation "wdc"
         .origin $00:8000
 
         .native         ; it gets serious

@@ -1,7 +1,7 @@
 // Print a Lisp-like listing of the AST
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 08. May 2018
-// First version: 08. May 2018
+// First version: 10. May 2018
 
 package parser
 
@@ -33,9 +33,9 @@ func Lisplister(AST *node.Node) {
 	// Special case
 	case token.T_start:
 		fmt.Print(AST.Text, "\n")
-	case token.T_opcodeWDC, token.T_opcode0, token.T_opcode1:
+	case token.T_opcWDC, token.T_opcSAN0, token.T_opcSAN1:
 		fmt.Print("(", AST.Text)
-	case token.T_directive, token.T_comment:
+	case token.T_directive, token.T_directivePara, token.T_comment:
 		fmt.Print("(", AST.Text)
 	case token.T_hex:
 		fmt.Print("$", AST.Text)

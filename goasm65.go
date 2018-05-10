@@ -75,10 +75,7 @@ func main() {
 
 	// *** LEXER ***
 
-	tokens, ok := lexer.Lexer(raw, *notation, *mpu)
-	if !ok {
-		log.Fatal("FATAL Lexer failed")
-	}
+	tokens := lexer.Lexer(raw, *notation, *mpu)
 
 	// TODO include .INCLUDE files and lex them
 	// Remember to add information on the file in the tokens for error
@@ -103,8 +100,9 @@ func main() {
 	// The parser takes a slice of tokens and returns an Abstract Syntax
 	// Tree (AST) built of node.Node elements. This AST is used as the basis
 	// for all other work
-
 	AST := parser.Parser(tokens)
+
+	// TODO HIER HIER
 
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST

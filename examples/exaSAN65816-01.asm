@@ -7,9 +7,9 @@
         .rom $8000-$FFFF
         .ram $FFF0, $FF01
 
-        .notation san
+        .mpu "65816"
+        .notation "san"
         .origin $00:8000
-        .mpu 65816
 
         .native         ; it gets serious
         .axy16

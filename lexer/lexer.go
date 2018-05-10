@@ -1,7 +1,7 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 08. May 2018
+// This version: 09. May 2018
 
 package lexer
 
@@ -47,8 +47,9 @@ var (
 // token stream.
 func addToken(ti int, s string, r int, i int) {
 	s0 := strings.TrimSpace(s)
-	r0 := r + 1 // computers count row from 0, we from one
-	tokens = append(tokens, token.Token{ti, s0, r0, i})
+	r0 := r + 1 // computers count row from 0, humans from 1
+	i0 := i + 1 // computers count from column 0, humans from 1
+	tokens = append(tokens, token.Token{ti, s0, r0, i0})
 }
 
 // findBinEOW takes an array of runes and returns the index of the first
@@ -283,11 +284,11 @@ func procSANMne(rs []rune, mpu string) (int, int, bool) {
 		// use that information
 		switch mt {
 		case 0:
-			o = token.T_opcode0
+			o = token.T_opcSAN0
 		case 1:
-			o = token.T_opcode1
+			o = token.T_opcSAN1
 		case 2:
-			o = token.T_opcode2
+			o = token.T_opcSAN2
 		}
 	}
 	return o, e, f
@@ -312,7 +313,18 @@ func procWDCMne(rs []rune, mpu string) (int, int, bool) {
 		_, ok := data.OpcodesWDC[mpu][s1]
 
 		if ok {
-			o = token.T_opcodeWDC
+
+			// To make life easier for the parser, we check to see
+			// if this is an instruction that definitely doesn't
+			// take any operands
+			_, ok := data.MneWDC65816NoPara[s1]
+
+			if ok {
+				o = token.T_opcWDCNoPara
+			} else {
+				o = token.T_opcWDC
+			}
+
 			f = true
 		}
 	}
@@ -332,9 +344,7 @@ func whichSANMne(rs []rune, mpu string) (int, bool) {
 // Lexer takes a list of raw code lines and returns a list of tokens and a flag
 // indicating if the conversion was successful or not. Error are handled by the
 // main function.
-func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
-
-	ok := true
+func Lexer(ls []string, notation, mpu string) *[]token.Token {
 
 	// OUTER LOOP: Proceed line-by-line
 	for ln, l := range ls {
@@ -388,10 +398,25 @@ func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 				word := string(cs[i : i+e])
 
 				if isDirective(word) {
-					addToken(token.T_directive, word, ln, i)
+
+					// We make life easier for the parser
+					// by distinguishing between simple
+					// directives (default) and those with
+					// parameters
+					_, ok := data.DirectivesPara[word]
+
+					if ok {
+						addToken(token.T_directivePara, word, ln, i)
+					} else {
+
+						addToken(token.T_directive, word, ln, i)
+					}
+
 					i = i + e - 1 // continue adds one
+					continue
 				}
-				continue
+
+				log.Fatalf("LEXER FATAL (%d,%d): Unknown directive '%s'", ln+1, i+1, word)
 
 			// Global label. The first character after the colon
 			// must be an uppercase or lowercase letter
@@ -402,7 +427,8 @@ func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 				// upper- or lowercase letter because a label is
 				// basically just a symbol
 				if !unicode.IsLetter(cs[i]) {
-					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): First char after colon must be a letter")
+					log.Fatalf("LEXER FATAL (%d,%d): Letter required after label colon",
+						ln+1, i+1)
 				}
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include colon
@@ -437,7 +463,8 @@ func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 				// upper- or lowercase letter because a label is
 				// basically just a symbol
 				if !unicode.IsLetter(cs[i]) {
-					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): First char after underscore must be a letter")
+					log.Fatalf("LEXER FATAL (%d,%d): Letter required after label underscore",
+						ln+1, i+1)
 				}
 
 				e := findSymbolEOW(cs[i:len(cs)])
@@ -469,6 +496,7 @@ func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 			if unicode.IsLetter(cs[i]) {
 
 				var e, tt int
+				var ok bool
 
 				// WDC and SAN give us totally different types
 				// of tokens because SAN allows us to immediatey
@@ -506,5 +534,5 @@ func Lexer(ls []string, notation, mpu string) (*[]token.Token, bool) {
 
 	addToken(token.T_eof, "That's all, folks!", len(ls), 0)
 
-	return &tokens, ok
+	return &tokens
 }

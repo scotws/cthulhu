@@ -2,7 +2,7 @@
 // A lot of these are used as sets since Go (golang) doesn't
 // provide that data structure by default
 // First version: 04. May 2018 (May the Force be with you!)
-// This version: 06. May 2018
+// This version: 09. May 2018
 
 package data
 
@@ -27,12 +27,21 @@ var OpcodesWDC = map[string]map[string](bool){
 	"65816": MneWDC65816,
 }
 
+// List of all directives (actually used as a set)
 var Directives = map[string](bool){
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".native": true, ".emulated": true, ".end": true,
 	".a8": true, ".a16": true, ".xy8": true, ".xy16": true,
 	".axy8": true, ".axy16": true, ".scope": true, ".scend": true,
 	".macro": true, ".macend": true, ".lsb": true, ".msb": true,
+	".bank": true, ".advance": true, ".skip": true,
+	".assert": true, ".ram": true, ".rom": true, ".notation": true,
+}
+
+// List of directives with Parameters
+var DirectivesPara = map[string](bool){
+	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
+	".word": true, ".macro": true, ".lsb": true, ".msb": true,
 	".bank": true, ".advance": true, ".skip": true,
 	".assert": true, ".ram": true, ".rom": true, ".notation": true,
 }

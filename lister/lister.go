@@ -34,11 +34,13 @@ func Walk(AST *node.Node) {
 		fmt.Print("$", AST.Text, " ")
 	case token.T_binary:
 		fmt.Print("%", AST.Text, " ")
-	case token.T_opcodeWDC:
+	case token.T_opcWDC:
 		fmt.Print(indent, indent, AST.Text, " ")
-	case token.T_opcode0:
+	case token.T_opcWDCNoPara:
 		fmt.Print(indent, indent, AST.Text, " ")
-	case token.T_opcode1:
+	case token.T_opcSAN0:
+		fmt.Print(indent, indent, AST.Text, " ")
+	case token.T_opcSAN1:
 		fmt.Print(indent, indent, AST.Text, " ")
 	default:
 		fmt.Print(AST.Text, " ")

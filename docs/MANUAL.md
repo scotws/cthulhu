@@ -1,7 +1,7 @@
 # Manual for the Goasm65 Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 07. May 2018
+This version: 10. May 2018
 
 
 
@@ -79,7 +79,8 @@ artificial limit to the line length, lines beyond 80 characters are discouraged.
         .ram $0000-$7FFF
         .rom $8000-$FFFF
 
-        .mpu 65816
+        .mpu "65816"
+        .notation "san"
         .org $00:8000
 
         .equ target $2000
@@ -154,7 +155,13 @@ that this word is not yet available.
 - **.long** (n/a) 
 - **.lsb** (n/a) 
 - **.msb** (n/a) 
+
+- **.mpu** Takes a string of **"6502"**, **"65c02"**, **"65816"**
+
 - **.native** (n/a) 
+
+- **.notation** Takes a string of **"san"** or **"wdc"**
+
 - **.origin** (n/a) 
 - **.ram** (n/a) 
 - **.rom** (n/a) 
@@ -163,7 +170,7 @@ that this word is not yet available.
 - **.xy16** (n/a) 
 - **.xy8** (n/a) 
 
-## Reserved for future use
+# Reserved for future use
 
 - **.if** (n/a) 
 - **.else** (n/a) 
@@ -179,3 +186,10 @@ that this word is not yet available.
 
 - **move** <NUMBER> <SOURCE> <DESTINATION> For non-overlapping moves, this
   will generate the MVP/MVN code
+
+## Literature and Websites
+
+The Super Tiny Compiler
+https://github.com/hazbo/the-super-tiny-compiler/blob/master/compiler.go
+
+

@@ -1,25 +1,28 @@
 Grammar for the goasm65816 
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 07. Mai 2018
+This version: 09. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
 our language description.
 
+// After stripping whitespace, a line can begin with one of four types:
         
-statement = comment directive | label | opcode 
+statement = comment | directive | label | instruction
 
 comment = ";" any_unicode <EOL>
 
 opcode = opcode_wdc | opcode_san
 opcode_wdc = "brk" | ... | "adc" operand | ... | "tay"
-opcode_san = "brk" | ... | "adc" operand | ... | "xce"
+opcode_san = "brk" | ... | lda.x expr | ...  
+
 
 operand = ( number | symbol ) [ "{" { number | symbol | operation }  "}" ]
 
-directive = "." { letter | dec_number | "!" } for one of:
+directive = "." { letter | dec_number | "!" | "*" } for one of:
 
+        ".*"
         ".a8"
         ".a16"
         ".axy16"
@@ -34,8 +37,9 @@ directive = "." { letter | dec_number | "!" } for one of:
         ".long" expr { "," expr }
         ".lsb" expr
         ".msb" expr
-        ".mpu" "6502" | "65c02" | "65816"
+        ".mpu" string of "6502" | "65c02" | "65816"
         ".native"
+        ".notation" string of "san" | "wdc"
         ".origin" expr
         ".ram" expr [ { "," expr } | "-" expr ] 
         ".rom" expr [ { "," expr } | "-" expr ] 
@@ -44,7 +48,6 @@ directive = "." { letter | dec_number | "!" } for one of:
         ".xy16"
         ".xy8"
         
-// HIER HIER HIER 
 expr = string | number | symbol 
 
 label = local_label | global_label
@@ -75,4 +78,15 @@ bin_digit = "0" | "1"
 string = "\"" { any_unicode } "\""
 
 letter = "a" ... "z" | "A" ... "Z"
+
+
+In addition, numbers have types, which can be addresses, values, or offsets.
+
+        addr = addr8 | addr16 | addr24
+        value = value8 | value16 | value24
+        offset = offset_small | offset_large
+
+
+
+
 

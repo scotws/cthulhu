@@ -47,7 +47,7 @@ func Formatter(tl *[]token.Token) bool {
 			fmt.Print(t.Text, " ")
 			continue
 
-		case token.T_opcode0:
+		case token.T_opcSAN0:
 			fmt.Print(indent2)
 			fmt.Print(t.Text, " ")
 			continue

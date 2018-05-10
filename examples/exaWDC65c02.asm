@@ -7,9 +7,9 @@
         .rom $8000-$FFFF
         .ram $FFF0, $FF01
 
-        .notation wdc
+        .mpu "65c02"
+        .notation "wdc"
         .origin $8000
-        .mpu 65c02
 
         .equ target1 $2fff
         .equ target2 $30aa
