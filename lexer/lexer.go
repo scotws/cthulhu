@@ -315,8 +315,10 @@ func procWDCMne(rs []rune, mpu string) (int, int, bool) {
 	// way, but internally all is lower case
 	s0 := strings.ToLower(string(rs))
 
-	// Any WDC opcode must be three characters long exactly
-	if len(s0) >= 3 {
+	// Any WDC opcode must be three characters long exactly, which means
+	// that either the word is exactly three characters long or the fourth
+	// letter is a blank
+	if (len(s0) > 3 && s0[3] == ' ') || len(s0) == 3 {
 		s1 := s0[0:3]
 		_, ok := data.OpcodesWDC[mpu][s1]
 
