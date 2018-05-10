@@ -52,7 +52,7 @@ func main() {
 		log.Fatalf("FATAL MPU '%s' not supported", *mpu)
 	}
 
-	// *** LOAD SOURCE FILE ***
+	// ***** LOAD SOURCE FILE *****
 
 	if *input == "" {
 		log.Fatal("FATAL No input file provided")
@@ -73,7 +73,7 @@ func main() {
 
 	verbose("Source file loaded.")
 
-	// *** LEXER ***
+	// ***** LEXER *****
 
 	tokens := lexer.Lexer(raw, *notation, *mpu)
 
@@ -82,9 +82,15 @@ func main() {
 	// purposes
 	verbose("(Includer not written yet.)")
 
+	// Part of the debugging information is a list of tokens
+	if *f_debug {
+		fmt.Println("=== List of tokens after initial lexing: ===\n")
+		lexer.Tokenlister(tokens)
+	}
+
 	verbose("Lexer run.")
 
-	// *** FORMATTER ***
+	// ***** FORMATTER *****
 
 	// The formatter produces a cleanly indented version of the source code,
 	// much like the gofmt program included with Go. See the file itself for
@@ -95,19 +101,17 @@ func main() {
 		verbose("Formatter run.")
 	}
 
-	// *** PARSER ***
+	// ***** PARSER *****
 
 	// The parser takes a slice of tokens and returns an Abstract Syntax
 	// Tree (AST) built of node.Node elements. This AST is used as the basis
 	// for all other work
 	AST := parser.Parser(tokens)
 
-	// TODO HIER HIER
-
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST
 	if *f_debug {
-		fmt.Println("AST after initial parsing:")
+		fmt.Println("=== AST after initial parsing: ===\n")
 		parser.Lisplister(&AST)
 	}
 

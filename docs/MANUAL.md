@@ -21,15 +21,16 @@ This version: 10. May 2018
 
 ## Assembler Syntax
 
-The syntax for GoAsm65816 should be quick to write and easy to parse to allow
+The syntax for Cthulhu should be quick to write and easy to parse to allow
 automatic formatting. Mostly, the type of a word can be determined by its 
 **first character**. The following list has the informal definitions, a formal
 grammar can be found in /docs/grammar.txt
 
 - **Comments** start with a semi-colon (`;`) and run to the end of the line
 
-- **Directives** start with a dot (`.`) and consist of lower-case letters, 
-  numbers, and the exclamation mark `!`. They can have parameters. 
+- **Directives** start with a dot (`.`) and consist of lower-case letters,
+  numbers, the start (`*`), and the exclamation mark `!`. They can have
+  parameters. 
 
 - **Hex numbers** start with the traditional dollar sign (`$`). It can contain
   dots and colons as separators for easier reading.
@@ -61,7 +62,7 @@ grammar can be found in /docs/grammar.txt
   valid inside a scope marked by  `.scope` and `.scend`. Apart from that, they
   follow the same rules as symbols.
 
-- **Math terms** are handled inside square braces and follow reverse polish
+- **Math terms** are handled inside curly braces and follow reverse polish
   notation (RPN). See below for a further description.
 
 
@@ -104,29 +105,30 @@ _loop
                 stp
 ```
 
-Note that `yes!`, `wtf?`, and `oh-no-no` are all legal symbols and (with colons
+Note that `yes!`, `wtf?`, and `no!no!no!` are all legal symbols and (with colons
 and underscores at the beginning) legal labels. 
 
 
-## Math Syntax
+## RPN Math Syntax
 
-GoAsm65816 allows a form of Reverse Polish Notation (RPN) for math, which is
+Cthulhu allows a form of Reverse Polish Notation (RPN) for math, which is
 appropriate because it was first built for a Forth system called Liara Forth. It
-is introduced by a left bracket and followed by a stack notation with numbers --
+is introduced by a curly brace and followed by a stack notation with numbers --
 binary, hex, and decimal -- and mathematical operation, along with some special
 functions. Examples:
 
 ```
         .equ target $2000
 
-                lda.# [40 10 +]
-                sta.zi target           ; STA (target)
-                sta.zi [target 1+]      ; STA (target+1)
+                lda.# {40 10 +}
+                sta.zi target            ; STA (target)
+                sta.zi {target 1 +}      ; STA (target+1)
 ```
-Note `1+` is a special operation to add one to the number.
 
 It is an error if there is more than one element on the math stack when the
 operation is finished. 
+
+
 
 ## List of Directives
 
@@ -137,6 +139,7 @@ that this word is not yet available.
 
 - **.a8** (n/a)
 - **.advance** (n/a) 
+- **.and **
 - **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
   assembly to make sure that the given parameter is true. Aborts with an error
   message if not. 
@@ -145,6 +148,8 @@ that this word is not yet available.
 - **.axy8** (n/a) 
 - **.bank** (n/a) 
 - **.byte** (n/a) 
+- **.drop** (RPN only)
+- **.dup**
 - **.emulate** (n/a) 
 
 - **.end** (n/a) No parameters. Marks end of assembly program.
@@ -154,6 +159,7 @@ that this word is not yet available.
 - **.include** (n/a) 
 - **.long** (n/a) 
 - **.lsb** (n/a) 
+- **.lshift**
 - **.msb** (n/a) 
 
 - **.mpu** Takes a string of **"6502"**, **"65c02"**, **"65816"**
@@ -162,15 +168,19 @@ that this word is not yet available.
 
 - **.notation** Takes a string of **"san"** or **"wdc"**
 
+- **.or**
 - **.origin** (n/a) 
 - **.ram** (n/a) 
+- **.rshift**
 - **.rom** (n/a) 
 - **.status** (n/a) 
+- **.swap**
 - **.word** (n/a) 
+- **.xor**
 - **.xy16** (n/a) 
 - **.xy8** (n/a) 
 
-# Reserved for future use
+### Reserved for future use
 
 - **.if** (n/a) 
 - **.else** (n/a) 
