@@ -16,7 +16,7 @@ import (
 const (
 	T_eof           int = iota // end of file
 	T_eol                      // added for formatting
-	T_whitespace               // tabs and spaces TODO see if even used
+	T_empty                    // marks and empty line
 	T_comment                  // starts with ;
 	T_directive                // simple directive, starts with .
 	T_directivePara            // directive with one or more paras
@@ -53,7 +53,7 @@ const (
 var Name = map[int](string){
 	T_eof:           "EOF",
 	T_eol:           "EOL",
-	T_whitespace:    "WS",
+	T_empty:         "EMPTY",
 	T_comment:       "COMMENT",
 	T_directive:     "DIR",
 	T_directivePara: "DIR_PARA",

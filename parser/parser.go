@@ -1,7 +1,7 @@
 // Token Package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 09. May 2018
+// This version: 10. May 2018
 
 package parser
 
@@ -71,7 +71,6 @@ func Parser(ts *[]token.Token) node.Node {
 // end-of-file, we crash because the assumption is that we call nextToken while
 // getting parameters
 func nextToken() token.Token {
-
 	cur++
 	n := (*tokens)[cur]
 
@@ -79,6 +78,7 @@ func nextToken() token.Token {
 		log.Fatalf("PARSER FATAL: Ran out of tokens at '%s' (%d,%d)\n",
 			n.Text, n.Line, n.Index)
 	}
+
 	return n
 }
 
@@ -133,5 +133,31 @@ func directivePara(t token.Token) {
 		kt := match(token.T_hex)
 		adopt(&n, &kt)
 
+	// We only accept decimal numbers for now
+	// TODO accept other stuff
+	// TODO should work for .word and .long as well
+	case ".byte":
+
+		kt := match(token.T_decimal)
+		adopt(&n, &kt)
+
+		var nt token.Token
+
+		for {
+			nt = nextToken()
+
+			// TODO This needs to be a lot more clever
+			if nt.Type == token.T_decimal {
+				adopt(&n, &nt)
+			}
+
+			if nt.Type == token.T_comma {
+				continue
+			}
+			if nt.Type == token.T_eol {
+				adopt(&n, &nt) // need final EOL
+				break
+			}
+		}
 	}
 }

@@ -16,45 +16,40 @@ import (
 // elements in a Lisp-inspired S-format (ie, lots of braces). It is used for
 // debugging.
 
-const indent = "       "
-
 func Lisplister(AST *node.Node) {
-
-	// An EOL token means we're done with this element
-	if AST.Type == token.T_eol {
-		fmt.Print("\n")
-		return
-	}
-
-	fmt.Print(" ")
 
 	switch AST.Type {
 
 	// Special case
+	case token.T_eol:
+		fmt.Print(")\n")
+	case token.T_empty:
+		fmt.Print("\n")
 	case token.T_start:
 		fmt.Print(AST.Text, "\n")
 	case token.T_opcWDC, token.T_opcSAN0, token.T_opcSAN1:
-		fmt.Print("(", AST.Text)
+		fmt.Print("( ", AST.Text)
 	case token.T_directive, token.T_directivePara, token.T_comment:
-		fmt.Print("(", AST.Text)
+		fmt.Print("( ", AST.Text)
 	case token.T_hex:
 		fmt.Print("$", AST.Text)
 	case token.T_binary:
 		fmt.Print("%", AST.Text)
+	case token.T_string:
+		fmt.Print("\"", AST.Text, "\"")
 	case token.T_label, token.T_localLabel, token.T_anonLabel:
-		fmt.Print("(", AST.Text)
+		fmt.Print("( ", AST.Text)
 	default:
 		fmt.Print(AST.Text)
 	}
 
 	// If we don't have kids, we're done
 	if len(AST.Kids) == 0 {
-		fmt.Print(")")
 		return
 	}
 
 	for _, k := range AST.Kids {
+		fmt.Print(" ")
 		Lisplister(k)
-
 	}
 }

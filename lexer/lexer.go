@@ -349,16 +349,16 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 	// OUTER LOOP: Proceed line-by-line
 	for ln, l := range ls {
 
-		// Check for empty lines. We add an EOL token to allow
+		// Check for empty lines. We add a token to allow
 		// formatting
 		if isEmpty(l) {
-			addToken(token.T_eol, "\n", ln, 0)
+			addToken(token.T_empty, "", ln, 1)
 			continue
 		}
 
 		if isCommentLine(l) {
-			addToken(token.T_comment, l, ln, 0)
-			addToken(token.T_eol, "\n", ln, 0)
+			addToken(token.T_comment, l, ln, 1)
+			addToken(token.T_eol, "\n", ln, 1)
 			continue
 		}
 
@@ -532,7 +532,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 		addToken(token.T_eol, "\n", ln, len(cs))
 	}
 
-	addToken(token.T_eof, "That's all, folks!", len(ls), 0)
+	addToken(token.T_eof, "That's all, folks!", len(ls), 1)
 
 	return &tokens
 }
