@@ -12,11 +12,17 @@
         .native
         .axy16
 
-                nop
-                nop
-                nop
+                lda.# 0000
+                tay
+@
+                sta.y $2000
+                sta.y $2000+$100
+                dey
+                bne -
 
-        .word {frog 2 .swap .dup *}
+                stp
+
+        .word {frog 2 .swap .dup *}, $ff, "frog"
         .byte 1, 2, 3, 4
         .byte 5, 6, 7, 8 ; and that's a wrap!
 

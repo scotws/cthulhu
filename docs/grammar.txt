@@ -1,22 +1,19 @@
 Grammar for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 10. Mai 2018
+This version: 11. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
 our language description.
 
-// After stripping whitespace, a line can begin with one of four types:
-statement = comment | directive | label | instruction
+// A line can begin with one of four types:
+
+statement = whitespace | comment | directive | label | instruction
 
 comment = ";" { anything } "<EOL>"
 
-opcode = opcode_wdc | opcode_san
-opcode_wdc = "brk" | ... | "adc" operand | ... | "tay"
-opcode_san = "brk" | ... | lda.x expr | ...  
 
-expr = number | symbol | rpn
 
 directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | "*"  }
         for one of:
@@ -48,29 +45,53 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
         ".xy8"
         
 
-label = local_label | global_label
+// Labels 
+
+label = ( local_label | global_label | anon_label ) [ directive | instruction ] [ comment ]
 local_label = "_" symbol
 global_label = ":" symbol
+anon_label = "@"
 
 symbol = letter { letter | digit | sym_special }
 sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "@" | "~" | "^" | "&" | "=" | "|"
 
-binary_op = "||" | "&&" | add_op | mul_op | rel_op
-add_op = "+" | "-" 
-mul_op = "*" | "/" | "%" | "<<" | ">>" 
-rel_op = "==" | "!=" | "<" | ">" | "<=" | ">=" 
+// Instruction
 
+instruction = instruction_wdc | instruction_san
+
+instruction_wdc = ( opc_wdc_nopara [ comment ] ) |
+                  ( opc_wdc [ operand ] [ comment ] ) 
+
+
+opc_wdc_nopara = "brk" | ... | "nop" | ... | "tax" ... 
+
+instruction_san = ( opc_san_0 [ comment ] ) |
+                  ( opc_san_1 operand_san [ comment ] ) |
+                  ( opc_san_2 operand_san "," operand_san [ comment ] )
+
+operand_san = [ single_operator ] ( number | symbol | rpn ) | 
+              ( number | symbol | rpn ) [ binary_operator ( number | symbol | rpn ) ]
+
+operand_wdc = [ single_operator ] ["#"] ["("] ( number | symbol | rpn ) [")"] [",x" | ",y"]
+
+single_operator = ".lsb" | ".msb" | ".bank" | ".not"
+binary_operator = ".and" | ".or" | ".xor" | "+" | "-" | "/" | "*" | ".lshift" | 
+        ".rshift" | "%"
 
 // Reverse Polish Notation (RPN) 
-rpn = "{" ( number | symbol )  { number | symbol | prn_op } "}" 
 
-rpn_op = rpn_op_1 | rpn_op_2
+rpn = "{" ( number | symbol )  { number | symbol | prn_operator } "}" 
 
-prn_op_1 = ".drop" | ".dup" | ".lsb" | ".msb" | ".bank" 
+rpn_operator = ".drop" | ".dup" | ".lsb" | ".msb" | ".bank" | "+" | "*" | "-" | "/" |
+        ".and" | ".or" | ".xor" | ".not" | ".invert" | ".lshift" | ".rshift" | "%"
+
 
 // Numbers
 
-number = bin_number | dec_number | hex_number | 
+number = bin_number | dec_number | hex_number 
+
+bin_number = '%' bin_digit { bin_digit | bin_special }
+bin_special = ":" | "." 
 
 dec_number = dec_digit { dec_digit }
 dec_digit = "0" ... "9"
@@ -79,14 +100,14 @@ hex_number = '$' hex_digit { hex_digit | hex_special }
 hex_special = ":" | "." 
 hex_digit = dec_digit | "a" ... "f" | "A" ... "F"
 
-bin_number = '%' bin_digit { bin_digit | bin_special }
-bin_special = ":" | "." 
-bin_digit = "0" | "1"
+
+// Basic types
 
 string = "\"" { any_unicode } "\""
-
 letter = "a" ... "z" | "A" ... "Z"
 
+
+==== TYPES ====
 
 In addition, numbers have types, which can be addresses, values, or offsets.
 
