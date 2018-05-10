@@ -92,20 +92,9 @@ func match(want int) token.Token {
 	return t
 }
 
-// adoptIfMatch takes the node we are currently working on and the token type
-// we are looking for. If the next token is of this type, we it to the current
-// token
-func adoptIfMatch(n *node.Node, want int) {
-
-	nt := nextToken()
-
-	if nt.Type != want {
-		log.Fatalf("PARSER FATAL (%d,%d): Wanted token type %s, got %s",
-			nt.Line, nt.Index, token.Name[want], token.Name[nt.Type])
-	}
-
-	kid := node.Create(nt)
-	n.Add(&kid)
+func adopt(mom *node.Node, kid *token.Token) {
+	kidnode := node.Create(*kid)
+	mom.Add(&kidnode)
 }
 
 // ***** INDIVIDUAL FUNCTIONS *****
@@ -120,11 +109,29 @@ func directivePara(t token.Token) {
 
 	switch t.Text {
 
-	case ".mpu", ".notation":
-		adoptIfMatch(&n, token.T_string)
+	case ".mpu":
+		kt := match(token.T_string)
+
+		if kt.Text != "65816" && kt.Text != "65c02" && kt.Text != "6502" {
+			log.Fatalf("PARSER FATAL (%d,%d): MPU type '%s' not supported",
+				kt.Line, kt.Index, kt.Text)
+		}
+
+		adopt(&n, &kt)
+
+	case ".notation":
+		kt := match(token.T_string)
+
+		if kt.Text != "san" && kt.Text != "wdc" {
+			log.Fatalf("PARSER FATAL (%d,%d): notation '%s' not supported",
+				kt.Line, kt.Index, kt.Text)
+		}
+
+		adopt(&n, &kt)
 
 	case ".origin":
-		adoptIfMatch(&n, token.T_hex)
+		kt := match(token.T_hex)
+		adopt(&n, &kt)
 
 	}
 }
