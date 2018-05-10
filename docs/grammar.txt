@@ -1,26 +1,25 @@
 Grammar for the goasm65816 
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 09. Mai 2018
+This version: 10. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
 our language description.
 
 // After stripping whitespace, a line can begin with one of four types:
-        
 statement = comment | directive | label | instruction
 
-comment = ";" any_unicode <EOL>
+comment = ";" { anything } "<EOL>"
 
 opcode = opcode_wdc | opcode_san
 opcode_wdc = "brk" | ... | "adc" operand | ... | "tay"
 opcode_san = "brk" | ... | lda.x expr | ...  
 
+expr = number | symbol | rpn
 
-operand = ( number | symbol ) [ "{" { number | symbol | operation }  "}" ]
-
-directive = "." { letter | dec_number | "!" | "*" } for one of:
+directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | "*"  }
+        for one of:
 
         ".*"
         ".a8"
@@ -29,26 +28,25 @@ directive = "." { letter | dec_number | "!" | "*" } for one of:
         ".advance" expr
         ".assert" "a8" | "a16" | "xy8" | "xy16" | "native" | "emulated"
         ".bank" expr
-        ".byte" expr { "," expr }
+        ".byte" expr { "," expr } [ comment ] "<EOL>"
         ".emulate"
         ".end"
         ".equ" symbol expr
         ".include" string
         ".long" expr { "," expr }
         ".lsb" expr
-        ".msb" expr
-        ".mpu" string of "6502" | "65c02" | "65816"
+        ".msb" 
+        ".mpu" string, one of "6502" | "65c02" | "65816"
         ".native"
-        ".notation" string of "san" | "wdc"
+        ".notation" string, one of "san" | "wdc"
         ".origin" expr
         ".ram" expr [ { "," expr } | "-" expr ] 
         ".rom" expr [ { "," expr } | "-" expr ] 
         ".status"
-        ".word" expr { "," expr }
+        ".word" expr { "," expr } [ comment ] "<EOL>"
         ".xy16"
         ".xy8"
         
-expr = string | number | symbol 
 
 label = local_label | global_label
 local_label = "_" symbol
@@ -57,22 +55,32 @@ global_label = ":" symbol
 symbol = letter { letter | digit | sym_special }
 sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "@" | "~" | "^" | "&" | "=" | "|"
 
-number = bin_number | dec_number | hex_number | 
-
 binary_op = "||" | "&&" | add_op | mul_op | rel_op
 add_op = "+" | "-" 
 mul_op = "*" | "/" | "%" | "<<" | ">>" 
 rel_op = "==" | "!=" | "<" | ">" | "<=" | ">=" 
 
-bin_number = '%' bin_digit { bin_digit | bin_special }
-hex_number = '$' hex_digit { hex_digit | hex_special }
+
+// Reverse Polish Notation (RPN) 
+rpn = "{" ( number | symbol )  { number | symbol | prn_op } "}" 
+
+rpn_op = rpn_op_1 | rpn_op_2
+
+prn_op_1 = ".drop" | ".dup" | ".lsb" | ".msb" | ".bank" 
+
+// Numbers
+
+number = bin_number | dec_number | hex_number | 
+
 dec_number = dec_digit { dec_digit }
-
-hex_special = ":" | "." 
-bin_special = ":" | "." 
-
-hex_digit = dec_digit | "a" ... "f" | "A" ... "F"
 dec_digit = "0" ... "9"
+
+hex_number = '$' hex_digit { hex_digit | hex_special }
+hex_special = ":" | "." 
+hex_digit = dec_digit | "a" ... "f" | "A" ... "F"
+
+bin_number = '%' bin_digit { bin_digit | bin_special }
+bin_special = ":" | "." 
 bin_digit = "0" | "1"
 
 string = "\"" { any_unicode } "\""
@@ -85,8 +93,4 @@ In addition, numbers have types, which can be addresses, values, or offsets.
         addr = addr8 | addr16 | addr24
         value = value8 | value16 | value24
         offset = offset_small | offset_large
-
-
-
-
 
