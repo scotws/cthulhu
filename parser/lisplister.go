@@ -1,13 +1,14 @@
 // Print a Lisp-like listing of the AST for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 08. May 2018
-// First version: 10. May 2018
+// First version: 11. May 2018
 
 package parser
 
 import (
 	"fmt"
 
+	"cthulhu/data"
 	"cthulhu/node"
 	"cthulhu/token"
 )
@@ -27,10 +28,29 @@ func Lisplister(AST *node.Node) {
 		fmt.Print("\n")
 	case token.START:
 		fmt.Print(AST.Text, "\n")
-	case token.WDC, token.SAN_0, token.SAN_1:
+	case token.WDC, token.SAN_0, token.SAN_1, token.WDC_NOPARA:
 		fmt.Print("( ", AST.Text)
-	case token.DIREC, token.DIREC_PARA, token.COMMENT:
-		fmt.Print("( ", AST.Text)
+
+	// Some of the directors are actually operators that don't start a
+	// a new line
+	case token.DIREC, token.DIREC_PARA:
+		_, ok := data.Operators[AST.Text]
+
+		if ok {
+			fmt.Print(AST.Text)
+		} else {
+			fmt.Print("( ", AST.Text)
+		}
+
+	// Comments come in two forms, at the beginning of a line or at the end
+	// of a line.
+	case token.COMMENT:
+		if AST.Index <= 2 {
+			fmt.Print("( ", AST.Text)
+		} else {
+			fmt.Print(") ( ", AST.Text)
+		}
+
 	case token.HEX_NUM:
 		fmt.Print("$", AST.Text)
 	case token.BIN_NUM:

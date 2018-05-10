@@ -37,7 +37,7 @@ var Directives = map[string](bool){
 	".bank": true, ".advance": true, ".skip": true,
 	".assert": true, ".ram": true, ".rom": true, ".notation": true,
 	".swap": true, ".drop": true, ".dup": true, ".lshift": true,
-	".rshift": true,
+	".rshift": true, ".not": true,
 }
 
 // List of directives with Parameters
@@ -46,5 +46,13 @@ var DirectivesPara = map[string](bool){
 	".word": true, ".macro": true, ".lsb": true, ".msb": true,
 	".bank": true, ".advance": true, ".skip": true,
 	".assert": true, ".ram": true, ".rom": true, ".notation": true,
-	".lshift": true, ".rshift": true,
+	".lshift": true, ".rshift": true, ".not": true,
+}
+
+// List of directives that are actually operators, that is, they don't start a
+// line but are part of a math term
+var Operators = map[string](bool){
+	".lshift": true, ".rshift": true, ".lsb": true, ".msb": true,
+	".bank": true, ".and": true, ".or": true, ".xor": true,
+	".not": true, ".dup": true, ".swap": true, ".drop": true,
 }
