@@ -1,4 +1,4 @@
-// Opcode tables for the 65c02
+// Opcode tables for the 65c02 for the Cthulhu Assembler
 // First version: 06. May 2018
 // This version: 06. May 2018
 

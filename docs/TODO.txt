@@ -1,7 +1,7 @@
-TODO for goasm65
+TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 06. May 2018
+This version: 10. May 2018
 
 - Write first primitive lexer
 - Write first primitive formatter

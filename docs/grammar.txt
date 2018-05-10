@@ -1,4 +1,4 @@
-Grammar for the goasm65816 
+Grammar for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
 This version: 10. Mai 2018

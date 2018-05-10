@@ -1,4 +1,4 @@
-// The goasm65 Assember
+// The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
 // This version: 10. May 2018
@@ -12,11 +12,11 @@ import (
 	"log"
 	"os"
 
-	"goasm65816/formatter"
-	"goasm65816/lexer"
-	"goasm65816/lister"
-	"goasm65816/parser"
-	"goasm65816/token"
+	"cthulhu/formatter"
+	"cthulhu/lexer"
+	"cthulhu/lister"
+	"cthulhu/parser"
+	"cthulhu/token"
 )
 
 var (

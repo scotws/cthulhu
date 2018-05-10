@@ -1,4 +1,4 @@
-// Lexer package for the GoAsm65816 assembler
+// Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
 // This version: 10. May 2018
@@ -11,8 +11,8 @@ import (
 	"strings"
 	"unicode"
 
-	"goasm65816/data"
-	"goasm65816/token"
+	"cthulhu/data"
+	"cthulhu/token"
 )
 
 var (

@@ -1,4 +1,4 @@
-// Print a Lisp-like listing of the AST
+// Print a Lisp-like listing of the AST for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 08. May 2018
 // First version: 10. May 2018
@@ -8,8 +8,8 @@ package parser
 import (
 	"fmt"
 
-	"goasm65816/node"
-	"goasm65816/token"
+	"cthulhu/node"
+	"cthulhu/token"
 )
 
 // lisplister takes an AST from the parser and prints out a list of the tree

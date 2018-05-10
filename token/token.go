@@ -1,4 +1,4 @@
-// Token structure for goasm65816
+// Token structure for Cthulhu Assembler
 // Scot W. Stevenson
 // First version: 02. May 2018
 // This version: 10. May 2018

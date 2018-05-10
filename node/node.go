@@ -1,4 +1,4 @@
-// Node data for goasm65816
+// Node data for Cthulhu Assembler
 // Scot W. Stevenson
 // First version 07. May 2018
 // This version 09. May 2018
@@ -6,7 +6,7 @@
 package node
 
 import (
-	"goasm65816/token"
+	"cthulhu/token"
 )
 
 // Homogeneous node stucture. We might have to add stuff to this later

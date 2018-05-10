@@ -1,4 +1,4 @@
-// Reverse Polish Notation (RPN) math processing
+// Reverse Polish Notation (RPN)
 // for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 10. May 2018

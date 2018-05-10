@@ -1,4 +1,4 @@
-// Opcode tables for the 65816
+// Opcode tables for the 65816 for the Cthulhu Assembler
 // First version: 06. May 2018
 // This version: 09. May 2018
 

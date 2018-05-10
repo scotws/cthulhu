@@ -1,8 +1,8 @@
-# goasm65 - An assembler for the 6502, 65c02, and 65816 MPU in Go (golang)
+# Cthulhu - An assembler for the 6502, 65c02, and 65816 MPU in Go (golang)
 Scot W. Stevenson <scot.stevenson@gmail.com>
 
 First version: 21. April 2018
-This version: 06. May 2018
+This version: 10. May 2018
 
 ## GOALS 
 

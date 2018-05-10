@@ -1,4 +1,4 @@
-// Contains basic data structures used by other routines
+// Basic data structures for the Cthulhu Assembler
 // A lot of these are used as sets since Go (golang) doesn't
 // provide that data structure by default
 // First version: 04. May 2018 (May the Force be with you!)

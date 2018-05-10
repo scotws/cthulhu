@@ -1,4 +1,4 @@
-; Test file for GoAsm65816 
+; Test file for the Cthulhu Assembler
 ; Scot W. Stevenson <scot.stevenson@gmail.com>
 ; First version: 21. Apr 2018
 ; This version: 07. May 2018
