@@ -1,7 +1,7 @@
 // Lexer package for the GoAsm65816 assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 09. May 2018
+// This version: 10. May 2018
 
 package lexer
 
@@ -19,26 +19,34 @@ var (
 	tokens []token.Token
 
 	// We can handle single-character tokens with this table and a loop
+	// DOLLAR ('$') is not included currently because it would screw up the
+	// lexer's hex number detection. Same for PERIOD ('.') because it
+	// doesn't work with directive detection
 	singleChars = []rune{
 		',', '-', '+', '@', '/', '*', '[', ']', '(', ')', '>', '<',
-		'#', '{', '}',
+		'#', '{', '}', '=', '&', '|', '~', '^',
 	}
 	singleCharTokens = []int{
-		token.T_comma,
-		token.T_minus,
-		token.T_plus,
-		token.T_anonLabel,
-		token.T_slash,
-		token.T_star,
-		token.T_leftSquare,
-		token.T_rightSquare,
-		token.T_leftParens,
-		token.T_rightParens,
-		token.T_greater,
-		token.T_less,
-		token.T_hash,
-		token.T_leftCurly,  // UNUSED
-		token.T_rightCurly, // UNUSED
+		token.COMMA,
+		token.MINUS,
+		token.PLUS,
+		token.ANON_LABEL,
+		token.SLASH,
+		token.STAR,
+		token.LEFT_SQUARE,
+		token.RIGHT_SQUARE,
+		token.LEFT_PARENS,
+		token.RIGHT_PARENS,
+		token.GREATER,
+		token.LESS,
+		token.HASH,
+		token.LEFT_CURLY,
+		token.RIGHT_CURLY,
+		token.EQUAL,
+		token.AMPERSAND,
+		token.PIPE,
+		token.PERCENT,
+		token.TILDE,
 	}
 )
 
@@ -284,11 +292,11 @@ func procSANMne(rs []rune, mpu string) (int, int, bool) {
 		// use that information
 		switch mt {
 		case 0:
-			o = token.T_opcSAN0
+			o = token.SAN_0
 		case 1:
-			o = token.T_opcSAN1
+			o = token.SAN_1
 		case 2:
-			o = token.T_opcSAN2
+			o = token.SAN_2
 		}
 	}
 	return o, e, f
@@ -320,9 +328,9 @@ func procWDCMne(rs []rune, mpu string) (int, int, bool) {
 			_, ok := data.MneWDC65816NoPara[s1]
 
 			if ok {
-				o = token.T_opcWDCNoPara
+				o = token.WDC_NOPARA
 			} else {
-				o = token.T_opcWDC
+				o = token.WDC
 			}
 
 			f = true
@@ -352,13 +360,13 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 		// Check for empty lines. We add a token to allow
 		// formatting
 		if isEmpty(l) {
-			addToken(token.T_empty, "", ln, 1)
+			addToken(token.EMPTY, "", ln, 1)
 			continue
 		}
 
 		if isCommentLine(l) {
-			addToken(token.T_comment, l, ln, 1)
-			addToken(token.T_eol, "\n", ln, 1)
+			addToken(token.COMMENT, l, ln, 1)
+			addToken(token.EOL, "\n", ln, 1)
 			continue
 		}
 
@@ -382,7 +390,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 			if unicode.IsNumber(cs[i]) {
 				e := findDecEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.T_decimal, string(word), ln, i)
+				addToken(token.DEC_NUM, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 			}
@@ -390,7 +398,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 			switch cs[i] {
 			case ';':
 				word := string(cs[i:len(cs)])
-				addToken(token.T_comment, word, ln, i)
+				addToken(token.COMMENT, word, ln, i)
 				i = len(cs)
 				continue
 			case '.':
@@ -406,10 +414,10 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 					_, ok := data.DirectivesPara[word]
 
 					if ok {
-						addToken(token.T_directivePara, word, ln, i)
+						addToken(token.DIREC_PARA, word, ln, i)
 					} else {
 
-						addToken(token.T_directive, word, ln, i)
+						addToken(token.DIREC, word, ln, i)
 					}
 
 					i = i + e - 1 // continue adds one
@@ -432,7 +440,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 				}
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include colon
-				addToken(token.T_label, string(word), ln, i)
+				addToken(token.LABEL, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -440,7 +448,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 				i += 1 // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.T_binary, string(word), ln, i)
+				addToken(token.BIN_NUM, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -450,7 +458,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 				i += 1 // skip '$' symbol
 				e := findHexEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.T_hex, string(word), ln, i)
+				addToken(token.HEX_NUM, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -469,7 +477,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include underscore
-				addToken(token.T_localLabel, string(word), ln, i)
+				addToken(token.LOCAL_LABEL, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -485,7 +493,7 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 				}
 
 				word := cs[i : i+e]
-				addToken(token.T_string, string(word), ln, i)
+				addToken(token.STRING, string(word), ln, i)
 				i = i + e // skip over final quote
 				continue
 			}
@@ -523,16 +531,16 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 					// of a symbol
 					e = findSymbolEOW(cs[i:len(cs)])
 					word := cs[i : i+e]
-					addToken(token.T_symbol, string(word), ln, i)
+					addToken(token.SYMBOL, string(word), ln, i)
 					i = i + e - 1 // continue adds one
 				}
 				continue
 			}
 		}
-		addToken(token.T_eol, "\n", ln, len(cs))
+		addToken(token.EOL, "\n", ln, len(cs))
 	}
 
-	addToken(token.T_eof, "That's all, folks!", len(ls), 1)
+	addToken(token.EOF, "That's all, folks!", len(ls), 1)
 
 	return &tokens
 }

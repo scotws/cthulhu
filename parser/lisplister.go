@@ -21,23 +21,23 @@ func Lisplister(AST *node.Node) {
 	switch AST.Type {
 
 	// Special case
-	case token.T_eol:
+	case token.EOL:
 		fmt.Print(")\n")
-	case token.T_empty:
+	case token.EMPTY:
 		fmt.Print("\n")
-	case token.T_start:
+	case token.START:
 		fmt.Print(AST.Text, "\n")
-	case token.T_opcWDC, token.T_opcSAN0, token.T_opcSAN1:
+	case token.WDC, token.SAN_0, token.SAN_1:
 		fmt.Print("( ", AST.Text)
-	case token.T_directive, token.T_directivePara, token.T_comment:
+	case token.DIREC, token.DIREC_PARA, token.COMMENT:
 		fmt.Print("( ", AST.Text)
-	case token.T_hex:
+	case token.HEX_NUM:
 		fmt.Print("$", AST.Text)
-	case token.T_binary:
+	case token.BIN_NUM:
 		fmt.Print("%", AST.Text)
-	case token.T_string:
+	case token.STRING:
 		fmt.Print("\"", AST.Text, "\"")
-	case token.T_label, token.T_localLabel, token.T_anonLabel:
+	case token.LABEL, token.LOCAL_LABEL, token.ANON_LABEL:
 		fmt.Print("( ", AST.Text)
 	default:
 		fmt.Print(AST.Text)

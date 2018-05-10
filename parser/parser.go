@@ -32,7 +32,7 @@ func Parser(ts *[]token.Token) node.Node {
 		log.Fatal("PARSER FATAL: Did not receive any tokens from lexer")
 	}
 
-	AST = node.Node{token.Token{token.T_start, "ROOT", 1, 0}, nil}
+	AST = node.Node{token.Token{token.START, "ROOT", 1, 0}, nil}
 	tokens = ts
 
 	for cur = 0; cur < len(*tokens); cur++ {
@@ -41,7 +41,7 @@ func Parser(ts *[]token.Token) node.Node {
 
 		// We end if we get the EOF token regardless of where we are in
 		// the token list
-		if t.Type == token.T_eof {
+		if t.Type == token.EOF {
 			break
 		}
 
@@ -53,7 +53,7 @@ func Parser(ts *[]token.Token) node.Node {
 		// on what type we have
 		switch t.Type {
 
-		case token.T_directivePara:
+		case token.DIREC:
 			directivePara(t)
 			continue
 
@@ -74,7 +74,7 @@ func nextToken() token.Token {
 	cur++
 	n := (*tokens)[cur]
 
-	if n.Type == token.T_eof {
+	if n.Type == token.EOF {
 		log.Fatalf("PARSER FATAL: Ran out of tokens at '%s' (%d,%d)\n",
 			n.Text, n.Line, n.Index)
 	}
@@ -110,7 +110,7 @@ func directivePara(t token.Token) {
 	switch t.Text {
 
 	case ".mpu":
-		kt := match(token.T_string)
+		kt := match(token.STRING)
 
 		if kt.Text != "65816" && kt.Text != "65c02" && kt.Text != "6502" {
 			log.Fatalf("PARSER FATAL (%d,%d): MPU type '%s' not supported",
@@ -120,7 +120,7 @@ func directivePara(t token.Token) {
 		adopt(&n, &kt)
 
 	case ".notation":
-		kt := match(token.T_string)
+		kt := match(token.STRING)
 
 		if kt.Text != "san" && kt.Text != "wdc" {
 			log.Fatalf("PARSER FATAL (%d,%d): notation '%s' not supported",
@@ -130,7 +130,7 @@ func directivePara(t token.Token) {
 		adopt(&n, &kt)
 
 	case ".origin":
-		kt := match(token.T_hex)
+		kt := match(token.HEX_NUM)
 		adopt(&n, &kt)
 
 	// We only accept decimal numbers for now
@@ -138,7 +138,7 @@ func directivePara(t token.Token) {
 	// TODO should work for .word and .long as well
 	case ".byte":
 
-		kt := match(token.T_decimal)
+		kt := match(token.DEC_NUM)
 		adopt(&n, &kt)
 
 		var nt token.Token
@@ -147,14 +147,14 @@ func directivePara(t token.Token) {
 			nt = nextToken()
 
 			// TODO This needs to be a lot more clever
-			if nt.Type == token.T_decimal {
+			if nt.Type == token.DEC_NUM {
 				adopt(&n, &nt)
 			}
 
-			if nt.Type == token.T_comma {
+			if nt.Type == token.COMMA {
 				continue
 			}
-			if nt.Type == token.T_eol {
+			if nt.Type == token.EOL {
 				adopt(&n, &nt) // need final EOL
 				break
 			}

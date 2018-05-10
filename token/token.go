@@ -1,11 +1,13 @@
 // Token structure for goasm65816
 // Scot W. Stevenson
 // First version: 02. May 2018
-// This version: 09. May 2018
+// This version: 10. May 2018
 
-// The important part for the parser is the number of parameters the token has,
-// for instance zero for an instruction such as "nop" and potentially lots of
-// them for a directive such as ".byte".
+// So here's a funny thing. The Go specs instist that you should always use
+// camel case, and not all caps, even for constants. However, if you take a look
+// at the Go tokens at https://golang.org/src/go/token/token.go you find ...
+// yes, the tokens are in all caps. This would seem to be a classic case of
+// "code as a say, not as I do", but we're not having any of it.
 
 package token
 
@@ -14,84 +16,100 @@ import (
 )
 
 const (
-	T_eof           int = iota // end of file
-	T_eol                      // added for formatting
-	T_empty                    // marks and empty line
-	T_comment                  // starts with ;
-	T_directive                // simple directive, starts with .
-	T_directivePara            // directive with one or more paras
-	T_opcWDC                   // simple WDC mnemonic without operands
-	T_opcWDCNoPara             // WDC mnemonics with definitely no operands
-	T_opcSAN0                  // SAN opcode without operands (nop)
-	T_opcSAN1                  // SAN opcode with one operand (jsr <TARGET>)
-	T_opcSAN2                  // SAN opcode with two operands (mvn, mvp)
-	T_binary                   // number, starts with %
-	T_hex                      // number, starts with $
-	T_decimal                  // number, starts with number 0-9
-	T_label                    // starts with :
-	T_localLabel               // starts with _
-	T_anonLabel                // starts with @
-	T_leftSquare               // [
-	T_rightSquare              // ]
-	T_leftParens               // (
-	T_rightParens              // )
-	T_leftCurly                // { (UNUSED)
-	T_rightCurly               // } (UNUSED)
-	T_greater                  // >
-	T_less                     // <
-	T_comma                    // ,
-	T_minus                    // -
-	T_plus                     // +
-	T_slash                    // /
-	T_star                     // *
-	T_hash                     // #
-	T_string                   // not a list of runes
-	T_symbol                   // any symbol
-	T_start                    // start of file
+	EOF          int = iota // end of file
+	START                   // start of file
+	EOL                     // end of line
+	EMPTY                   // marks empty line for formatting
+	COMMENT                 // always go to end of the line
+	DIREC                   // simple directive, no parameters
+	DIREC_PARA              // directive with one or more parameters
+	WDC                     // WDC mnemonic, operand status unknown
+	WDC_NOPARA              // WDC mnemonics with definitely no operands
+	SAN_0                   // SAN opcode without any operands ("nop")
+	SAN_1                   // SAN opcode with exactly one operand
+	SAN_2                   // SAN opcode with two operands (mvn, mvp)
+	BIN_NUM                 // binary number
+	HEX_NUM                 // hexadecimal number
+	DEC_NUM                 // decimal number
+	LABEL                   // absolute label (starts with ":")
+	LOCAL_LABEL             // scoped label (starts with "_")
+	ANON_LABEL              // anonymous label (starts with "@")
+	LEFT_SQUARE             // [
+	RIGHT_SQUARE            // ]
+	LEFT_PARENS             // (
+	RIGHT_PARENS            // )
+	LEFT_CURLY              // {
+	RIGHT_CURLY             // }
+	GREATER                 // >
+	LESS                    // <
+	COMMA                   // ,
+	MINUS                   // -
+	PLUS                    // +
+	SLASH                   // /
+	STAR                    // *
+	HASH                    // #
+	STRING                  // not a list of runes
+	SYMBOL                  // any symbol
+	EQUAL                   // =
+	AMPERSAND               // &
+	PIPE                    // |
+	PERCENT                 // %
+	DOLLAR                  // $
+	PERIOD                  // .
+	TILDE                   // ~
+	CARET                   // ^
 )
 
 var Name = map[int](string){
-	T_eof:           "EOF",
-	T_eol:           "EOL",
-	T_empty:         "EMPTY",
-	T_comment:       "COMMENT",
-	T_directive:     "DIR",
-	T_directivePara: "DIR_PARA",
-	T_opcWDC:        "OPC_WDC",
-	T_opcWDCNoPara:  "OPC_WDC_NOPARA",
-	T_opcSAN0:       "OPC_SAN_0",
-	T_opcSAN1:       "OPC_SAN_1",
-	T_opcSAN2:       "OPC_SAN_2",
-	T_binary:        "BINARY",
-	T_hex:           "HEX",
-	T_decimal:       "DECIMAL",
-	T_label:         "LABEL",
-	T_localLabel:    "LOCAL_LABEL",
-	T_anonLabel:     "ANON_LABEL",
-	T_leftSquare:    "LEFT_SQUARE",
-	T_rightSquare:   "RIGHT_SQUARE",
-	T_leftParens:    "LEFT_PARENS",
-	T_rightParens:   "RIGHT_PARENS",
-	T_leftCurly:     "LEFT_CURLY",  // UNUSED
-	T_rightCurly:    "RIGHT_CURLY", // UNUSED
-	T_greater:       "GREATER",
-	T_less:          "LESS",
-	T_comma:         "COMMA",
-	T_minus:         "MINUS",
-	T_plus:          "PLUS",
-	T_slash:         "SLASH",
-	T_star:          "STAR",
-	T_hash:          "HASH",
-	T_string:        "STRING",
-	T_symbol:        "SYMBOL",
-	T_start:         "START",
+	EOF:          "EOF",
+	START:        "START",
+	EOL:          "EOL",
+	EMPTY:        "EMPTY",
+	COMMENT:      "COMMENT",
+	DIREC:        "DIREC",
+	DIREC_PARA:   "DIREC_PARA",
+	WDC:          "OPC_WDC",
+	WDC_NOPARA:   "OPC_WDC_NOPARA",
+	SAN_0:        "OPC_SAN_0",
+	SAN_1:        "OPC_SAN_1",
+	SAN_2:        "OPC_SAN_2",
+	BIN_NUM:      "BIN_NUM",
+	HEX_NUM:      "HEX_NUM",
+	DEC_NUM:      "DEC_NUM",
+	LABEL:        "LABEL",
+	LOCAL_LABEL:  "LOCAL_LABEL",
+	ANON_LABEL:   "ANON_LABEL",
+	LEFT_SQUARE:  "LEFT_SQUARE",
+	RIGHT_SQUARE: "RIGHT_SQUARE",
+	LEFT_PARENS:  "LEFT_PARENS",
+	RIGHT_PARENS: "RIGHT_PARENS",
+	LEFT_CURLY:   "LEFT_CURLY",
+	RIGHT_CURLY:  "RIGHT_CURLY",
+	GREATER:      "GREATER",
+	LESS:         "LESS",
+	COMMA:        "COMMA",
+	MINUS:        "MINUS",
+	PLUS:         "PLUS",
+	SLASH:        "SLASH",
+	STAR:         "STAR",
+	HASH:         "HASH",
+	STRING:       "STRING",
+	SYMBOL:       "SYMBOL",
+	EQUAL:        "EQUAL",
+	AMPERSAND:    "AMPERSAND",
+	PIPE:         "PIPE",
+	PERCENT:      "PERCENT",
+	DOLLAR:       "DOLLAR",
+	PERIOD:       "PERIOD",
+	TILDE:        "TILDE",
+	CARET:        "CARET",
 }
 
 type Token struct {
 	Type  int
 	Text  string // raw text
 	Line  int    // starts with 1
-	Index int    // starts with 0
+	Index int    // starts with 1
 }
 
 // TODO see if we need these after testing, should probably be moved out to the

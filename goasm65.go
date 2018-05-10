@@ -1,7 +1,7 @@
 // The goasm65 Assember
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 08. May 2018
+// This version: 10. May 2018
 
 package main
 
