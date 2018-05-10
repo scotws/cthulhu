@@ -5,3 +5,13 @@
 // This version: 10. May 2018
 
 package rpn
+
+import (
+	"fmt"
+
+	"cthulhu/node"
+)
+
+func Rpn() {
+	fmt.Println("(RPN not written yet)")
+}
