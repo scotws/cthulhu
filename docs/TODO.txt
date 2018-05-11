@@ -1,14 +1,24 @@
 TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 10. May 2018
+This version: 11. May 2018
 
-- Write first primitive lexer
-- Write first primitive formatter
-- Write first primitive parser
+
+TODO NEXT
+
+- Change code to only accept SAN, write external conversion program for 
+  SAN to WDC and WDC to SAN instead.
+- Redefine symbol to allow "_"
+- Anything with "_" as first character is a symbol or a label
+- Redefine labels as SYMBOL COLON ("HERE:")
+
+- Remove token LOCAL_LABEL, let Parser handle 
+
 
 
 PARSER TRICKS
+
+- Enable type checking for directives and instructions
 
 - Define .ram and .rom regions and make sure there are no attempts to (say)
   write outside of ROM or read outside of RAM or ROM. Formats:
