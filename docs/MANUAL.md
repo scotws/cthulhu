@@ -12,9 +12,6 @@ This version: 10. May 2018
 - **-i <FILE>** Input file (required).
 - **-l** Generate listing file.
 - **-m <STRING>** MPU. Currently supported are `6502`, `65c02`, and `65816`
-- **-n <STRING>** Assembler notation. Currently supported are `wdc` for
-  traditional Western Design Center notation and `san` for Simpler Assember
-  Notation. 
 - **-s** Generate symbol table.
 - **-v** Verbose mode. 
 
@@ -45,9 +42,9 @@ grammar can be found in /docs/grammar.txt
 - **Strings** and **single characters** are enclosed by quotation marks (`\"`).
   This means that single characters are not enclosed in single quotes.
 
-- **Mnemonics** belong to a fixed set of 256 words. Goasm65816 will accept
-  various notations, currently "WDC" for the traditional Western Design Center
-  and "SAN" for the Simpler Assembler Notation. 
+- **Mnemonics** belong to a fixed set of 256 words. Cthulhu accepts
+  Simpler Assembler Notation (SAN), but includes a conversion program to move
+  traditional WDC notation to SAN. 
 
 - **Symbols** start with upper- or lowercase (unicode) letter, not a number or a
   special character. They can then contain futher upper- or lowercase letters,
@@ -81,7 +78,6 @@ artificial limit to the line length, lines beyond 80 characters are discouraged.
         .rom $8000-$FFFF
 
         .mpu "65816"
-        .notation "san"
         .org $00:8000
 
         .equ target $2000
@@ -165,8 +161,6 @@ that this word is not yet available.
 - **.mpu** Takes a string of **"6502"**, **"65c02"**, **"65816"**
 
 - **.native** (n/a) 
-
-- **.notation** Takes a string of **"san"** or **"wdc"**
 
 - **.or**
 - **.origin** (n/a) 

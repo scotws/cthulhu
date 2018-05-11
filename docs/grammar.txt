@@ -35,7 +35,6 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
         ".msb" 
         ".mpu" string, one of "6502" | "65c02" | "65816"
         ".native"
-        ".notation" string, one of "san" | "wdc"
         ".origin" expr
         ".ram" expr [ { "," expr } | "-" expr ] 
         ".rom" expr [ { "," expr } | "-" expr ] 
@@ -57,22 +56,12 @@ sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "@" | "~" | "^" | "&" | 
 
 // Instruction
 
-instruction = instruction_wdc | instruction_san
-
-instruction_wdc = ( opc_wdc_nopara [ comment ] ) |
-                  ( opc_wdc [ operand ] [ comment ] ) 
-
-
-opc_wdc_nopara = "brk" | ... | "nop" | ... | "tax" ... 
-
 instruction_san = ( opc_san_0 [ comment ] ) |
                   ( opc_san_1 operand_san [ comment ] ) |
                   ( opc_san_2 operand_san "," operand_san [ comment ] )
 
 operand_san = [ single_operator ] ( number | symbol | rpn ) | 
               ( number | symbol | rpn ) [ binary_operator ( number | symbol | rpn ) ]
-
-operand_wdc = [ single_operator ] ["#"] ["("] ( number | symbol | rpn ) [")"] [",x" | ",y"]
 
 single_operator = ".lsb" | ".msb" | ".bank" | ".not"
 binary_operator = ".and" | ".or" | ".xor" | "+" | "-" | "/" | "*" | ".lshift" | 

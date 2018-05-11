@@ -1,15 +1,34 @@
-// Opcode tables for the 6502 for the Cthulhu Assembler
+// Opcode tables for the 65c02 for the Cthulhu Assembler
 // First version: 06. May 2018
-// This version: 11. May 2018
+// This version: 06. May 2018
 
 package data
 
-// TODO pare down for the 6502
+// TODO pare down to 65c02
+
+// Map (actually set) of legal WDC mnemonics for the 65c02
+var MneWDC65c02 = map[string](bool){
+	"adc": true, "and": true, "asl": true, "bcc": true, "bcs": true, "beq": true,
+	"bit": true, "bmi": true, "bne": true, "bpl": true, "bra": true, "brk": true,
+	"bvc": true, "bvs": true, "clc": true, "cld": true, "cli": true, "clv": true,
+	"cmp": true, "cop": true, "cpx": true, "cpy": true, "dec": true, "dex": true,
+	"dey": true, "eor": true, "inc": true, "inx": true, "iny": true, "jmp": true,
+	"jsr": true, "lda": true, "ldx": true, "ldy": true, "lsr": true, "mvn": true,
+	"mvp": true, "nop": true, "ora": true, "pha": true, "phb": true, "phd": true,
+	"phe": true, "phk": true, "php": true, "phx": true, "phy": true, "pla": true,
+	"plb": true, "pld": true, "plp": true, "plx": true, "ply": true, "rep": true,
+	"rol": true, "ror": true, "rti": true, "rts": true, "sbc": true, "sec": true,
+	"sed": true, "sei": true, "sep": true, "sta": true, "stp": true, "stx": true,
+	"sty": true, "stz": true, "tax": true, "tay": true, "tcd": true, "tcs": true,
+	"tdc": true, "trb": true, "tsb": true, "tsc": true, "tsx": true, "txa": true,
+	"txs": true, "txy": true, "tya": true, "tyx": true, "wai": true, "wdm": true,
+	"xba": true, "xce": true,
+}
 
 // Data bank of opcodes, with mnemonics (SAN and WDC), length in bytes, number
 // of operands, the actual opcode, and a flag if the opcode is affected by
 // switches of the register size
-var Opcodes6502 = map[string](Opcode){
+var Opcodes65c02 = map[string](Opcode){
 	"brk":      Opcode{"brk", "brk", 2, 1, 0x00, false}, // we require a signature byte
 	"ora.dxi":  Opcode{"ora.dxi", "ora", 2, 1, 0x01, false},
 	"cop":      Opcode{"cop", "cop", 2, 0, 0x02, false},

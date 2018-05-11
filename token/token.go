@@ -1,7 +1,7 @@
 // Token structure for Cthulhu Assembler
 // Scot W. Stevenson
 // First version: 02. May 2018
-// This version: 10. May 2018
+// This version: 11. May 2018
 
 // So here's a funny thing. The Go specs instist that you should always use
 // camel case, and not all caps, even for constants. However, if you take a look
@@ -23,11 +23,9 @@ const (
 	COMMENT                 // always go to end of the line
 	DIREC                   // simple directive, no parameters
 	DIREC_PARA              // directive with one or more parameters
-	WDC                     // WDC mnemonic, operand status unknown
-	WDC_NOPARA              // WDC mnemonics with definitely no operands
-	SAN_0                   // SAN opcode without any operands ("nop")
-	SAN_1                   // SAN opcode with exactly one operand
-	SAN_2                   // SAN opcode with two operands (mvn, mvp)
+	OPC_0                   // SAN opcode without any operands ("nop")
+	OPC_1                   // SAN opcode with exactly one operand
+	OPC_2                   // SAN opcode with two operands (mvn, mvp)
 	BIN_NUM                 // binary number
 	HEX_NUM                 // hexadecimal number
 	DEC_NUM                 // decimal number
@@ -68,11 +66,9 @@ var Name = map[int](string){
 	COMMENT:      "COMMENT",
 	DIREC:        "DIREC",
 	DIREC_PARA:   "DIREC_PARA",
-	WDC:          "OPC_WDC",
-	WDC_NOPARA:   "OPC_WDC_NOPARA",
-	SAN_0:        "OPC_SAN_0",
-	SAN_1:        "OPC_SAN_1",
-	SAN_2:        "OPC_SAN_2",
+	OPC_0:        "OPC_0",
+	OPC_1:        "OPC_1",
+	OPC_2:        "OPC_2",
 	BIN_NUM:      "BIN_NUM",
 	HEX_NUM:      "HEX_NUM",
 	DEC_NUM:      "DEC_NUM",

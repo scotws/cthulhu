@@ -1,7 +1,7 @@
 // Token Package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 10. May 2018
+// This version: 11. May 2018
 
 package parser
 
@@ -114,16 +114,6 @@ func directivePara(t token.Token) {
 
 		if kt.Text != "65816" && kt.Text != "65c02" && kt.Text != "6502" {
 			log.Fatalf("PARSER FATAL (%d,%d): MPU type '%s' not supported",
-				kt.Line, kt.Index, kt.Text)
-		}
-
-		adopt(&n, &kt)
-
-	case ".notation":
-		kt := match(token.STRING)
-
-		if kt.Text != "san" && kt.Text != "wdc" {
-			log.Fatalf("PARSER FATAL (%d,%d): notation '%s' not supported",
 				kt.Line, kt.Index, kt.Text)
 		}
 

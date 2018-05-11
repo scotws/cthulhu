@@ -12,7 +12,7 @@ TODO NEXT
 - Anything with "_" as first character is a symbol or a label
 - Redefine labels as SYMBOL COLON ("HERE:")
 
-- Remove token LOCAL_LABEL, let Parser handle 
+- Remove token LOCAL_LABEL, let Parser handle that
 
 
 

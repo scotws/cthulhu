@@ -2,7 +2,7 @@
 // Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 10. May 2018
-// This version: 10. May 2018
+// This version: 11. May 2018
 
 package lexer
 

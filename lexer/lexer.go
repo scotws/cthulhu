@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 10. May 2018
+// This version: 11. May 2018
 
 package lexer
 
@@ -292,59 +292,19 @@ func procSANMne(rs []rune, mpu string) (int, int, bool) {
 		// use that information
 		switch mt {
 		case 0:
-			o = token.SAN_0
+			o = token.OPC_0
 		case 1:
-			o = token.SAN_1
+			o = token.OPC_1
 		case 2:
-			o = token.SAN_2
+			o = token.OPC_2
 		}
 	}
 	return o, e, f
 }
 
-// proWDCMne takes a list of runes and checks to see if it contains a legal
-// mnemonic for the traditional WDC notation. If yes, it returns a token, the
-// index of the first rune past the mnemonic and a bool to designate success or
-// failure
-func procWDCMne(rs []rune, mpu string) (int, int, bool) {
-	var o int
-
-	f := false
-
-	// We allow uppercase letters for mnenomics because we are nice that
-	// way, but internally all is lower case
-	s0 := strings.ToLower(string(rs))
-
-	// Any WDC opcode must be three characters long exactly, which means
-	// that either the word is exactly three characters long or the fourth
-	// letter is a blank
-	if (len(s0) > 3 && s0[3] == ' ') || len(s0) == 3 {
-		s1 := s0[0:3]
-		_, ok := data.OpcodesWDC[mpu][s1]
-
-		if ok {
-
-			// To make life easier for the parser, we check to see
-			// if this is an instruction that definitely doesn't
-			// take any operands
-			_, ok := data.MneWDC65816NoPara[s1]
-
-			if ok {
-				o = token.WDC_NOPARA
-			} else {
-				o = token.WDC
-			}
-
-			f = true
-		}
-	}
-	return o, 3, f
-}
-
 // whichSANMne takes an array of runes and returns a int signaling the number
 // of operands the SAN mnemonic takes (0, 1, or 2) and a flag if this is in fact
-// a mnemonic. We can't do this yet for the WDC mnemonics because we'd have to
-// figure out the operand which can be tricky
+// a mnemonic.
 func whichSANMne(rs []rune, mpu string) (int, bool) {
 	ok := false
 	oc, ok := data.OpcodesSAN[mpu][string(rs)]
@@ -354,7 +314,7 @@ func whichSANMne(rs []rune, mpu string) (int, bool) {
 // Lexer takes a list of raw code lines and returns a list of tokens and a flag
 // indicating if the conversion was successful or not. Error are handled by the
 // main function.
-func Lexer(ls []string, notation, mpu string) *[]token.Token {
+func Lexer(ls []string, mpu string) *[]token.Token {
 
 	// OUTER LOOP: Proceed line-by-line
 	for ln, l := range ls {
@@ -500,28 +460,13 @@ func Lexer(ls []string, notation, mpu string) *[]token.Token {
 				continue
 			}
 
-			// See if we are dealing with a mnemonic. This step is
-			// more complicated because we accept more than one
-			// notation
+			// See if we are dealing with a mnemonic
 			if unicode.IsLetter(cs[i]) {
 
 				var e, tt int
 				var ok bool
 
-				// WDC and SAN give us totally different types
-				// of tokens because SAN allows us to immediatey
-				// say how many operands an instruction has.
-				// This means we let the specialized routines
-				// take care of the token
-				switch notation {
-
-				case "wdc":
-					tt, e, ok = procWDCMne(cs[i:len(cs)], mpu)
-				case "san":
-					tt, e, ok = procSANMne(cs[i:len(cs)], mpu)
-				default:
-					log.Fatalf("LEXER FATAL: Received illegal notation '%s'\n")
-				}
+				tt, e, ok = procSANMne(cs[i:len(cs)], mpu)
 
 				if ok {
 					addToken(tt, string(cs[i:i+e]), ln, i)

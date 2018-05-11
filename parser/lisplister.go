@@ -28,7 +28,7 @@ func Lisplister(AST *node.Node) {
 		fmt.Print("\n")
 	case token.START:
 		fmt.Print(AST.Text, "\n")
-	case token.WDC, token.SAN_0, token.SAN_1, token.WDC_NOPARA:
+	case token.OPC_0, token.OPC_1:
 		fmt.Print("( ", AST.Text)
 
 	// Some of the directors are actually operators that don't start a

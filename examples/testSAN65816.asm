@@ -4,7 +4,6 @@
 ; This version: 10. Mai 2018
 
         .mpu "65816"
-        .notation "san"
         .origin $00:8000
 
         .equ frog %0000.1111

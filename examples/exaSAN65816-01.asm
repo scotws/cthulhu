@@ -1,14 +1,13 @@
 ; Test file for the Cthulhu Assembler
 ; Scot W. Stevenson <scot.stevenson@gmail.com>
 ; First version: 21. Apr 2018
-; This version: 07. May 2018
+; This version: 11. May 2018
 
         .ram $0000-$7FFF
         .rom $8000-$FFFF
         .ram $FFF0, $FF01
 
         .mpu "65816"
-        .notation "san"
         .origin $00:8000
 
         .native         ; it gets serious
