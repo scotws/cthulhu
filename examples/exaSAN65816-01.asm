@@ -15,7 +15,7 @@
 
         .equ target1 $00:2fff
         .equ target2 $00.30aa
-:start
+start:
                 nop             ; this really does nothing
 
                 ldx.# 0010
@@ -33,11 +33,11 @@
 
 ; Silly subroutine. Call with char value in A
         .scope
-:got_a?
+got_a?:
         .axy8
                 ldy.# 00        ; false
                 tyx
-_loop
+_loop:
                 lda.x check_a
                 beq done
                 cmp.# "a"
@@ -45,16 +45,16 @@ _loop
                 inx
                 bra loop
 
-_found!
+_found!:
                 dey             ; to $ff
-_done
+_done:
         .axy16
                 rts
         .scend
 
-:stuff
+stuff:
         .byte 0, $0A, 2, 2+1, "4", %0000:1111 ; just a test
 
-:check_a
+check_a:
         .byte "This is a string", 0
         .end        

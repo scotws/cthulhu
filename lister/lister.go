@@ -5,6 +5,7 @@
 
 // The lister will produce a detailed listing of the final
 // binary file with source code, comments and whatnot
+// Currently, this is more just a version of the formatter
 
 package lister
 
@@ -28,15 +29,17 @@ func Walk(AST *node.Node) {
 
 	case token.EOL:
 		fmt.Print("\n")
-	case token.DIREC:
+	case token.EMPTY:
+		fmt.Print(" \n")
+	case token.DIREC, token.DIREC_PARA:
 		fmt.Print(indent, AST.Text, " ")
+	case token.LABEL, token.LOCAL_LABEL:
+		fmt.Print(AST.Text, ":")
 	case token.HEX_NUM:
 		fmt.Print("$", AST.Text, " ")
 	case token.BIN_NUM:
 		fmt.Print("%", AST.Text, " ")
-	case token.OPC_0:
-		fmt.Print(indent, indent, AST.Text, " ")
-	case token.OPC_1:
+	case token.OPC_0, token.OPC_1:
 		fmt.Print(indent, indent, AST.Text, " ")
 	default:
 		fmt.Print(AST.Text, " ")

@@ -1,7 +1,7 @@
 # Manual for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 10. May 2018
+This version: 11. May 2018
 
 
 
@@ -87,11 +87,11 @@ artificial limit to the line length, lines beyond 80 characters are discouraged.
         .xy8
 
 ;; This are getting serious
-:start
+start:
         .scope
                 lda.# 0000
                 ldx.# $FF
-_loop
+_loop:
                 sta.x target
                 dex             ; remember two bytes per A at 16 bit
                 dex
@@ -101,11 +101,27 @@ _loop
                 stp
 ```
 
-Note that `yes!`, `wtf?`, and `no!no!no!` are all legal symbols and (with colons
-and underscores at the beginning) legal labels. 
+Note that `yes!`, `wtf?`, and `No!No!No!` are all legal symbols and (with colons
+at the end) legal labels. 
+
+### Labels
+
+Labels must start with a letter or an underscore `_`, that is, they follow the same
+rules for symbols. When defined, they take a colon `:` as last character. 
 
 
-## RPN Math Syntax
+```
+global_label: ; accessable from everywhere
+        .scope
+_local_Label: ; only accessable in this scope
+        .scend
+```
+
+During formatting, label definitions (the ones with the colons) are moved to the
+very front of the line.
+
+
+### RPN Math Syntax
 
 Cthulhu allows a form of Reverse Polish Notation (RPN) for math, which is
 appropriate because it was first built for a Forth system called Liara Forth. It
@@ -152,6 +168,7 @@ that this word is not yet available.
 
 - **.equ** (n/a) Required paramters: **<SYMBOL> <NUMBER>**. Defines a symbol.
 
+- **.here** Inserts current Program Counter (PC) address
 - **.include** (n/a) 
 - **.long** (n/a) 
 - **.lsb** (n/a) 
@@ -181,7 +198,8 @@ that this word is not yet available.
 - **.invoke** (n/a) 
 - **.macro** (n/a) 
 - **.mend** (n/a) 
-- **.print** (n/a) 
+- **.print** Takes a string and prints it turning compilation (useful for
+  debugging)
 - **.scope** (n/a) 
 - **.scend** (n/a) 
 - **.then** (n/a) 

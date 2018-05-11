@@ -7,6 +7,7 @@
 // the example of gofmt
 
 // TODO remove double empty lines
+// TODO print .byte, .word, .long nicely
 
 package formatter
 
@@ -31,8 +32,12 @@ func Formatter(tl *[]token.Token) {
 			fmt.Print("\n")
 			continue
 
-		case token.LOCAL_LABEL, token.LABEL, token.ANON_LABEL:
-			fmt.Print(t.Text, "\n")
+		case token.LOCAL_LABEL, token.LABEL:
+			fmt.Print(t.Text, ":")
+			continue
+
+		case token.ANON_LABEL:
+			fmt.Print(t.Text)
 			continue
 
 		case token.STRING:

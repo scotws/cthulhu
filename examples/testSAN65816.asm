@@ -13,10 +13,12 @@
 
                 lda.# 0000
                 tay
+_loop:
 @
                 sta.y $2000
                 sta.y $2000+$100
                 dey
+                bne _loop
                 bne -
 
                 stp

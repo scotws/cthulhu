@@ -6,17 +6,14 @@ This version: 11. May 2018
 
 TODO NEXT
 
-- Change code to only accept SAN, write external conversion program for 
-  SAN to WDC and WDC to SAN instead.
 - Redefine symbol to allow "_"
 - Anything with "_" as first character is a symbol or a label
 - Redefine labels as SYMBOL COLON ("HERE:")
-
 - Remove token LOCAL_LABEL, let Parser handle that
 
 
 
-PARSER TRICKS
+COOL STUFF TRICKS
 
 - Enable type checking for directives and instructions
 
@@ -36,7 +33,8 @@ PARSER TRICKS
 - Support "relocation" mode where everything is branches and no jumps
 
 
-PSEUDOINSTRUCTIONS
 
+DO LATER
+
+- Write external conversion program for SAN to WDC and WDC to SAN
 - Built-in pseudo-instruction / macros for movement: move count source -> destination (65816)
-

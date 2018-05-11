@@ -53,6 +53,7 @@ var (
 // addToken takes the token identifier, the actual text of the token from the
 // source code, the row and index the token was found in, and adds it to the
 // token stream.
+// TODO add file name
 func addToken(ti int, s string, r int, i int) {
 	s0 := strings.TrimSpace(s)
 	r0 := r + 1 // computers count row from 0, humans from 1
@@ -149,10 +150,10 @@ func findHexEOW(rs []rune) int {
 	return e
 }
 
-// findSANMneEOW takes an array of runes and returns the index of the
+// findMneEOW takes an array of runes and returns the index of the
 // the first rune that doesn't belong in a SAN mnemonic. If there is none,
 // returns the length of the rune array
-func findSANMneEOW(rs []rune) int {
+func findMneEOW(rs []rune) int {
 	e := len(rs)
 
 	// Start one character in to skip '.'
@@ -174,8 +175,7 @@ func findSANMneEOW(rs []rune) int {
 func findSymbolEOW(rs []rune) int {
 	e := len(rs)
 
-	// Start one character in to skip '_' and ':'
-	for i := 1; i < len(rs); i++ {
+	for i := 0; i < len(rs); i++ {
 
 		if !unicode.IsLetter(rs[i]) &&
 			!unicode.IsNumber(rs[i]) &&
@@ -233,9 +233,8 @@ func isEmpty(s string) bool {
 }
 
 // isLegalSymbolChar takes a rune and returns a bool depending if it is a legal
-// character for a symbol or a label. Note that this doesn't mean that a symbol
-// or label may begin with these runes, they just are allowed after the
-// initial character
+// character for a symbol or a label. Note that ':' is not a legal symbol
+// character, but a flag marking the definition of the label
 func isLegalSymbolChar(r rune) bool {
 
 	lsc := map[rune](bool){
@@ -269,20 +268,20 @@ func isSingleCharToken(r rune) (int, bool) {
 	return t, f
 }
 
-// proSANMne takes a list of runes and checks to see if it contains a legal
+// procMne takes a list of runes and checks to see if it contains a legal
 // mnemonic for the Simpler Assembler Notation (SAN). If yes, it returns a
 // token, the index of the first rune past the mnemonic and a bool to designate
 // success or failure
-func procSANMne(rs []rune, mpu string) (int, int, bool) {
+func procMne(rs []rune, mpu string) (int, int, bool) {
 
 	var o int
 
 	f := false
 
-	e := findSANMneEOW(rs)
+	e := findMneEOW(rs)
 	r := rs[0:e]
 
-	mt, ok := whichSANMne(r, mpu)
+	mt, ok := whichMne(r, mpu)
 
 	if ok {
 		f = true
@@ -302,10 +301,10 @@ func procSANMne(rs []rune, mpu string) (int, int, bool) {
 	return o, e, f
 }
 
-// whichSANMne takes an array of runes and returns a int signaling the number
+// whichMne takes an array of runes and returns a int signaling the number
 // of operands the SAN mnemonic takes (0, 1, or 2) and a flag if this is in fact
 // a mnemonic.
-func whichSANMne(rs []rune, mpu string) (int, bool) {
+func whichMne(rs []rune, mpu string) (int, bool) {
 	ok := false
 	oc, ok := data.OpcodesSAN[mpu][string(rs)]
 	return oc.Operands, ok
@@ -388,24 +387,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 
 				log.Fatalf("LEXER FATAL (%d,%d): Unknown directive '%s'", ln+1, i+1, word)
 
-			// Global label. The first character after the colon
-			// must be an uppercase or lowercase letter
-			case ':':
-				i += 1 // skip ':' symbol
-
-				// First character after the colon must be an
-				// upper- or lowercase letter because a label is
-				// basically just a symbol
-				if !unicode.IsLetter(cs[i]) {
-					log.Fatalf("LEXER FATAL (%d,%d): Letter required after label colon",
-						ln+1, i+1)
-				}
-				e := findSymbolEOW(cs[i:len(cs)])
-				word := cs[i-1 : i+e] // Include colon
-				addToken(token.LABEL, string(word), ln, i)
-				i = i + e - 1 // continue adds one
-				continue
-
+			// Binary number
 			case '%':
 				i += 1 // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
@@ -424,7 +406,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				i = i + e - 1 // continue adds one
 				continue
 
-			// Local label. First character after the underscore
+			// Local label or symbol. First character after the underscore
 			// must be a letter
 			case '_':
 				i += 1 // skip '_' symbol
@@ -439,7 +421,23 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 
 				e := findSymbolEOW(cs[i:len(cs)])
 				word := cs[i-1 : i+e] // Include underscore
-				addToken(token.LOCAL_LABEL, string(word), ln, i)
+
+				// if the next character is a colon (':'), we've
+				// definied a local label here, otherwise it's a
+				// scoped symbol
+
+				if i+e < len(cs) {
+					nc := cs[i+e]
+
+					if nc == ':' {
+						addToken(token.LOCAL_LABEL, string(word), ln, i)
+						i = i + e // continue adds one, but skip colon
+						continue
+					}
+				}
+
+				// Not a local label, just some sort of symbol
+				addToken(token.SYMBOL, string(word), ln, i)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -460,29 +458,47 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				continue
 			}
 
-			// See if we are dealing with a mnemonic
+			// We start with a letter. See if this is an opcode, a symbol, or a
+			// global label definition
 			if unicode.IsLetter(cs[i]) {
 
 				var e, tt int
 				var ok bool
 
-				tt, e, ok = procSANMne(cs[i:len(cs)], mpu)
+				// We take some work off the parser by getting
+				// the information about what kind of opcode we
+				// have -- one with zero, one, or two (65816
+				// only) operands
+				tt, e, ok = procMne(cs[i:len(cs)], mpu)
 
 				if ok {
 					addToken(tt, string(cs[i:i+e]), ln, i)
 					i = i + e - 1 // continue adds one
-				} else {
-
-					// If this is not some opcode and none
-					// of the above, it has to be some sort
-					// of a symbol
-					e = findSymbolEOW(cs[i:len(cs)])
-					word := cs[i : i+e]
-					addToken(token.SYMBOL, string(word), ln, i)
-					i = i + e - 1 // continue adds one
+					continue
 				}
+
+				// We're dealing with some sort of symbol.
+				e = findSymbolEOW(cs[i:len(cs)])
+				word := cs[i : i+e]
+
+				// if the next character is a colon (':'), we've
+				// definied a global label here
+				if i+e < len(cs) {
+					nc := cs[i+e]
+
+					if nc == ':' {
+						addToken(token.LABEL, string(word), ln, i)
+						i = i + e // continue adds one, but skip colon
+						continue
+					}
+				}
+
+				// This is just a symbol then
+				addToken(token.SYMBOL, string(word), ln, i)
+				i = i + e - 1 // continue adds one
 				continue
 			}
+
 		}
 		addToken(token.EOL, "\n", ln, len(cs))
 	}

@@ -29,7 +29,7 @@ const (
 	BIN_NUM                 // binary number
 	HEX_NUM                 // hexadecimal number
 	DEC_NUM                 // decimal number
-	LABEL                   // absolute label (starts with ":")
+	LABEL                   // absolute label (ends with ":")
 	LOCAL_LABEL             // scoped label (starts with "_")
 	ANON_LABEL              // anonymous label (starts with "@")
 	LEFT_SQUARE             // [

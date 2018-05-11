@@ -19,15 +19,17 @@ func Tokenlister(ts *[]token.Token) {
 
 	for _, t := range *ts {
 
-		if t.Type == token.COMMENT || t.Type == token.EMPTY ||
-			t.Type == token.EOL || t.Type == token.EOF ||
-			t.Type == token.COMMA || t.Type == token.MINUS ||
-			t.Type == token.HASH || t.Type == token.LEFT_CURLY ||
-			t.Type == token.RIGHT_CURLY || t.Type == token.PLUS ||
-			t.Type == token.LEFT_PARENS ||
-			t.Type == token.RIGHT_PARENS {
+		switch t.Type {
+
+		case token.COMMENT, token.EMPTY, token.EOL, token.EOF, token.COMMA,
+			token.MINUS, token.HASH, token.LEFT_CURLY, token.RIGHT_CURLY,
+			token.PLUS, token.LEFT_PARENS, token.RIGHT_PARENS:
 			fmt.Printf("<%s>", token.Name[t.Type])
-		} else {
+
+		case token.LABEL, token.LOCAL_LABEL:
+			fmt.Printf("<%s [%s]>", token.Name[t.Type], t.Text)
+
+		default:
 			fmt.Printf("<%s [%s]>", token.Name[t.Type], t.Text)
 		}
 

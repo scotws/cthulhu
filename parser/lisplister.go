@@ -57,7 +57,9 @@ func Lisplister(AST *node.Node) {
 		fmt.Print("%", AST.Text)
 	case token.STRING:
 		fmt.Print("\"", AST.Text, "\"")
-	case token.LABEL, token.LOCAL_LABEL, token.ANON_LABEL:
+	case token.LABEL, token.LOCAL_LABEL:
+		fmt.Print("( ", AST.Text, ":")
+	case token.ANON_LABEL:
 		fmt.Print("( ", AST.Text)
 	default:
 		fmt.Print(AST.Text)

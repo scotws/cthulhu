@@ -29,6 +29,7 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
         ".emulate"
         ".end"
         ".equ" symbol expr
+        ".here"
         ".include" string
         ".long" expr { "," expr }
         ".lsb" expr
@@ -47,12 +48,12 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
 // Labels 
 
 label = ( local_label | global_label | anon_label ) [ directive | instruction ] [ comment ]
-local_label = "_" symbol
-global_label = ":" symbol
+local_label = "_" symbol ":" 
+global_label = symbol ":" 
 anon_label = "@"
 
 symbol = letter { letter | digit | sym_special }
-sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "@" | "~" | "^" | "&" | "=" | "|"
+sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "~" | "^" | "&" | "=" | "|"
 
 // Instruction
 
