@@ -189,7 +189,7 @@ func findSymbolEOW(rs []rune) int {
 
 // findStringEOW starts at a quote mark and searches for the next quote mark,
 // returning its last character's index. It also returns a success bool. If no
-// quote mark was, found return a zero as an it and a false bool
+// quote mark was found, return a zero as int and a false bool
 func findStringEOW(rs []rune) (int, bool) {
 	f := false
 	t := 0
@@ -203,7 +203,8 @@ func findStringEOW(rs []rune) (int, bool) {
 	return t, f
 }
 
-// isCommentLine takes a string and checks to see if it is a full-line comment
+// isCommentLine takes a string and checks to see if it is a comment by getting
+// rid of the whitespace around it
 func isCommentLine(s string) bool {
 	f := false
 	s0 := strings.TrimSpace(s)
@@ -224,11 +225,9 @@ func isDirective(s string) bool {
 // isEmptyLine take a complete line and checks to see if it is all whitespace
 func isEmpty(s string) bool {
 	f := false
-
 	if len(strings.TrimSpace(s)) == 0 {
 		f = true
 	}
-
 	return f
 }
 
@@ -290,6 +289,7 @@ func procMne(rs []rune, mpu string) (int, int, bool) {
 		// operands it has just from the mnenomic, so we might as well
 		// use that information
 		switch mt {
+
 		case 0:
 			o = token.OPC_0
 		case 1:
@@ -356,12 +356,19 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				continue
 			}
 
+			// Now things get a little tricker, because we have to
+			// isolate words
+
 			switch cs[i] {
+
+			// Comments. Always run till the end of the line
 			case ';':
 				word := string(cs[i:len(cs)])
 				addToken(token.COMMENT, word, ln, i)
 				i = len(cs)
 				continue
+
+			// Directives
 			case '.':
 				e := findDirectiveEOW(cs[i:len(cs)])
 				word := string(cs[i : i+e])
@@ -407,7 +414,8 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				continue
 
 			// Local label or symbol. First character after the underscore
-			// must be a letter
+			// must be a letter. There is currently code duplication
+			// here with the detection of global labels
 			case '_':
 				i++ // skip '_' symbol
 
@@ -458,8 +466,9 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				continue
 			}
 
-			// We start with a letter. See if this is an opcode, a symbol, or a
-			// global label definition
+			// Our word starts with a letter, which means it can be
+			// an instruction, a label definition, or just a normal
+			// symbol
 			if unicode.IsLetter(cs[i]) {
 
 				var e, tt int
@@ -498,6 +507,9 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				i = i + e - 1 // continue adds one
 				continue
 			}
+
+			log.Fatalf("LEXER FATAL (%d,%d): Can't process char '%s'",
+				ln, i, cs[i])
 
 		}
 		addToken(token.EOL, "\n", ln, len(cs))
