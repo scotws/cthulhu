@@ -6,12 +6,7 @@ This version: 11. May 2018
 
 TODO NEXT
 
-- Redefine symbol to allow "_"
-- Anything with "_" as first character is a symbol or a label
-- Redefine labels as SYMBOL COLON ("HERE:")
-- Remove token LOCAL_LABEL, let Parser handle that
-
-
+- Continue work on parser
 
 COOL STUFF TRICKS
 
