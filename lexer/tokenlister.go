@@ -13,8 +13,7 @@ import (
 )
 
 // Tokenlister takes the list of tokens produced by the lexer and prints them
-// out
-
+// out in a nice way for debugging purposes
 func Tokenlister(ts *[]token.Token) {
 
 	for _, t := range *ts {

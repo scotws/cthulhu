@@ -13,10 +13,9 @@ import (
 	"cthulhu/token"
 )
 
-// lisplister takes an AST from the parser and prints out a list of the tree
+// Lisplister takes an AST from the parser and prints out a list of the tree
 // elements in a Lisp-inspired S-format (ie, lots of braces). It is used for
 // debugging.
-
 func Lisplister(AST *node.Node) {
 
 	switch AST.Type {
@@ -57,8 +56,11 @@ func Lisplister(AST *node.Node) {
 		fmt.Print("%", AST.Text)
 	case token.STRING:
 		fmt.Print("\"", AST.Text, "\"")
+
+	// TODO missing closing parens if label is not alone in the line
 	case token.LABEL, token.LOCAL_LABEL:
 		fmt.Print("( ", AST.Text, ":")
+
 	case token.ANON_LABEL:
 		fmt.Print("( ", AST.Text)
 	default:

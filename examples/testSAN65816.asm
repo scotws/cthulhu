@@ -13,15 +13,13 @@
 
                 lda.# 0000
                 tay
-_loop:
-@
+myloop:
                 sta.y $2000
                 sta.y $2000+$100
                 dey
-                bne _loop
-                bne -
+                bne myloop
 
-                stp
+stop:           stp ; it's all over, baby!
 
         .word {frog 2 .swap .dup *}, $ff, "frog"
         .byte 1, 2, 3, 4

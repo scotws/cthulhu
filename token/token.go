@@ -11,10 +11,6 @@
 
 package token
 
-import (
-	"fmt"
-)
-
 const (
 	EOF          int = iota // end of file
 	START                   // start of file
@@ -108,6 +104,7 @@ type Token struct {
 	Index int    // starts with 1
 }
 
+/*
 // TODO see if we need these after testing, should probably be moved out to the
 // specialized tools
 
@@ -123,3 +120,4 @@ func (t *Token) PrintLine() {
 	ts := fmt.Sprintf("<%s>", Name[t.Type])
 	fmt.Printf("%15s (%02d,%02d): \t%s\n", ts, t.Line, t.Index, t.Text)
 }
+*/

@@ -20,13 +20,13 @@ import (
 )
 
 var (
-	f_debug   = flag.Bool("d", false, "Print lots and lots of debugging information")
-	input     = flag.String("i", "", "Input file (REQUIRED)")
-	f_format  = flag.Bool("f", false, "Return formatted version of source")
-	f_verbose = flag.Bool("v", false, "Give verbose messages")
-	f_listing = flag.Bool("l", false, "Generate listing file")
-	mpu       = flag.String("m", "65c02", "MPU (default 65c02)")
-	f_symbols = flag.Bool("s", false, "Generate symbol table file")
+	fDebug   = flag.Bool("d", false, "Print lots and lots of debugging information")
+	input    = flag.String("i", "", "Input file (REQUIRED)")
+	fFormat  = flag.Bool("f", false, "Return formatted version of source")
+	fVerbose = flag.Bool("v", false, "Give verbose messages")
+	fListing = flag.Bool("l", false, "Generate listing file")
+	mpu      = flag.String("m", "65c02", "MPU (default 65c02)")
+	fSymbols = flag.Bool("s", false, "Generate symbol table file")
 
 	raw    []string
 	tokens []token.Token
@@ -34,7 +34,7 @@ var (
 
 // Verbose prints the given string if the verbose flag is set
 func verbose(s string) {
-	if *f_verbose {
+	if *fVerbose {
 		fmt.Println(s)
 	}
 }
@@ -78,8 +78,9 @@ func main() {
 	verbose("(Includer not written yet.)")
 
 	// Part of the debugging information is a list of tokens
-	if *f_debug {
-		fmt.Println("=== List of tokens after initial lexing: ===\n")
+	if *fDebug {
+		fmt.Println("=== List of tokens after initial lexing: ===")
+		fmt.Println()
 		lexer.Tokenlister(tokens)
 	}
 
@@ -91,7 +92,7 @@ func main() {
 	// much like the gofmt program included with Go. See the file itself for
 	// more detail
 
-	if *f_format {
+	if *fFormat {
 		formatter.Formatter(tokens)
 		verbose("Formatter run.")
 	}
@@ -105,8 +106,9 @@ func main() {
 
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST
-	if *f_debug {
-		fmt.Println("=== AST after initial parsing: ===\n")
+	if *fDebug {
+		fmt.Println("=== AST after initial parsing: ===")
+		fmt.Println()
 		parser.Lisplister(&AST)
 	}
 
@@ -138,7 +140,7 @@ func main() {
 	// information such as the actual byte stored for each instruction and
 	// the modes the 65816 was in during each instruction
 
-	if *f_listing {
+	if *fListing {
 		lister.Lister(AST)
 		verbose("Lister run.")
 	}

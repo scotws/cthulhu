@@ -18,9 +18,9 @@ import (
 var (
 	tokens []token.Token
 
-	// We can handle single-character tokens with this table and a loop
+	// We can handle single-character tokens with this table and a loop.
 	// DOLLAR ('$') is not included currently because it would screw up the
-	// lexer's hex number detection. Same for PERIOD ('.') because it
+	// lexer's hex number detection; same for PERIOD ('.') because it
 	// doesn't work with directive detection
 	singleChars = []rune{
 		',', '-', '+', '@', '/', '*', '[', ']', '(', ')', '>', '<',
@@ -58,12 +58,12 @@ func addToken(ti int, s string, r int, i int) {
 	s0 := strings.TrimSpace(s)
 	r0 := r + 1 // computers count row from 0, humans from 1
 	i0 := i + 1 // computers count from column 0, humans from 1
-	tokens = append(tokens, token.Token{ti, s0, r0, i0})
+	tokens = append(tokens, token.Token{Type: ti, Text: s0, Line: r0, Index: i0})
 }
 
 // findBinEOW takes an array of runes and returns the index of the first
 // non-binary number character (0 and 1). If there is none, it returns the
-// length of the string
+// length of the string. Note any ':' and '.' count when calculating the length
 func findBinEOW(rs []rune) int {
 	e := len(rs)
 
@@ -389,7 +389,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 
 			// Binary number
 			case '%':
-				i += 1 // skip '%' symbol
+				i++ // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
 				addToken(token.BIN_NUM, string(word), ln, i)
@@ -399,7 +399,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			// Hex number. We allow uppercase and lowercase heximal
 			// digits
 			case '$':
-				i += 1 // skip '$' symbol
+				i++ // skip '$' symbol
 				e := findHexEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
 				addToken(token.HEX_NUM, string(word), ln, i)
@@ -409,7 +409,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			// Local label or symbol. First character after the underscore
 			// must be a letter
 			case '_':
-				i += 1 // skip '_' symbol
+				i++ // skip '_' symbol
 
 				// First character after the underscore must be an
 				// upper- or lowercase letter because a label is
@@ -445,7 +445,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			// Note we currently don't allow backslashes to get the
 			// quotation mark itself
 			case '"':
-				i += 1 // skip leading quote
+				i++ // skip leading quote
 				e, ok := findStringEOW(cs[i:len(cs)])
 
 				if !ok {
