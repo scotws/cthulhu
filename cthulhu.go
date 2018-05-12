@@ -12,7 +12,9 @@ import (
 	"log"
 	"os"
 
+	"cthulhu/analyzer"
 	"cthulhu/formatter"
+	"cthulhu/generator"
 	"cthulhu/lexer"
 	"cthulhu/lister"
 	"cthulhu/parser"
@@ -126,17 +128,21 @@ func main() {
 	// processes on it to convert numbers, etc. Comments and other entries
 	// are ignored
 	// TODO see about passing out symbol table(s)
-	aAst := analyzer.Analyzer(ast)
+	aAst := analyzer.Analyzer(ast, *fTrace)
 
 	if *fDebug {
-		fmt.Println("=== Modified AST after analyzing step: ===")
+		fmt.Println("=== AST modified the following nodes: ===")
 		fmt.Println()
-		parser.Lisplister(aAst)
+		analyzer.Worklister(aAst)
+		fmt.Println()
 	}
 
-	verbose("(Analyzer not written yet.)")
-
-	// TODO print Lisp tree if debugging enabled
+	if *fDebug {
+		fmt.Println("=== AST after analyze step ===")
+		fmt.Println()
+		parser.Lisplister(aAst)
+		fmt.Println()
+	}
 
 	// *** GENERATOR ***
 
@@ -144,7 +150,7 @@ func main() {
 	// and produces the actual bytes that will be saved in the final file.
 	// TODO
 
-	verbose("(Generator not written yet.)")
+	generator.Generator(aAst)
 
 	// *** LISTER ***
 

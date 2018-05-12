@@ -1,7 +1,7 @@
 // Print a Lisp-like listing of the AST for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 08. May 2018
-// First version: 11. May 2018
+// This version: 12. May 2018
 
 package parser
 
@@ -22,11 +22,13 @@ func Lisplister(AST *node.Node) {
 
 	// Special case
 	case token.EOL:
-		fmt.Print(")\n")
+		fmt.Print("<EOL> )\n")
+	case token.EOF:
+		fmt.Print("( <EOF> )\n")
 	case token.EMPTY:
-		fmt.Print("\n")
+		fmt.Print("( <EMPTY> )\n")
 	case token.START:
-		fmt.Print(AST.Text, "\n")
+		fmt.Print(" ( ", AST.Text, " )", "\n")
 	case token.OPC_0, token.OPC_1:
 		fmt.Print("( ", AST.Text)
 

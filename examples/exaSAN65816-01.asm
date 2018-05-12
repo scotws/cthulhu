@@ -3,9 +3,9 @@
 ; First version: 21. Apr 2018
 ; This version: 11. May 2018
 
-        .ram $0000-$7FFF
-        .rom $8000-$FFFF
-        .ram $FFF0, $FF01
+        .ram $0000 $7FFF
+        .rom $8000 $FFFF
+        ; .ram $FFF0, $FF01
 
         .mpu "65816"
         .origin $00:8000

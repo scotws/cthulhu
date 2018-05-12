@@ -1,7 +1,7 @@
 // Node types for the AST of the Cthulhu Assembler
 // Scot W. Stevenson
 // First version 07. May 2018
-// This version 11. May 2018
+// This version 12. May 2018
 
 // Because we have a simple assembler and are not going to use obscene amounts
 // of data, we can get away with a homogenous Abstract Syntax Tree (AST) with
@@ -22,6 +22,7 @@ type Node struct {
 	Kids        []*Node // for children nodes
 	Value       int     // for numbers of all sorts
 	Code        []byte  // The final byte stream that is added at the end
+	Modified    bool    // Marks if analyzer touched node
 }
 
 // Add creates a new subnode on an existing node. This is just a nicer way of
@@ -35,6 +36,13 @@ func (n *Node) Add(k *Node) {
 func (n *Node) Adopt(k *Node, t *token.Token) {
 	nn := Create(*t)
 	n.Kids = append(n.Kids, &nn)
+}
+
+// Evict removes a subnode with the index 0 from the given node, returning a
+// bool to single if everything worked okay
+func (n *Node) Evict(i int) []*Node {
+	copy(n.Kids[i:], n.Kids[i+1:])
+	return n.Kids[:len(n.Kids)-1]
 }
 
 // Creates returns a new node when given a token.

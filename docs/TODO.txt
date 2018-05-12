@@ -1,12 +1,12 @@
 TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 11. May 2018
+This version: 12. May 2018
 
 
 TODO NEXT
 
-- Continue work on parser
+- Add token for whole-line comments, making life easier on everybody
 
 COOL STUFF TRICKS
 
