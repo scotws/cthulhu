@@ -45,13 +45,10 @@ func Lisplister(AST *node.Node) {
 
 	// Comments come in two forms, at the beginning of a line or at the end
 	// of a line.
+	case token.COMMENT_LINE:
+		fmt.Print("( ", AST.Text)
 	case token.COMMENT:
-		if AST.Index <= 2 {
-			fmt.Print("( ", AST.Text)
-		} else {
-			fmt.Print(") ( ", AST.Text)
-		}
-
+		fmt.Print(") ( ", AST.Text)
 	case token.HEX_NUM:
 		fmt.Print("$", AST.Text)
 	case token.BIN_NUM:

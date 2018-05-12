@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 11. May 2018
+// This version: 12. May 2018
 
 package lexer
 
@@ -325,8 +325,10 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			continue
 		}
 
+		// See if this is a whole-line comment, which gets a different
+		// token than the comments in-line
 		if isCommentLine(l) {
-			addToken(token.COMMENT, l, ln, 1)
+			addToken(token.COMMENT_LINE, l, ln, 1)
 			addToken(token.EOL, "\n", ln, 1)
 			continue
 		}
@@ -361,7 +363,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 
 			switch cs[i] {
 
-			// Comments. Always run till the end of the line
+			// In-line comments. Always run till the end of the line
 			case ';':
 				word := string(cs[i:len(cs)])
 				addToken(token.COMMENT, word, ln, i)

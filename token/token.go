@@ -1,7 +1,7 @@
 // Token structure for Cthulhu Assembler
 // Scot W. Stevenson
 // First version: 02. May 2018
-// This version: 11. May 2018
+// This version: 12. May 2018
 
 // So here's a funny thing: The Go specs instist that you should always use
 // camel case, and not all caps, even for constants. However, if you take a look
@@ -25,7 +25,8 @@ const (
 	START                   // start of file
 	EOL                     // end of line
 	EMPTY                   // marks empty line for formatting
-	COMMENT                 // always go to end of the line
+	COMMENT                 // in-line comments
+	COMMENT_LINE            // whole-line comments
 	DIREC                   // simple directive, no parameters
 	DIREC_PARA              // directive with one or more parameters
 	OPC_0                   // SAN opcode without any operands ("nop")
@@ -76,6 +77,7 @@ var Name = map[int](string){
 	EOL:          "EOL",
 	EMPTY:        "EMPTY",
 	COMMENT:      "COMMENT",
+	COMMENT_LINE: "COMMENT_LINE",
 	DIREC:        "DIREC",
 	DIREC_PARA:   "DIREC_PARA",
 	OPC_0:        "OPC_0",

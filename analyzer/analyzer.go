@@ -111,15 +111,15 @@ func walk(n *node.Node, trace bool) {
 
 		switch tt {
 
-		case token.EMPTY:
+		case token.EMPTY, token.COMMENT:
 			n.Kids = n.Evict(i)
 
-		// This step can leave multiple EOL tokens if our comments are
-		// full-line, but not when there are in-line comments
-		// TODO fix this
-		case token.COMMENT:
+		// If we have a full-line comment, we have to remove the EOL as
+		// well
+		case token.COMMENT_LINE:
 			n.Kids = n.Evict(i)
-
+			n.Kids = n.Evict(i)
+			i--
 		}
 
 		if trace {

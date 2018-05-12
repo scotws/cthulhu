@@ -52,7 +52,7 @@ func Formatter(tl *[]token.Token) {
 			fmt.Print("$", t.Text)
 			continue
 
-		case token.COMMENT:
+		case token.COMMENT, token.COMMENT_LINE:
 			fmt.Print(t.Text)
 			continue
 

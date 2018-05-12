@@ -22,7 +22,8 @@ func Tokenlister(ts *[]token.Token) {
 
 		case token.COMMENT, token.EMPTY, token.EOL, token.EOF, token.COMMA,
 			token.MINUS, token.HASH, token.LEFT_CURLY, token.RIGHT_CURLY,
-			token.PLUS, token.LEFT_PARENS, token.RIGHT_PARENS:
+			token.PLUS, token.LEFT_PARENS, token.RIGHT_PARENS,
+			token.COMMENT_LINE:
 			fmt.Printf("<%s>", token.Name[t.Type])
 
 		case token.LABEL, token.LOCAL_LABEL:
