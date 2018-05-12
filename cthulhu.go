@@ -1,7 +1,7 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 11. May 2018
+// This version: 12. May 2018
 
 package main
 
@@ -23,6 +23,7 @@ var (
 	fDebug   = flag.Bool("d", false, "Print lots and lots of debugging information")
 	input    = flag.String("i", "", "Input file (REQUIRED)")
 	fFormat  = flag.Bool("f", false, "Return formatted version of source")
+	fHexdump = flag.Bool("h", false, "Add hexdump of binary to file 'cthulhu.hex'")
 	fVerbose = flag.Bool("v", false, "Give verbose messages")
 	fListing = flag.Bool("l", false, "Generate listing file")
 	mpu      = flag.String("m", "65c02", "MPU (default 65c02)")
@@ -122,8 +123,16 @@ func main() {
 	// *** ANALYZER ***
 
 	// The analyzer examens the AST provided by the parser and runs various
-	// processes on it to convert numbers,
-	// TODO
+	// processes on it to convert numbers, etc. Comments and other entries
+	// are ignored
+	// TODO see about passing out symbol table(s)
+	aAst := analyzer.Analyzer(ast)
+
+	if *fDebug {
+		fmt.Println("=== Modified AST after analyzing step: ===")
+		fmt.Println()
+		parser.Lisplister(aAst)
+	}
 
 	verbose("(Analyzer not written yet.)")
 
@@ -137,8 +146,6 @@ func main() {
 
 	verbose("(Generator not written yet.)")
 
-	// TODO print Lisp tree if debugging enabled
-
 	// *** LISTER ***
 
 	// The lister produces a detailed listing of the code with useful
@@ -148,6 +155,12 @@ func main() {
 	if *fListing {
 		lister.Lister(ast)
 		verbose("Lister run.")
+	}
+
+	// *** HEXDUMP ***
+
+	if *fHexdump {
+		verbose("(Hexdump not installed yet)")
 	}
 
 }
