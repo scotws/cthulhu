@@ -37,8 +37,8 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
         ".mpu" string, one of "6502" | "65c02" | "65816"
         ".native"
         ".origin" expr
-        ".ram" expr [ { "," expr } | "-" expr ] 
-        ".rom" expr [ { "," expr } | "-" expr ] 
+        ".ram" addr addr 
+        ".rom" addr addr
         ".status"
         ".word" expr { "," expr } [ comment ] "<EOL>"
         ".xy16"

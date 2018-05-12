@@ -31,7 +31,7 @@ var Directives = map[string](bool){
 	".bank": true, ".advance": true, ".skip": true,
 	".assert": true, ".ram": true, ".rom": true,
 	".swap": true, ".drop": true, ".dup": true, ".lshift": true,
-	".rshift": true, ".not": true, ".here": true,
+	".rshift": true, ".not": true, ".here": true, ".include": true,
 }
 
 // List of directives with Parameters
@@ -39,7 +39,7 @@ var DirectivesPara = map[string](bool){
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".macro": true, ".lsb": true, ".msb": true,
 	".bank": true, ".advance": true, ".skip": true,
-	".assert": true, ".ram": true, ".rom": true,
+	".assert": true, ".ram": true, ".rom": true, ".include": true,
 	".lshift": true, ".rshift": true, ".not": true,
 }
 

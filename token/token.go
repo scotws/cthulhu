@@ -3,16 +3,25 @@
 // First version: 02. May 2018
 // This version: 11. May 2018
 
-// So here's a funny thing. The Go specs instist that you should always use
+// So here's a funny thing: The Go specs instist that you should always use
 // camel case, and not all caps, even for constants. However, if you take a look
 // at the Go tokens at https://golang.org/src/go/token/token.go you find ...
-// yes, the tokens are in all caps. This would seem to be a classic case of
+// gee, the tokens are in all caps. This would seem to be a classic case of
 // "code as a say, not as I do", but we're not having any of it.
 
 package token
 
+type Token struct {
+	Type  int
+	Text  string // raw text
+	Line  int    // starts with 1
+	Index int    // starts with 1
+}
+
 const (
-	EOF          int = iota // end of file
+	// We start off with literals, which are easy to work with
+	lit_begin    int = iota // start of all literals
+	EOF                     // end of file
 	START                   // start of file
 	EOL                     // end of line
 	EMPTY                   // marks empty line for formatting
@@ -52,6 +61,13 @@ const (
 	PERIOD                  // .
 	TILDE                   // ~
 	CARET                   // ^
+	lit_end
+
+	// After the literals come the composits which need rules to check them
+	comp_begin
+	ADDRESS
+	NUMBER
+	comp_end
 )
 
 var Name = map[int](string){
@@ -95,29 +111,34 @@ var Name = map[int](string){
 	PERIOD:       "PERIOD",
 	TILDE:        "TILDE",
 	CARET:        "CARET",
+
+	// Composite types
+	ADDRESS: "ADDRESS",
+	NUMBER:  "NUMBER",
 }
 
-type Token struct {
-	Type  int
-	Text  string // raw text
-	Line  int    // starts with 1
-	Index int    // starts with 1
+// compositeTypes is a map that contains the literal subtypes that composite
+// types contain
+var compositeTokens = map[int][]int{
+	ADDRESS: []int{SYMBOL, HEX_NUM, BIN_NUM},  // TODO missing math
+	NUMBER:  []int{HEX_NUM, BIN_NUM, DEC_NUM}, // TODO missing math
 }
 
-/*
-// TODO see if we need these after testing, should probably be moved out to the
-// specialized tools
+// IsLiteral checks to see if the given token is a literal (say, HEX_NUM) or a
+// composite value (say, NUMBER) that needs further testing
+func (t *Token) IsLiteral(tt int) bool {
+	f := false
 
-// Print just prints the token name without a final line feed. It is mainly
-// used for testing
-func (t *Token) Print() {
-	fmt.Printf("<%s>", Name[t.Type])
+	if tt > lit_begin && tt < lit_end {
+		f = true
+	}
+	return f
 }
 
-// PrintLine displays longform information from the token. It is used mainly
-// for testing
-func (t *Token) PrintLine() {
-	ts := fmt.Sprintf("<%s>", Name[t.Type])
-	fmt.Printf("%15s (%02d,%02d): \t%s\n", ts, t.Line, t.Index, t.Text)
+// Subtypes is given a composite type and returns a list of literal types to
+// check against
+// TODO check for legal values
+func Subtypes(ct int) []int {
+	at := compositeTokens[ct]
+	return at
 }
-*/

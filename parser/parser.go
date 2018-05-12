@@ -1,11 +1,17 @@
-// Token Package for the Cthulhu assembler
+// Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
 // This version: 11. May 2018
 
+// The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
+// of the list of tokens. All further processing is handled in later steps. Note
+// this means that we also include information such as comments that would
+// usually be thrown out -- we use the AST to output clean formatting, however
+
 package parser
 
 import (
+	"fmt"
 	"log"
 
 	"cthulhu/node"
@@ -14,115 +20,184 @@ import (
 
 var (
 	tokens *[]token.Token // list of tokens to parse (from lexer)
-	AST    node.Node      // root of the Abstract Syntax Tree (AST)
-	cur    int            // index of the current character we are looking at
 )
 
-// There are two ways to set up a parser like this: Either you can use
-// nextToken, consume and match to move along without apparent indexing, or you
-// use a normal for loop with the index. We'll go with the index because it
-// gives greater flexibility in looking ahead.
+// The Go parser (see https://golang.org/src/go/parser/parser.go) keeps
+// everything in a struct, so that can't be a bad way to do it.
+type Parser struct {
+	tokens []token.Token // list of tokens to be modified
+	cur    int           // index to the current token we're looking at
+	tok    token.Token   // one token lookahead
+	ast    node.Node     // root of the Abstract Syntax Tree (AST)
+}
 
-// Parser is the actual parsing function. It takes a list of token.Tokens and
-// returns a node that contains a list of pointers to the whole program. Errors
-// are handled here, currently mostly by fatal logging (for now)
-func Parser(ts *[]token.Token) node.Node {
+// Init sets up the parser for the init run, haven been given the list of tokens
+func (p *Parser) Init(ts *[]token.Token) {
 
 	if len(*ts) == 0 {
-		log.Fatal("PARSER FATAL: Did not receive any tokens from lexer")
+		log.Fatal("LEXER FATAL: Received empty token list.")
 	}
 
-	AST = node.Node{token.Token{token.START, "ROOT", 1, 0}, nil}
-	tokens = ts
+	p.tokens = *ts
+	p.ast = node.Node{Token: token.Token{Type: token.START, Text: "ROOT"}}
+	p.cur = -1 // pointer to current will be increased during first run
+}
 
-	for cur = 0; cur < len(*tokens); cur++ {
+// next moves the pointer to the current token up by one and retrieves the next
+// token from the token list. For things to work, we definitely need a EOF (end
+// of file) token
+func (p *Parser) next() {
 
-		t := (*tokens)[cur]
+	// Move to next token
+	p.cur++
 
-		// We end if we get the EOF token regardless of where we are in
-		// the token list
-		if t.Type == token.EOF {
+	// Get lookahead token
+	if p.cur+1 <= len(p.tokens) {
+		p.tok = p.tokens[p.cur+1]
+	} else {
+		p.tok = token.Token{Type: token.EOF} // paranoid
+	}
+}
+
+// match takes a token type and silently confirms that the current type is what
+// we want it to be -- otherwise, it fails, currently with a fatal log message.
+// For literal types, this can be quick, for composite types, we need different
+// rules
+// TODO this needs to be defined recursively
+func (p *Parser) match(want int) {
+
+	found := false
+	p.next()
+	t := p.tokens[p.cur] // our new current token
+
+	// If this is a composite type, we have to walk through all the literal
+	// subtypes
+	if !t.IsLiteral(want) {
+
+		for _, got := range token.Subtypes(want) {
+
+			if got == t.Type {
+				found = true
+				break
+			}
+		}
+
+	} else {
+		// This is already a literal
+		if t.Type == want {
+			found = true
+		}
+	}
+
+	if !found {
+
+		log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
+			t.Line, t.Index, token.Name[want], token.Name[t.Type])
+	}
+}
+
+// trace prints information on the parsing process
+// TODO this is working at the wrong spot at the moment
+func (p *Parser) trace() {
+	c := p.tokens[p.cur]
+	fmt.Printf("PARSER TRACE: Current token %s [%s], next token: %s\n",
+		token.Name[c.Type], c.Text, token.Name[p.tok.Type])
+}
+
+// Parser is the actual parsing function. It takes a list of token.Tokens and
+// returns the root node.Node to the whole program. Errors
+// are handled here, currently mostly by fatal logging (for now)
+func (p *Parser) Parse(trace bool) *node.Node {
+
+	for {
+		// Get next token and lookahead
+		p.next()
+
+		// TODO trace only works for first word in series
+		if trace {
+			p.trace()
+		}
+
+		// Continue until we're done
+		if p.tok.Type == token.EOF {
+			final := node.Create(p.tok) // We need EOF node
+			p.ast.Add(&final)
 			break
 		}
 
-		// We need to define this before the switch statement, but after
-		// the beginning of the loop or the definition will not work
-		var n node.Node
+		// Main switch statement to create new nodes
 
-		// This is where the magic happens: Call various routines based
-		// on what type we have
+		var n node.Node
+		t := p.tokens[p.cur] // just too lazy to type
+
 		switch t.Type {
 
-		case token.DIREC:
-			directivePara(t)
-			continue
+		case token.DIREC_PARA:
+			p.parseDirecPara()
 
-		// The simple stuff just gets packed in a node and returned
 		default:
 			n = node.Create(t)
+			p.ast.Add(&n)
 		}
-		AST.Add(&n)
 	}
 
-	return AST
-}
-
-// nextToken moves to the next token and returns it. If the next token is an
-// end-of-file, we crash because the assumption is that we call nextToken while
-// getting parameters
-func nextToken() token.Token {
-	cur++
-	n := (*tokens)[cur]
-
-	if n.Type == token.EOF {
-		log.Fatalf("PARSER FATAL: Ran out of tokens at '%s' (%d,%d)\n",
-			n.Text, n.Line, n.Index)
-	}
-
-	return n
-}
-
-// match gets the next token, making sure that it is of the type we requested
-func match(want int) token.Token {
-	t := nextToken()
-	if t.Type != want {
-		log.Fatalf("PARSER FATAL (%d,%d): Wanted token type %s, got %s",
-			t.Line, t.Index, token.Name[want], token.Name[t.Type])
-	}
-	return t
-}
-
-func adopt(mom *node.Node, kid *token.Token) {
-	kidnode := node.Create(*kid)
-	mom.Add(&kidnode)
+	return &p.ast
 }
 
 // ***** INDIVIDUAL FUNCTIONS *****
 
 // Directives with parameters
-func directivePara(t token.Token) {
+func (p *Parser) parseDirecPara() {
+
+	t := p.tokens[p.cur]
 
 	// We know that we must have a legal directive because the lexer checked
-	// that for us
+	// for us. We store that first
 	n := node.Create(t)
-	AST.Add(&n)
+	p.ast.Add(&n)
 
 	switch t.Text {
 
-	case ".mpu":
-		kt := match(token.STRING)
+	case ".equ":
+		p.match(token.SYMBOL)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+		p.match(token.NUMBER) // TODO can be another symbol or RPR etc
+		p.ast.Adopt(&n, &p.tokens[p.cur])
 
-		if kt.Text != "65816" && kt.Text != "65c02" && kt.Text != "6502" {
+	case ".include":
+		p.match(token.STRING)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+
+	case ".mpu":
+		p.match(token.STRING)
+		nt := p.tokens[p.cur] // our new current token
+
+		if nt.Text != "65816" && nt.Text != "65c02" && nt.Text != "6502" {
 			log.Fatalf("PARSER FATAL (%d,%d): MPU type '%s' not supported",
-				kt.Line, kt.Index, kt.Text)
+				nt.Line, nt.Index, nt.Text)
 		}
 
-		adopt(&n, &kt)
+		p.ast.Adopt(&n, &nt)
 
 	case ".origin":
-		kt := match(token.HEX_NUM)
-		adopt(&n, &kt)
+		p.match(token.NUMBER)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
 
+	case ".ram":
+		p.match(token.ADDRESS)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+		p.match(token.ADDRESS)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+
+	case ".rom":
+		p.match(token.ADDRESS)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+		p.match(token.ADDRESS)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
+	}
+}
+
+/*
 	// We only accept decimal numbers for now
 	// TODO accept other stuff
 	// TODO should work for .word and .long as well
@@ -151,3 +226,4 @@ func directivePara(t token.Token) {
 		}
 	}
 }
+*/

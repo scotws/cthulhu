@@ -158,8 +158,8 @@ that this word is not yet available.
 
 - **.axy16** (n/a) 
 - **.axy8** (n/a) 
-- **.bank** (n/a) 
-- **.byte** (n/a) 
+- **.bank** ADDRESS (n/a) 
+- **.byte** ADDRESS (n/a) 
 - **.drop** (RPN only)
 - **.dup**
 - **.emulate** (n/a) 
@@ -169,7 +169,7 @@ that this word is not yet available.
 - **.equ** (n/a) Required paramters: **<SYMBOL> <NUMBER>**. Defines a symbol.
 
 - **.here** Inserts current Program Counter (PC) address
-- **.include** (n/a) 
+- **.include** STRING (n/a) 
 - **.long** (n/a) 
 - **.lsb** (n/a) 
 - **.lshift**
@@ -181,9 +181,9 @@ that this word is not yet available.
 
 - **.or**
 - **.origin** (n/a) 
-- **.ram** (n/a) 
+- **.ram** ADDRESS ADDRESS
 - **.rshift**
-- **.rom** (n/a) 
+- **.rom** ADDRESS ADDRESS  
 - **.status** (n/a) 
 - **.swap**
 - **.word** (n/a) 

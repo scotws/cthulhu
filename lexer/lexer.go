@@ -508,6 +508,10 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				continue
 			}
 
+			// We don't believe in illegal tokens -- the
+			// assembly language is so simple, if something is not
+			// right, which will be rare, we want to fail hard and
+			// fast
 			log.Fatalf("LEXER FATAL (%d,%d): Can't process char '%s'",
 				ln, i, cs[i])
 

@@ -18,38 +18,38 @@ import (
 
 const indent = "       "
 
-func Lister(AST node.Node) {
-	Walk(&AST)
+func Lister(ast *node.Node) {
+	Walk(ast)
 }
 
 // Generic walking function, depth first
-func Walk(AST *node.Node) {
+func Walk(ast *node.Node) {
 
-	switch AST.Type {
+	switch ast.Type {
 
 	case token.EOL:
 		fmt.Print("\n")
 	case token.EMPTY:
 		fmt.Print(" \n")
 	case token.DIREC, token.DIREC_PARA:
-		fmt.Print(indent, AST.Text, " ")
+		fmt.Print(indent, ast.Text, " ")
 	case token.LABEL, token.LOCAL_LABEL:
-		fmt.Print(AST.Text, ":")
+		fmt.Print(ast.Text, ":")
 	case token.HEX_NUM:
-		fmt.Print("$", AST.Text, " ")
+		fmt.Print("$", ast.Text, " ")
 	case token.BIN_NUM:
-		fmt.Print("%", AST.Text, " ")
+		fmt.Print("%", ast.Text, " ")
 	case token.OPC_0, token.OPC_1:
-		fmt.Print(indent, indent, AST.Text, " ")
+		fmt.Print(indent, indent, ast.Text, " ")
 	default:
-		fmt.Print(AST.Text, " ")
+		fmt.Print(ast.Text, " ")
 	}
 
-	if len(AST.Kids) == 0 {
+	if len(ast.Kids) == 0 {
 		return
 	}
 
-	for _, k := range AST.Kids {
+	for _, k := range ast.Kids {
 		Walk(k)
 	}
 }

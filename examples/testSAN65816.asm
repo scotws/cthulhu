@@ -6,10 +6,15 @@
         .mpu "65816"
         .origin $00:8000
 
+        .ram $0000 $7fff
+        .rom $8000 $ffff
+
         .equ frog %0000.1111
 
         .native
         .axy16
+
+        .include "somefile.asm"
 
                 lda.# 0000
                 tay
@@ -18,8 +23,8 @@ myloop:
                 sta.y $2000+$100
                 dey
                 bne myloop
-
-stop:           stp ; it's all over, baby!
+stop:           
+                stp ; it's all over, baby!
 
         .word {frog 2 .swap .dup *}, $ff, "frog"
         .byte 1, 2, 3, 4

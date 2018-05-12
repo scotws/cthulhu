@@ -27,6 +27,7 @@ var (
 	fListing = flag.Bool("l", false, "Generate listing file")
 	mpu      = flag.String("m", "65c02", "MPU (default 65c02)")
 	fSymbols = flag.Bool("s", false, "Generate symbol table file")
+	fTrace   = flag.Bool("t", false, "Print even more debugging info from parser")
 
 	raw    []string
 	tokens []token.Token
@@ -101,15 +102,19 @@ func main() {
 
 	// The parser takes a slice of tokens and returns an Abstract Syntax
 	// Tree (AST) built of node.Node elements. This AST is used as the basis
-	// for all other work
-	AST := parser.Parser(tokens)
+	// for all other work. The trace flag determines if we put out lots
+	// (lots!) of information for debugging, far and beyond the normal stuff
+	p := parser.Parser{}
+
+	p.Init(tokens)
+	ast := p.Parse(*fTrace)
 
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST
 	if *fDebug {
 		fmt.Println("=== AST after initial parsing: ===")
 		fmt.Println()
-		parser.Lisplister(&AST)
+		parser.Lisplister(ast)
 	}
 
 	verbose("Parser run.")
@@ -141,7 +146,7 @@ func main() {
 	// the modes the 65816 was in during each instruction
 
 	if *fListing {
-		lister.Lister(AST)
+		lister.Lister(ast)
 		verbose("Lister run.")
 	}
 
