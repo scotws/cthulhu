@@ -15,27 +15,28 @@ import (
 	"strconv"
 	"strings"
 
+	"cthulhu/data"
 	"cthulhu/node"
 	"cthulhu/token"
 )
 
 // The analyzer walks the Abstract Syntax Tree (AST) created by the parser and
 // modifies it in various ways
-func Analyzer(ast *node.Node, trace bool) *node.Node {
+func Analyzer(m *data.Machine, trace bool) {
 
 	// FIRST PASS
-	walk(ast, trace)
+	walk(m.AST, m.MPU, trace)
 
 	// SECOND PASS
+	// TODO
 
 	fmt.Println()
-	return ast
 }
 
 // Walk is the main internal routine that visits every node and does something
 // depending on type. We break out what we do into little functions to allow
 // easier testing and possibly concurrency once we know what we are doing.
-func walk(n *node.Node, trace bool) {
+func walk(n *node.Node, mpu string, trace bool) {
 
 	var ok bool
 
@@ -153,7 +154,7 @@ func walk(n *node.Node, trace bool) {
 
 		// OPCODE 0 CONVERSION: Opcodes with no operands
 		case token.OPC_0:
-			oc, ok := getOpcode(n.Text)
+			oc, ok := getOpcode(mpu, n.Text)
 			if !ok {
 				log.Fatalf("ANALYZER FATAL (%d, %d): Opcode '%s' unrecognized",
 					n.Line, n.Index, n.Text)
@@ -189,7 +190,7 @@ func walk(n *node.Node, trace bool) {
 
 		// We've got good kids now, let's walk them recursively
 		for _, k := range n.Kids {
-			walk(k, trace)
+			walk(k, mpu, trace)
 		}
 	}
 }
@@ -222,7 +223,7 @@ func convertNum(s string, base int) (int, bool) {
 
 // getOpcode takes a Simpler Assembler Notation (SAN) mnemonic and returns the
 // opcode value and a flag to single if it went okay
-func getOpcode(m string) byte {
-	oc, ok := data.OpcodesSAN[mpu][m].Value
-	return co, ok
+func getOpcode(mpu string, mn string) (byte, bool) {
+	oc, ok := data.OpcodesSAN[mpu][mn]
+	return oc.Value, ok
 }

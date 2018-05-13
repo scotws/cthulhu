@@ -13,7 +13,8 @@ import (
 	"os"
 
 	"cthulhu/analyzer"
-	"cthulhu/formatter"
+	"cthulhu/data"
+	//	"cthulhu/formatter"
 	"cthulhu/generator"
 	"cthulhu/lexer"
 	"cthulhu/lister"
@@ -90,17 +91,6 @@ func main() {
 
 	verbose("Lexer run.")
 
-	// ***** FORMATTER *****
-
-	// The formatter produces a cleanly indented version of the source code,
-	// much like the gofmt program included with Go. See the file itself for
-	// more detail
-
-	if *fFormat {
-		formatter.Formatter(tokens)
-		verbose("Formatter run.")
-	}
-
 	// ***** PARSER *****
 
 	// The parser takes a slice of tokens and returns an Abstract Syntax
@@ -122,25 +112,45 @@ func main() {
 
 	verbose("Parser run.")
 
+	// ***** FORMATTER *****
+
+	// The formatter produces a cleanly indented version of the source code,
+	// much like the gofmt program included with Go. See the file itself for
+	// more detail
+	// TODO move from token to AST based formatting
+
+	/*
+		if *fFormat {
+			formatter.Formatter(ast)
+			verbose("Formatter run.")
+		}
+	*/
+
+	// *** CONSTRUCT THE MACHINE
+
+	// We are now at the point where we can construct a machine to hold the
+	// greater values
+	machine := data.Machine{MPU: *mpu, AST: ast}
+
 	// *** ANALYZER ***
 
 	// The analyzer examens the AST provided by the parser and runs various
 	// processes on it to convert numbers, etc. Comments and other entries
 	// are ignored
 	// TODO see about passing out symbol table(s)
-	aAst := analyzer.Analyzer(ast, *fTrace)
+	analyzer.Analyzer(&machine, *fTrace)
 
 	if *fDebug {
 		fmt.Println("=== Completed nodes after analyzer ===")
 		fmt.Println()
-		analyzer.Worklister(aAst)
+		analyzer.Worklister(machine.AST)
 		fmt.Println()
 	}
 
 	if *fDebug {
 		fmt.Println("=== AST after analyzer ===")
 		fmt.Println()
-		parser.Nodelister(aAst)
+		parser.Nodelister(machine.AST)
 		fmt.Println()
 	}
 
@@ -150,7 +160,7 @@ func main() {
 	// and produces the actual bytes that will be saved in the final file.
 	// TODO
 
-	generator.Generator(aAst)
+	generator.Generator(machine.AST)
 
 	// *** LISTER ***
 
@@ -159,7 +169,7 @@ func main() {
 	// the modes the 65816 was in during each instruction
 
 	if *fListing {
-		lister.Lister(ast)
+		lister.Lister(machine.AST)
 		verbose("Lister run.")
 	}
 
