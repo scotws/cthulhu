@@ -150,9 +150,21 @@ func walk(n *node.Node, trace bool) {
 				fmt.Printf("ANALYZER (%d, %d): Processed STRING \"%s\", now %s\n",
 					n.Line, n.Index, n.Text, node.FormatByteSlice(n.Code))
 			}
+
+		// OPCODE 0 CONVERSION: Opcodes with no operands
+		case token.OPC_0:
+			oc, ok := getOpcode(n.Text)
+			if !ok {
+				log.Fatalf("ANALYZER FATAL (%d, %d): Opcode '%s' unrecognized",
+					n.Line, n.Index, n.Text)
+			}
+
+			n.Code = append(n.Code, oc)
+			n.Done = true
 		}
 
-		// if this node doesn't have kids, we're done
+		// If this node doesn't have kids, we're done. This ends the
+		// recursion
 		if len(n.Kids) == 0 {
 			return
 		}
@@ -175,7 +187,7 @@ func walk(n *node.Node, trace bool) {
 
 		n.Kids = newKids
 
-		// We've got kids, let's walk them recursively
+		// We've got good kids now, let's walk them recursively
 		for _, k := range n.Kids {
 			walk(k, trace)
 		}
@@ -206,4 +218,11 @@ func convertNum(s string, base int) (int, bool) {
 	}
 
 	return int(v), ok
+}
+
+// getOpcode takes a Simpler Assembler Notation (SAN) mnemonic and returns the
+// opcode value and a flag to single if it went okay
+func getOpcode(m string) byte {
+	oc, ok := data.OpcodesSAN[mpu][m].Value
+	return co, ok
 }
