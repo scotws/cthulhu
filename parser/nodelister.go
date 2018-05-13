@@ -25,10 +25,17 @@ func Nodelister(ast *node.Node) {
 	if ast.Type != token.EOL &&
 		ast.Type != token.EMPTY {
 
-		if ast.Done {
-			fmt.Print(" ", node.FormatByteSlice(ast.Code))
+		// TODO clean this up with a switch once we have everything
+		// working
+
+		if ast.Type == token.DEC_NUM {
+			fmt.Printf(" (%d) ", ast.Value)
 		} else {
 			fmt.Print(" (", ast.Text, ")")
+		}
+
+		if ast.Done {
+			fmt.Print(" -> ", node.FormatByteSlice(ast.Code))
 		}
 	}
 
