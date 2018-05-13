@@ -54,7 +54,13 @@ func Lisplister(AST *node.Node) {
 	case token.BIN_NUM:
 		fmt.Print("%", AST.Text)
 	case token.STRING:
-		fmt.Print("\"", AST.Text, "\"")
+
+		if AST.Done {
+			fmt.Print(node.FormatByteSlice(AST.Code))
+		} else {
+
+			fmt.Print("\"", AST.Text, "\"")
+		}
 
 	// TODO missing closing parens if label is not alone in the line
 	case token.LABEL, token.LOCAL_LABEL:

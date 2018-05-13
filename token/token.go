@@ -69,6 +69,11 @@ const (
 	ADDRESS
 	NUMBER
 	comp_end
+
+	// Then we have the complex types
+	complex_begin
+	RPN // Reverse Polish Notation (RPN) math terms
+	complex_end
 )
 
 var Name = map[int](string){
@@ -138,7 +143,7 @@ func (t *Token) IsLiteral(tt int) bool {
 }
 
 // Subtypes is given a composite type and returns a list of literal types to
-// check against
+// check against, such as NUMBER to HEX_NUM, BIN_NUM and DEC_NUM
 // TODO check for legal values
 func Subtypes(ct int) []int {
 	at := compositeTokens[ct]

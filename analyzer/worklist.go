@@ -3,6 +3,8 @@
 // First version: 12. May 2018
 // First version: 12. May 2018
 
+// Worklister will walk the tree and display useful information
+
 package analyzer
 
 import (
@@ -12,22 +14,11 @@ import (
 	"cthulhu/token"
 )
 
-// Worklister takes an AST from the parser and prints out the list of nodes that
-// were modified
 func Worklister(aAst *node.Node) {
 
-	if aAst.Modified == true {
-
-		switch aAst.Type {
-
-		case token.DEC_NUM, token.HEX_NUM, token.BIN_NUM:
-			fmt.Printf("Node (%d,%d) was '%s', now is %s with Value %d\n",
-				aAst.Line, aAst.Index, aAst.Text, token.Name[aAst.Type], aAst.Value)
-
-		default:
-			fmt.Printf("Node (%d,%d) otherwise modified (removed subnode?), now is '%s'\n",
-				aAst.Line, aAst.Index, aAst.Text)
-		}
+	if aAst.Done {
+		fmt.Printf("Node (%d, %d) [%s, \"%s\"] complete: %s\n",
+			aAst.Line, aAst.Index, token.Name[aAst.Type], aAst.Text, node.FormatByteSlice(aAst.Code))
 	}
 
 	// If we don't have kids, we're done

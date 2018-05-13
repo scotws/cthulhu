@@ -1,7 +1,7 @@
 Grammar for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 11. Mai 2018
+This version: 13. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
@@ -9,11 +9,10 @@ our language description.
 
 // A line can begin with one of four types:
 
-statement = whitespace | comment | directive | label | instruction
+statement = comment | directive | label | instruction
 
-comment = ";" { anything } "<EOL>"
-
-
+comment_line = ";" { anything } "<EOL>"
+comment = { anything } ";" { anything } "<EOL>"
 
 directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | "*"  }
         for one of:
@@ -37,8 +36,8 @@ directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | 
         ".mpu" string, one of "6502" | "65c02" | "65816"
         ".native"
         ".origin" expr
-        ".ram" addr addr 
-        ".rom" addr addr
+        ".ram" expr expr
+        ".rom" expr expr
         ".status"
         ".word" expr { "," expr } [ comment ] "<EOL>"
         ".xy16"
@@ -61,19 +60,26 @@ instruction_san = ( opc_san_0 [ comment ] ) |
                   ( opc_san_1 operand_san [ comment ] ) |
                   ( opc_san_2 operand_san "," operand_san [ comment ] )
 
-operand_san = [ single_operator ] ( number | symbol | rpn ) | 
-              ( number | symbol | rpn ) [ binary_operator ( number | symbol | rpn ) ]
+operand_san = expr
 
 single_operator = ".lsb" | ".msb" | ".bank" | ".not"
 binary_operator = ".and" | ".or" | ".xor" | "+" | "-" | "/" | "*" | ".lshift" | 
         ".rshift" | "%"
 
+// Expression
+
+value = number | symbol | rpn
+
+expr =  value | single_operator value | value binary_operator value [ comment ] <EOL>
+
+
 // Reverse Polish Notation (RPN) 
 
-rpn = "{" ( number | symbol )  { number | symbol | prn_operator } "}" 
+rpn = "{" value { value | prn_operator } "}" [ comment ] 
 
 rpn_operator = ".drop" | ".dup" | ".lsb" | ".msb" | ".bank" | "+" | "*" | "-" | "/" |
-        ".and" | ".or" | ".xor" | ".not" | ".invert" | ".lshift" | ".rshift" | "%"
+        ".and" | ".or" | ".xor" | ".not" | ".invert" | ".lshift" | ".rshift" | "%" |
+        ".swap"
 
 
 // Numbers
@@ -102,6 +108,6 @@ letter = "a" ... "z" | "A" ... "Z"
 In addition, numbers have types, which can be addresses, values, or offsets.
 
         addr = addr8 | addr16 | addr24
-        value = value8 | value16 | value24
+        data = data8 | data16 | data24 
         offset = offset_small | offset_large
 

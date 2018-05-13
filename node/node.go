@@ -1,7 +1,7 @@
 // Node types for the AST of the Cthulhu Assembler
 // Scot W. Stevenson
 // First version 07. May 2018
-// This version 12. May 2018
+// This version 13. May 2018
 
 // Because we have a simple assembler and are not going to use obscene amounts
 // of data, we can get away with a homogenous Abstract Syntax Tree (AST) with
@@ -12,6 +12,9 @@
 package node
 
 import (
+	"bytes"
+	"fmt"
+
 	"cthulhu/token"
 )
 
@@ -22,7 +25,7 @@ type Node struct {
 	Kids        []*Node // for children nodes
 	Value       int     // for numbers of all sorts
 	Code        []byte  // The final byte stream that is added at the end
-	Modified    bool    // Marks if analyzer touched node
+	Done        bool    // Marks if node has been completely processed
 }
 
 // Add creates a new subnode on an existing node. This is just a nicer way of
@@ -48,4 +51,23 @@ func (n *Node) Evict(i int) []*Node {
 // Creates returns a new node when given a token.
 func Create(t token.Token) Node {
 	return Node{Token: t}
+}
+
+// FormatByteSlice takes a slice of bytes -- usually node.Code, which is why we
+// keep it here -- and returns them as a nicely formatted string
+func FormatByteSlice(bs []byte) string {
+
+	var buffer bytes.Buffer
+	var s string
+
+	buffer.WriteString("[")
+
+	for _, b := range bs {
+		s = fmt.Sprintf(" %0X", b)
+		buffer.WriteString(s)
+	}
+
+	buffer.WriteString(" ]")
+
+	return buffer.String()
 }

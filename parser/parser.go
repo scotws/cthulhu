@@ -1,7 +1,7 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 11. May 2018
+// This version: 13. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps. Note

@@ -131,14 +131,14 @@ func main() {
 	aAst := analyzer.Analyzer(ast, *fTrace)
 
 	if *fDebug {
-		fmt.Println("=== AST modified the following nodes: ===")
+		fmt.Println("=== Completed nodes after analyzer ===")
 		fmt.Println()
 		analyzer.Worklister(aAst)
 		fmt.Println()
 	}
 
 	if *fDebug {
-		fmt.Println("=== AST after analyze step ===")
+		fmt.Println("=== AST after analyzer ===")
 		fmt.Println()
 		parser.Lisplister(aAst)
 		fmt.Println()

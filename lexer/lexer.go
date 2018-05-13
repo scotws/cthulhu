@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 12. May 2018
+// This version: 13. May 2018
 
 package lexer
 
