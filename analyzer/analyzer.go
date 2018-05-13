@@ -165,7 +165,7 @@ func walk(n *node.Node, trace bool) {
 
 			switch tt {
 
-			case token.EMPTY, token.COMMENT:
+			case token.EMPTY, token.COMMENT, token.EOL:
 				n.Kids = n.Evict(i)
 
 				if trace {
