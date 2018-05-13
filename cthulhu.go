@@ -70,7 +70,7 @@ func main() {
 		raw = append(raw, scanner.Text())
 	}
 
-	verbose("Source file loaded.")
+	verbose("=== Source file loaded ===")
 
 	// ***** LEXER *****
 
@@ -83,7 +83,7 @@ func main() {
 
 	// Part of the debugging information is a list of tokens
 	if *fDebug {
-		fmt.Println("=== List of tokens after initial lexing: ===")
+		fmt.Println("=== List of tokens after initial lexing ===")
 		fmt.Println()
 		lexer.Tokenlister(tokens)
 	}

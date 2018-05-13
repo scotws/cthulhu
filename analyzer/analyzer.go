@@ -159,33 +159,21 @@ func walk(n *node.Node, trace bool) {
 
 		// We have kids, but we kick out those deadbeats such as
 		// comments and empty lines that just suck all our energy
+		var newKids []*node.Node
+
 		for i := 0; i < len(n.Kids); i++ {
 
 			tt := n.Kids[i].Type
 
-			switch tt {
-
-			case token.EMPTY, token.COMMENT, token.EOL:
-				n.Kids = n.Evict(i)
-
-				if trace {
-					fmt.Printf("ANALYZER (%d, %d): Removed subnode of type %s\n",
-						n.Line, n.Index, token.Name[tt])
-				}
-
-			// If we have a full-line comment, we have to remove the EOL as
-			// well
-			case token.COMMENT_LINE:
-				n.Kids = n.Evict(i)
-				n.Kids = n.Evict(i)
-				i--
-
-				if trace {
-					fmt.Printf("ANALYZER (%d, %d): Removed subnode of type %s\n",
-						n.Line, n.Index, token.Name[tt])
-				}
+			if tt != token.EMPTY &&
+				tt != token.COMMENT &&
+				tt != token.EOL &&
+				tt != token.COMMENT_LINE {
+				newKids = append(newKids, n.Kids[i])
 			}
 		}
+
+		n.Kids = newKids
 
 		// We've got kids, let's walk them recursively
 		for _, k := range n.Kids {
