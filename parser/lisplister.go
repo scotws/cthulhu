@@ -1,4 +1,4 @@
-// Print a Lisp-like listing of the AST for the Cthulhu Assembler
+// Print a Lisp-like listing of the ast for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 08. May 2018
 // This version: 12. May 2018
@@ -13,12 +13,12 @@ import (
 	"cthulhu/token"
 )
 
-// Lisplister takes an AST from the parser and prints out a list of the tree
+// Lisplister takes an ast from the parser and prints out a list of the tree
 // elements in a Lisp-inspired S-format (ie, lots of braces). It is used for
 // debugging.
-func Lisplister(AST *node.Node) {
+func Lisplister(ast *node.Node) {
 
-	switch AST.Type {
+	switch ast.Type {
 
 	// Special case
 	case token.EOL:
@@ -28,56 +28,68 @@ func Lisplister(AST *node.Node) {
 	case token.EMPTY:
 		fmt.Print("( <EMPTY> )\n")
 	case token.START:
-		fmt.Print(" ( ", AST.Text, " )", "\n")
+		fmt.Print(" ( ", ast.Text, " )", "\n")
 	case token.OPC_0, token.OPC_1:
-		fmt.Print("( ", AST.Text)
+		fmt.Print("( ", ast.Text)
 
 	// Some of the directors are actually operators that don't start a
 	// a new line
 	case token.DIREC, token.DIREC_PARA:
-		_, ok := data.Operators[AST.Text]
+		_, ok := data.Operators[ast.Text]
 
 		if ok {
-			fmt.Print(AST.Text)
+			fmt.Print(ast.Text)
 		} else {
-			fmt.Print("( ", AST.Text)
+			fmt.Print("( ", ast.Text)
 		}
 
 	// Comments come in two forms, at the beginning of a line or at the end
 	// of a line.
 	case token.COMMENT_LINE:
-		fmt.Print("( ", AST.Text)
+		fmt.Print("( ", ast.Text)
 	case token.COMMENT:
-		fmt.Print(") ( ", AST.Text)
+		fmt.Print(") ( ", ast.Text)
+
+	// HEX_NUM are converted to DEC_NUM by the analyzer, so if we have a
+	// HEX_NUM, we haven't converted it yet. Same for BIN_NUM
 	case token.HEX_NUM:
-		fmt.Print("$", AST.Text)
+		fmt.Print("$", ast.Text)
 	case token.BIN_NUM:
-		fmt.Print("%", AST.Text)
+		fmt.Print("%", ast.Text)
+
+	case token.DEC_NUM:
+
+		if ast.Done {
+			fmt.Print(node.FormatByteSlice(ast.Code))
+		} else {
+			fmt.Print(ast.Text)
+		}
+
 	case token.STRING:
 
-		if AST.Done {
-			fmt.Print(node.FormatByteSlice(AST.Code))
+		if ast.Done {
+			fmt.Print(node.FormatByteSlice(ast.Code))
 		} else {
 
-			fmt.Print("\"", AST.Text, "\"")
+			fmt.Print("\"", ast.Text, "\"")
 		}
 
 	// TODO missing closing parens if label is not alone in the line
 	case token.LABEL, token.LOCAL_LABEL:
-		fmt.Print("( ", AST.Text, ":")
+		fmt.Print("( ", ast.Text, ":")
 
 	case token.ANON_LABEL:
-		fmt.Print("( ", AST.Text)
+		fmt.Print("( ", ast.Text)
 	default:
-		fmt.Print(AST.Text)
+		fmt.Print(ast.Text)
 	}
 
 	// If we don't have kids, we're done
-	if len(AST.Kids) == 0 {
+	if len(ast.Kids) == 0 {
 		return
 	}
 
-	for _, k := range AST.Kids {
+	for _, k := range ast.Kids {
 		fmt.Print(" ")
 		Lisplister(k)
 	}

@@ -38,7 +38,7 @@ func (n *Node) Add(k *Node) {
 // just a nice way of combining Create and Add
 func (n *Node) Adopt(k *Node, t *token.Token) {
 	nn := Create(*t)
-	n.Kids = append(n.Kids, &nn)
+	k.Kids = append(k.Kids, &nn)
 }
 
 // Evict removes a subnode with the index 0 from the given node, returning a

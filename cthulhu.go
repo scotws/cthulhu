@@ -1,7 +1,7 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 12. May 2018
+// This version: 13. May 2018
 
 package main
 
@@ -25,12 +25,12 @@ var (
 	fDebug   = flag.Bool("d", false, "Print lots and lots of debugging information")
 	input    = flag.String("i", "", "Input file (REQUIRED)")
 	fFormat  = flag.Bool("f", false, "Return formatted version of source")
-	fHexdump = flag.Bool("h", false, "Add hexdump of binary to file 'cthulhu.hex'")
+	fHexdump = flag.Bool("h", false, "Add hexdump of binary in text file \"cthulhu.hex\"")
 	fVerbose = flag.Bool("v", false, "Give verbose messages")
 	fListing = flag.Bool("l", false, "Generate listing file")
-	mpu      = flag.String("m", "65c02", "MPU (default 65c02)")
+	mpu      = flag.String("m", "65c02", "MPU type")
 	fSymbols = flag.Bool("s", false, "Generate symbol table file")
-	fTrace   = flag.Bool("t", false, "Print even more debugging info from parser")
+	fTrace   = flag.Bool("t", false, "Print horrifying amount of debugging info")
 
 	raw    []string
 	tokens []token.Token
@@ -109,15 +109,15 @@ func main() {
 	// (lots!) of information for debugging, far and beyond the normal stuff
 	p := parser.Parser{}
 
-	p.Init(tokens)
-	ast := p.Parse(*fTrace)
+	p.Init(tokens, *mpu, *fTrace)
+	ast := p.Parse()
 
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST
 	if *fDebug {
 		fmt.Println("=== AST after initial parsing: ===")
 		fmt.Println()
-		parser.Lisplister(ast)
+		parser.Nodelister(ast)
 	}
 
 	verbose("Parser run.")
@@ -140,7 +140,7 @@ func main() {
 	if *fDebug {
 		fmt.Println("=== AST after analyzer ===")
 		fmt.Println()
-		parser.Lisplister(aAst)
+		parser.Nodelister(aAst)
 		fmt.Println()
 	}
 

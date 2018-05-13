@@ -6,12 +6,11 @@
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps. Note
 // this means that we also include information such as comments that would
-// usually be thrown out -- we use the AST to output clean formatting, however
+// usually be thrown out -- we use the AST to output clean formatting, however.
 
 package parser
 
 import (
-	"fmt"
 	"log"
 
 	"cthulhu/node"
@@ -29,10 +28,12 @@ type Parser struct {
 	cur    int           // index to the current token we're looking at
 	tok    token.Token   // one token lookahead
 	ast    node.Node     // root of the Abstract Syntax Tree (AST)
+	mpu    string        // MPU type requested by the user
+	trace  bool          // User requests lots and lots of info
 }
 
 // Init sets up the parser for the init run, haven been given the list of tokens
-func (p *Parser) Init(ts *[]token.Token) {
+func (p *Parser) Init(ts *[]token.Token, wantMPU string, trace bool) {
 
 	if len(*ts) == 0 {
 		log.Fatal("LEXER FATAL: Received empty token list.")
@@ -41,6 +42,8 @@ func (p *Parser) Init(ts *[]token.Token) {
 	p.tokens = *ts
 	p.ast = node.Node{Token: token.Token{Type: token.START, Text: "ROOT"}}
 	p.cur = -1 // pointer to current will be increased during first run
+	p.mpu = wantMPU
+	p.trace = trace
 }
 
 // next moves the pointer to the current token up by one and retrieves the next
@@ -96,27 +99,14 @@ func (p *Parser) match(want int) {
 	}
 }
 
-// trace prints information on the parsing process
-// TODO this is working at the wrong spot at the moment
-func (p *Parser) trace() {
-	c := p.tokens[p.cur]
-	fmt.Printf("PARSER TRACE: Current token %s [%s], next token: %s\n",
-		token.Name[c.Type], c.Text, token.Name[p.tok.Type])
-}
-
 // Parser is the actual parsing function. It takes a list of token.Tokens and
 // returns the root node.Node to the whole program. Errors
 // are handled here, currently mostly by fatal logging (for now)
-func (p *Parser) Parse(trace bool) *node.Node {
+func (p *Parser) Parse() *node.Node {
 
 	for {
 		// Get next token and lookahead
 		p.next()
-
-		// TODO trace only works for first word in series
-		if trace {
-			p.trace()
-		}
 
 		// Continue until we're done
 		if p.tok.Type == token.EOF {
@@ -168,16 +158,12 @@ func (p *Parser) parseDirecPara() {
 		p.match(token.STRING)
 		p.ast.Adopt(&n, &p.tokens[p.cur])
 
+	// In theory, we could already check here if the requested MPU and the
+	// MPU from the source file match. However, the parser doesn't modify
+	// information because it's the base for the nicely formatted output
 	case ".mpu":
 		p.match(token.STRING)
-		nt := p.tokens[p.cur] // our new current token
-
-		if nt.Text != "65816" && nt.Text != "65c02" && nt.Text != "6502" {
-			log.Fatalf("PARSER FATAL (%d,%d): MPU type '%s' not supported",
-				nt.Line, nt.Index, nt.Text)
-		}
-
-		p.ast.Adopt(&n, &nt)
+		p.ast.Adopt(&n, &p.tokens[p.cur])
 
 	case ".origin":
 		p.match(token.NUMBER)
