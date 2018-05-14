@@ -65,10 +65,10 @@ const (
 	lit_end
 
 	// After the literals come the composits which need rules to check them
-	comp_begin
+	composite_begin
 	ADDRESS
 	NUMBER
-	comp_end
+	composite_end
 
 	// Then we have the complex types
 	complex_begin
@@ -137,6 +137,17 @@ func (t *Token) IsLiteral(tt int) bool {
 	f := false
 
 	if tt > lit_begin && tt < lit_end {
+		f = true
+	}
+	return f
+}
+
+// IsComposite checks to see if the given token is a composite
+// value (say, NUMBER)
+func (t *Token) IsComposite(tt int) bool {
+	f := false
+
+	if tt > composite_begin && tt < composite_end {
 		f = true
 	}
 	return f

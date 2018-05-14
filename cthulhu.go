@@ -97,10 +97,8 @@ func main() {
 	// Tree (AST) built of node.Node elements. This AST is used as the basis
 	// for all other work. The trace flag determines if we put out lots
 	// (lots!) of information for debugging, far and beyond the normal stuff
-	p := parser.Parser{}
-
-	p.Init(tokens, *mpu, *fTrace)
-	ast := p.Parse()
+	parser.Init(tokens, *fTrace)
+	ast := parser.Parser()
 
 	// Part of the debugging information is a Lisp-like list of elements of
 	// the AST

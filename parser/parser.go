@@ -18,49 +18,139 @@ import (
 )
 
 var (
-	tokens *[]token.Token // list of tokens to parse (from lexer)
+	tokens    *[]token.Token // list of tokens to parse (from lexer)
+	p         int            // index to the current token we're looking at
+	current   token.Token    // current token we're examining
+	lookahead token.Token    // one token lookahead
+	ast       node.Node      // root of the Abstract Syntax Tree (AST)
+	mpu       string         // MPU type requested by the user
+	trace     bool           // User requests lots and lots of info
 )
 
-// The Go parser (see https://golang.org/src/go/parser/parser.go) keeps
-// everything in a struct, so that can't be a bad way to do it.
-type Parser struct {
-	tokens []token.Token // list of tokens to be modified
-	cur    int           // index to the current token we're looking at
-	tok    token.Token   // one token lookahead
-	ast    node.Node     // root of the Abstract Syntax Tree (AST)
-	mpu    string        // MPU type requested by the user
-	trace  bool          // User requests lots and lots of info
-}
-
 // Init sets up the parser for the init run, haven been given the list of tokens
-func (p *Parser) Init(ts *[]token.Token, wantMPU string, trace bool) {
+func Init(ts *[]token.Token, tr bool) {
 
 	if len(*ts) == 0 {
 		log.Fatal("LEXER FATAL: Received empty token list.")
 	}
 
-	p.tokens = *ts
-	p.ast = node.Node{Token: token.Token{Type: token.START, Text: "ROOT"}}
-	p.cur = -1 // pointer to current will be increased during first run
-	p.mpu = wantMPU
-	p.trace = trace
+	tokens = ts
+	p = -1 // bumped up to 0 by initial call to next
+	ast = node.Node{Token: token.Token{Type: token.START, Text: "Cthulhu"}}
+	trace = tr
+}
+
+// Parser is the actual parsing function. It takes a list of token.Tokens and
+// returns the root node.Node to the whole program. Errors
+// are handled here, currently mostly by fatal logging (for now)
+func Parser() *node.Node {
+
+	for {
+		ast.Kids = append(ast.Kids, walk())
+
+		// This is what we actually use to end
+		if current.Type == token.EOF {
+			break
+		}
+	}
+
+	return &ast
 }
 
 // next moves the pointer to the current token up by one and retrieves the next
-// token from the token list. For things to work, we definitely need a EOF (end
-// of file) token
-func (p *Parser) next() {
+// token from the token list
+func next() {
 
-	// Move to next token
-	p.cur++
+	if p+1 < len(*tokens) {
+		p++
+		current = (*tokens)[p]
 
-	// Get lookahead token
-	if p.cur+1 <= len(p.tokens) {
-		p.tok = p.tokens[p.cur+1]
+		if p+1 < len(*tokens) {
+			lookahead = (*tokens)[p+1]
+		}
 	} else {
-		p.tok = token.Token{Type: token.EOF} // paranoid
+		lookahead = token.Token{Type: token.EOF}
 	}
 }
+
+// walk
+func walk() *node.Node {
+
+	var n node.Node
+
+	next()
+
+	switch current.Type {
+
+	case token.EOL, token.EOF, token.EMPTY, token.START:
+		n = node.Create(current)
+	case token.COMMENT_LINE, token.COMMENT:
+		n = node.Create(current)
+	case token.DIREC_PARA:
+		n = parseDirectPara()
+	}
+
+	return &n
+}
+
+// Parse directive nodes with parameters
+func parseDirectPara() node.Node {
+
+	var n node.Node
+
+	switch current.Text {
+
+	case ".equ":
+		// Save DIREC mother node
+		n = node.Create(current)
+
+		// Next token must be a symbol
+		if lookahead.Type != token.SYMBOL {
+			wrongToken(token.SYMBOL, lookahead)
+		}
+		next()
+		n.Adopt(&n, &current)
+
+		// Next token must be an expression
+		next()
+		kt := parseNumber() // TODO Testing, replace by parseExpr()
+		n.Adopt(&n, &kt)
+
+	case ".mpu":
+		n = node.Create(current)
+
+		if lookahead.Type != token.STRING {
+			wrongToken(token.STRING, lookahead)
+		}
+
+		n.Adopt(&n, &lookahead)
+		next()
+
+	}
+	return n
+
+}
+
+func parseNumber() token.Token {
+
+	t := current.Type
+
+	if t != token.DEC_NUM &&
+		t != token.HEX_NUM &&
+		t != token.BIN_NUM {
+		wrongToken(token.NUMBER, current)
+	}
+	return current
+}
+
+// wrongToken takes the token we want, the token we got, and complains by
+// crashing that they are not the same
+func wrongToken(want int, got token.Token) {
+	log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
+		got.Line, got.Index, token.Name[want], token.Name[got.Type])
+}
+
+/*
 
 // match takes a token type and silently confirms that the current type is what
 // we want it to be -- otherwise, it fails, currently with a fatal log message.
@@ -75,7 +165,7 @@ func (p *Parser) match(want int) {
 
 	// If this is a composite type, we have to walk through all the literal
 	// subtypes
-	if !t.IsLiteral(want) {
+	if t.IsComposite(want) {
 
 		for _, got := range token.Subtypes(want) {
 
@@ -93,48 +183,32 @@ func (p *Parser) match(want int) {
 	}
 
 	if !found {
-
 		log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
 			t.Line, t.Index, token.Name[want], token.Name[t.Type])
 	}
 }
 
-// Parser is the actual parsing function. It takes a list of token.Tokens and
-// returns the root node.Node to the whole program. Errors
-// are handled here, currently mostly by fatal logging (for now)
-func (p *Parser) Parse() *node.Node {
 
-	for {
-		// Get next token and lookahead
-		p.next()
 
-		// Continue until we're done
-		if p.tok.Type == token.EOF {
-			final := node.Create(p.tok) // We need EOF node
-			p.ast.Add(&final)
-			break
-		}
+// ***** LITERAL FUNCTIONS*****
 
-		// Main switch statement to create new nodes
+func (p *Parser) parseString() {
 
-		var n node.Node
-		t := p.tokens[p.cur] // just too lazy to type
+	t := p.lookahead
 
-		switch t.Type {
-
-		case token.DIREC_PARA:
-			p.parseDirecPara()
-
-		default:
-			n = node.Create(t)
-			p.ast.Add(&n)
-		}
+	if t.Type != token.STRING {
+		wrongToken(t.Line, t.Index, token.STRING, t.Type)
 	}
 
-	return &p.ast
-}
+	p.match(token.STRING)
 
-// ***** INDIVIDUAL FUNCTIONS *****
+	t := p.tokens[p.cur] // our new current token
+
+	if t.Type != token.STRING {
+
+	p.ast.Adopt(&n, &p.lookahead)
+	p.next()
+}
 
 // Directives with parameters
 func (p *Parser) parseDirecPara() {
@@ -148,22 +222,34 @@ func (p *Parser) parseDirecPara() {
 
 	switch t.Text {
 
-	case ".equ":
-		p.match(token.SYMBOL)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-		p.match(token.NUMBER) // TODO can be another symbol or RPR etc
-		p.ast.Adopt(&n, &p.tokens[p.cur])
+	/*
+		case ".byte":
+
+			parseExpr()
+
+				kt := match(token.DEC_NUM)
+				adopt(&n, &kt)
+
+				var nt token.Token
+
+				for {
+					nt = nextToken()
+
+					// TODO This needs to be a lot more clever
+					if nt.Type == token.DEC_NUM {
+						adopt(&n, &nt)
+					}
+
+					p.match(token.COMMA)
+
+					if nt.Type == token.EOL {
+						adopt(&n, &nt) // need final EOL
 
 	case ".include":
-		p.match(token.STRING)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
+		p.ast.Adopt(&n, parseString())
 
-	// In theory, we could already check here if the requested MPU and the
-	// MPU from the source file match. However, the parser doesn't modify
-	// information because it's the base for the nicely formatted output
-	case ".mpu":
-		p.match(token.STRING)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
+		// p.match(token.STRING)
+		// p.ast.Adopt(&n, &p.tokens[p.cur])
 
 	case ".origin":
 		p.match(token.NUMBER)
@@ -183,33 +269,4 @@ func (p *Parser) parseDirecPara() {
 	}
 }
 
-/*
-	// We only accept decimal numbers for now
-	// TODO accept other stuff
-	// TODO should work for .word and .long as well
-	case ".byte":
-
-		kt := match(token.DEC_NUM)
-		adopt(&n, &kt)
-
-		var nt token.Token
-
-		for {
-			nt = nextToken()
-
-			// TODO This needs to be a lot more clever
-			if nt.Type == token.DEC_NUM {
-				adopt(&n, &nt)
-			}
-
-			if nt.Type == token.COMMA {
-				continue
-			}
-			if nt.Type == token.EOL {
-				adopt(&n, &nt) // need final EOL
-				break
-			}
-		}
-	}
-}
 */
