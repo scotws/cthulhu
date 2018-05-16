@@ -1,7 +1,7 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 14. May 2018
+// This version: 16. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps,
@@ -74,14 +74,43 @@ func consume() {
 	}
 }
 
-// Rule of thumb:
+// match takes a token type and checks it against the next (lookahead) token. If
+// they are a literal match -- say, a STRING and a STRING -- it consumes the
+// current token, making the lookahead the current one. If the token type is a
+// composite -- say, token.NUMBER, it checks to see if it is legal such as
+// token.BIN_NUM and returns that sub_type.
+func match(tt int) {
 
-// - parse routines deal with individual elements of a grammar rule, such as
-// expressions. They take no parameters and return a node. They work on the
-// lookahead token, not the current token
+	found := false
 
-// - match() checks for a fixed literal (for instance, "{") and silently consue
-// it, only raising an error if something goes wrong
+	// Walk through the composite types to see if this is a legal subtype
+	if token.IsComposite(tt) {
+
+		sts := token.SubTypes(tt)
+
+		for _, t := range sts {
+
+			if t == lookahead.Type {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			wrongToken(tt, lookahead)
+		}
+
+		// TODO deal with complex tokens such as RPN
+	} else if token.IsComplex(tt) {
+
+		log.Fatalf("PARSER FATAL: Can't deal with complex tokens yet")
+
+	} else if lookahead.Type != tt {
+		wrongToken(tt, lookahead)
+	}
+
+	consume()
+}
 
 // walk
 func walk() *node.Node {
@@ -94,63 +123,56 @@ func walk() *node.Node {
 
 	case token.EOL, token.EOF, token.EMPTY, token.START:
 		n = node.Create(current)
-	case token.COMMENT_LINE, token.COMMENT:
+
+	// We keep comments for the formatted output; the lexer has already done
+	// all the heavy lifting for strings
+	case token.COMMENT_LINE, token.COMMENT, token.STRING:
 		n = node.Create(current)
+
 	case token.DIREC_PARA:
 		n = parseDirectPara()
+
+	case token.DIREC:
+		n = node.Create(current)
 	}
 
 	return &n
 }
 
-// Parse directive nodes with parameters
+// Parse directive nodes with parameters. The lexer has taken care of making
+// sure that we only have legal directives at this point
 func parseDirectPara() node.Node {
 
-	var n node.Node
+	// Save DIREC mother node
+	n := node.Create(current)
 
 	switch current.Text {
 
 	case ".equ":
-		// Save DIREC mother node
-		n = node.Create(current)
-
-		// Next token must be a symbol
-		if lookahead.Type != token.SYMBOL {
-			wrongToken(token.SYMBOL, lookahead)
-		}
-		consume()
+		match(token.SYMBOL)
 		n.Adopt(&n, &current)
 
 		// Next token must be an expression
-		consume()
-		kt := parseNumber() // TODO Testing, replace by parseExpr()
-		n.Adopt(&n, &kt)
+		match(token.NUMBER) // TODO Testing, replace by parseExpr()
+		n.Adopt(&n, &current)
+
+	// TODO see if we even should have include files here anymore
+	case ".include":
+		match(token.STRING)
+		n.Adopt(&n, &current)
 
 	case ".mpu":
-		n = node.Create(current)
+		// Next token must be a string
+		match(token.STRING)
+		n.Adopt(&n, &current)
 
-		if lookahead.Type != token.STRING {
-			wrongToken(token.STRING, lookahead)
-		}
-
-		n.Adopt(&n, &lookahead)
-		consume()
-
+	case ".origin":
+		// Next token must be a NUMBER
+		match(token.NUMBER)
+		n.Adopt(&n, &current)
 	}
 	return n
 
-}
-
-func parseNumber() token.Token {
-
-	t := current.Type
-
-	if t != token.DEC_NUM &&
-		t != token.HEX_NUM &&
-		t != token.BIN_NUM {
-		wrongToken(token.NUMBER, current)
-	}
-	return current
 }
 
 // wrongToken takes the token we want, the token we got, and complains by

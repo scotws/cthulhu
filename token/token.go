@@ -73,7 +73,8 @@ const (
 
 	// Then we have the complex types
 	complex_begin
-	RPN // Reverse Polish Notation (RPN) math terms
+	RPN   // Reverse Polish Notation (RPN) math terms
+	RANGE // two numbers connected by an ELLIPSIS
 	complex_end
 )
 
@@ -123,7 +124,11 @@ var Name = map[int](string){
 
 	// Composite types
 	ADDRESS: "ADDRESS",
-	NUMBER:  "NUMBER",
+	NUMBER:  "NUMBER", // either BIN_NUM, DEC_NUM, or HEX_NUM
+
+	// Complex types: Made up out of totally different types of tokens
+	RANGE: "RANGE", // includes ELLIPSIS "..."
+	RPN:   "RPN",   // includes complex math terms encased in "{" and "}"
 }
 
 // compositeTypes is a map that contains the literal subtypes that composite
@@ -135,7 +140,7 @@ var compositeTokens = map[int][]int{
 
 // IsLiteral checks to see if the given token is a literal (say, HEX_NUM) or a
 // composite value (say, NUMBER) that needs further testing
-func (t *Token) IsLiteral(tt int) bool {
+func IsLiteral(tt int) bool {
 	f := false
 
 	if tt > lit_begin && tt < lit_end {
@@ -144,9 +149,20 @@ func (t *Token) IsLiteral(tt int) bool {
 	return f
 }
 
+// IsComplex checks to see if the given token is a complex type
+// value (say, RPN)
+func IsComplex(tt int) bool {
+	f := false
+
+	if tt > complex_begin && tt < complex_end {
+		f = true
+	}
+	return f
+}
+
 // IsComposite checks to see if the given token is a composite
 // value (say, NUMBER)
-func (t *Token) IsComposite(tt int) bool {
+func IsComposite(tt int) bool {
 	f := false
 
 	if tt > composite_begin && tt < composite_end {
@@ -157,8 +173,7 @@ func (t *Token) IsComposite(tt int) bool {
 
 // Subtypes is given a composite type and returns a list of literal types to
 // check against, such as NUMBER to HEX_NUM, BIN_NUM and DEC_NUM
-// TODO check for legal values
-func Subtypes(ct int) []int {
+func SubTypes(ct int) []int {
 	at := compositeTokens[ct]
 	return at
 }

@@ -1,7 +1,7 @@
 // Analyzer package for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 12. May 2018
-// This version: 13. May 2018
+// This version: 16. May 2018
 
 // The analyzer is where the main processing happens. As the core of the back
 // end part of the assembler, it is nicknamed "Azathoth, ruler of the Outer
@@ -46,6 +46,8 @@ func walk(n *node.Node, mpu string, trace bool) {
 
 		switch n.Text {
 
+		// TODO we need to figure out some way of getting rid of
+		// this node once we have harvested the MPU information
 		case ".mpu":
 			// We should have exactly one parameter of the type string
 			if len(n.Kids) != 1 {
