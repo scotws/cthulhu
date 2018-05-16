@@ -105,6 +105,11 @@ func match(tt int) {
 
 		log.Fatalf("PARSER FATAL: Can't deal with complex tokens yet")
 
+		// TODO Deal with RPN
+		// TODO Deal with EXPR
+		// TODO Deal with RANGE
+
+		// It looks like we got ourselves a literal, which is nice
 	} else if lookahead.Type != tt {
 		wrongToken(tt, lookahead)
 	}
@@ -134,6 +139,9 @@ func walk() *node.Node {
 
 	case token.DIREC:
 		n = node.Create(current)
+
+	case token.LABEL, token.ANON_LABEL, token.LOCAL_LABEL:
+		n = node.Create(current)
 	}
 
 	return &n
@@ -149,6 +157,7 @@ func parseDirectPara() node.Node {
 	switch current.Text {
 
 	case ".equ":
+		// First token must be a symbol
 		match(token.SYMBOL)
 		n.Adopt(&n, &current)
 
