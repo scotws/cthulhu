@@ -1,12 +1,13 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 13. May 2018
+// This version: 14. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
-// of the list of tokens. All further processing is handled in later steps. Note
-// this means that we also include information such as comments that would
-// usually be thrown out -- we use the AST to output clean formatting, however.
+// of the list of tokens. All further processing is handled in later steps,
+// because the initial AST is the basis of other tools such as the formatter,
+// which is why we keep otherwise useless information like the empty lines and
+// comments.
 
 package parser
 
@@ -35,7 +36,7 @@ func Init(ts *[]token.Token, tr bool) {
 	}
 
 	tokens = ts
-	p = -1 // bumped up to 0 by initial call to next
+	p = -1 // bumped up to 0 by initial call to consume
 	ast = node.Node{Token: token.Token{Type: token.START, Text: "Cthulhu"}}
 	trace = tr
 }
@@ -57,9 +58,9 @@ func Parser() *node.Node {
 	return &ast
 }
 
-// next moves the pointer to the current token up by one and retrieves the next
-// token from the token list
-func next() {
+// consume moves the pointer to the current token up by one and retrieves the next
+// token from the token list. This could also be called next
+func consume() {
 
 	if p+1 < len(*tokens) {
 		p++
@@ -73,12 +74,21 @@ func next() {
 	}
 }
 
+// Rule of thumb:
+
+// - parse routines deal with individual elements of a grammar rule, such as
+// expressions. They take no parameters and return a node. They work on the
+// lookahead token, not the current token
+
+// - match() checks for a fixed literal (for instance, "{") and silently consue
+// it, only raising an error if something goes wrong
+
 // walk
 func walk() *node.Node {
 
 	var n node.Node
 
-	next()
+	consume()
 
 	switch current.Type {
 
@@ -108,11 +118,11 @@ func parseDirectPara() node.Node {
 		if lookahead.Type != token.SYMBOL {
 			wrongToken(token.SYMBOL, lookahead)
 		}
-		next()
+		consume()
 		n.Adopt(&n, &current)
 
 		// Next token must be an expression
-		next()
+		consume()
 		kt := parseNumber() // TODO Testing, replace by parseExpr()
 		n.Adopt(&n, &kt)
 
@@ -124,7 +134,7 @@ func parseDirectPara() node.Node {
 		}
 
 		n.Adopt(&n, &lookahead)
-		next()
+		consume()
 
 	}
 	return n
@@ -160,7 +170,7 @@ func wrongToken(want int, got token.Token) {
 func (p *Parser) match(want int) {
 
 	found := false
-	p.next()
+	p.consume()
 	t := p.tokens[p.cur] // our new current token
 
 	// If this is a composite type, we have to walk through all the literal
@@ -207,7 +217,7 @@ func (p *Parser) parseString() {
 	if t.Type != token.STRING {
 
 	p.ast.Adopt(&n, &p.lookahead)
-	p.next()
+	p.consume()
 }
 
 // Directives with parameters

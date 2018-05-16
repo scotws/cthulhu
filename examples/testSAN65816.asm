@@ -6,8 +6,8 @@
         .mpu "65816"
         .origin $00:8000
 
-        .ram $0000 $7fff
-        .rom $8000 $ffff
+        .ram $0000 ... $7fff
+        .rom $8000 ... $ffff
 
         .equ frog %0000.1111
 
@@ -27,7 +27,7 @@ stop:
                 stp ; it's all over, baby!
 
         .word {frog 2 .swap .dup *}, $ff, "frog"
-        .byte 1, 2, 3, 4
+        .byte 1 ... 4
         .byte 5, 6, 7, 8 ; and that's a wrap!
 
         .end        

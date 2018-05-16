@@ -1,7 +1,7 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 13. May 2018
+// This version: 15. May 2018
 
 package main
 
@@ -116,6 +116,8 @@ func main() {
 	// much like the gofmt program included with Go. See the file itself for
 	// more detail
 	// TODO move from token to AST based formatting
+	// TODO Since formatting is not related to the other parsing steps,
+	//      we should be able to do this concurrently
 
 	/*
 		if *fFormat {
@@ -165,6 +167,8 @@ func main() {
 	// The lister produces a detailed listing of the code with useful
 	// information such as the actual byte stored for each instruction and
 	// the modes the 65816 was in during each instruction
+	// TODO Since this is based on the AST, we should be able to do this
+	//      concurrently
 
 	if *fListing {
 		lister.Lister(machine.AST)
@@ -173,6 +177,8 @@ func main() {
 
 	// *** HEXDUMP ***
 
+	// TODO Since this is based on the AST, we should be able to do this
+	//      concurrently
 	if *fHexdump {
 		verbose("(Hexdump not installed yet)")
 	}

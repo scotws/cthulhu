@@ -1,7 +1,12 @@
 # Manual for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 11. May 2018
+This version: 14. May 2018
+
+
+## Introduction 
+
+*Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn ...*
 
 
 
@@ -112,6 +117,7 @@ rules for symbols. When defined, they take a colon `:` as last character.
 
 ```
 global_label: ; accessable from everywhere
+
         .scope
 _local_Label: ; only accessable in this scope
         .scend
@@ -194,15 +200,17 @@ that this word is not yet available.
 ### Reserved for future use
 
 - **.if** (n/a) 
+- **.then** (n/a) 
 - **.else** (n/a) 
 - **.invoke** (n/a) 
+- **.loop** ("x" | "y") <RANGE> 
+- **.lend**
 - **.macro** (n/a) 
 - **.mend** (n/a) 
 - **.print** Takes a string and prints it turning compilation (useful for
   debugging)
 - **.scope** (n/a) 
 - **.scend** (n/a) 
-- **.then** (n/a) 
 
 ## PSEUDOINSTRUCTIONS
 
@@ -211,7 +219,10 @@ that this word is not yet available.
 
 ## Literature and Websites
 
+For literature on the Cthulhu Mythos and H.P. Lovecraft, 
+
 The Super Tiny Compiler
 https://github.com/hazbo/the-super-tiny-compiler/blob/master/compiler.go
+
 
 

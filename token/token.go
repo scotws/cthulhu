@@ -29,6 +29,7 @@ const (
 	COMMENT_LINE            // whole-line comments
 	DIREC                   // simple directive, no parameters
 	DIREC_PARA              // directive with one or more parameters
+	ELLIPSIS                // directive "..." used for various things
 	OPC_0                   // SAN opcode without any operands ("nop")
 	OPC_1                   // SAN opcode with exactly one operand
 	OPC_2                   // SAN opcode with two operands (mvn, mvp)
@@ -81,6 +82,7 @@ var Name = map[int](string){
 	START:        "START",
 	EOL:          "EOL",
 	EMPTY:        "EMPTY",
+	ELLIPSIS:     "ELLIPSIS",
 	COMMENT:      "COMMENT",
 	COMMENT_LINE: "COMMENT_LINE",
 	DIREC:        "DIREC",

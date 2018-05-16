@@ -1,7 +1,7 @@
 Grammar for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 13. Mai 2018
+This version: 16. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
@@ -11,35 +11,40 @@ our language description.
 
 statement = comment | directive | label | instruction
 
-comment_line = ";" { anything } "<EOL>"
-comment = { anything } ";" { anything } "<EOL>"
+comment_line = ";" { anything } <EOL>
+comment = [ label ] ( directive | instruction ) ";" { anything } <EOL>
 
-directive = "." ( letter | dec_digit | "!" | "*" ) { letter | dec_digit | "!" | "*"  }
+element = expr | range 
+range = expr ellipsis expr
+expr =  value | single_operator value | value binary_operator value [ comment ]
+value = number | symbol | rpn | ".here"
+
+directive = "." ( letter | dec_digit | "!" | ".." ) { letter | dec_digit | "!" }
         for one of:
 
-        ".*"
+        "..." // ellipsis
         ".a8"
         ".a16"
         ".axy16"
         ".advance" expr
         ".assert" "a8" | "a16" | "xy8" | "xy16" | "native" | "emulated"
         ".bank" expr
-        ".byte" expr { "," expr } [ comment ] "<EOL>"
+        ".byte" element { "," element }
         ".emulate"
         ".end"
         ".equ" symbol expr
         ".here"
         ".include" string
-        ".long" expr { "," expr }
+        ".long" element { "," element }
         ".lsb" expr
         ".msb" 
         ".mpu" string, one of "6502" | "65c02" | "65816"
         ".native"
         ".origin" expr
-        ".ram" expr expr
-        ".rom" expr expr
+        ".ram" element { "," element } 
+        ".rom" element { "," element }
         ".status"
-        ".word" expr { "," expr } [ comment ] "<EOL>"
+        ".word" element { "," element } 
         ".xy16"
         ".xy8"
         
@@ -56,22 +61,12 @@ sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "~" | "^" | "&" | "=" | 
 
 // Instruction
 
-instruction_san = ( opc_san_0 [ comment ] ) |
-                  ( opc_san_1 operand_san [ comment ] ) |
-                  ( opc_san_2 operand_san "," operand_san [ comment ] )
-
-operand_san = expr
+instruction =  opc_0  |  opc_1 expr  | opc_2 expr "," expr
 
 single_operator = ".lsb" | ".msb" | ".bank" | ".not"
+
 binary_operator = ".and" | ".or" | ".xor" | "+" | "-" | "/" | "*" | ".lshift" | 
         ".rshift" | "%"
-
-// Expression
-
-value = number | symbol | rpn
-
-expr =  value | single_operator value | value binary_operator value [ comment ] <EOL>
-
 
 // Reverse Polish Notation (RPN) 
 
@@ -84,15 +79,15 @@ rpn_operator = ".drop" | ".dup" | ".lsb" | ".msb" | ".bank" | "+" | "*" | "-" | 
 
 // Numbers
 
-number = bin_number | dec_number | hex_number 
+number = bin_num | dec_num | hex_num 
 
-bin_number = '%' bin_digit { bin_digit | bin_special }
+bin_num = "%" bin_digit { bin_digit | bin_special }
 bin_special = ":" | "." 
 
-dec_number = dec_digit { dec_digit }
+dec_num = dec_digit { dec_digit }
 dec_digit = "0" ... "9"
 
-hex_number = '$' hex_digit { hex_digit | hex_special }
+hex_num = "$" hex_digit { hex_digit | hex_special }
 hex_special = ":" | "." 
 hex_digit = dec_digit | "a" ... "f" | "A" ... "F"
 

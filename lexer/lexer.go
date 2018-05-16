@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 13. May 2018
+// This version: 16. May 2018
 
 package lexer
 
@@ -112,6 +112,7 @@ func findDirectiveEOW(rs []rune) int {
 
 		if !unicode.IsNumber(rs[i]) &&
 			!unicode.IsLetter(rs[i]) &&
+			rs[i] != '.' &&
 			rs[i] != '!' {
 			e = i
 			break
@@ -376,6 +377,15 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				word := string(cs[i : i+e])
 
 				if isDirective(word) {
+
+					// ellipsis is a special case because it
+					// can be used for various things such
+					// as listings of bytes
+					if word == "..." {
+						addToken(token.ELLIPSIS, word, ln, i)
+						i = i + e - 1 // continue adds one
+						continue
+					}
 
 					// We make life easier for the parser
 					// by distinguishing between simple
