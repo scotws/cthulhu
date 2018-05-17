@@ -179,6 +179,65 @@ func parseDirectPara() node.Node {
 		// Next token must be a NUMBER
 		match(token.NUMBER)
 		n.Adopt(&n, &current)
+
+	case ".ram", ".rom":
+
+		// First token must be an expression
+		match(token.NUMBER) // TODO Testing, replace by EXPR
+
+		// If we survived that, the current token is a NUMBER. We don't
+		// save it quite yet, though, because we need to see if we're
+		// dealing with a range
+
+		switch lookahead.Type {
+
+		case token.ELLIPSIS:
+
+			// We insert a RANGE token as the first child of current
+			// token and add the other children to it
+			rt := token.Token{
+				Type:  token.RANGE,
+				Line:  current.Line,
+				Index: current.Type,
+				Text:  "RANGE",
+			}
+
+			// Create a range node
+			rn := node.Create(rt)
+
+			// At this point, the current token is still the first
+			// number and the lookahead is the ellipsis. Next step
+			// is to add the range to the RAM/ROM node
+			n.Kids = append(n.Kids, &rn)
+
+			// Now we add the current token as the first element of
+			// the range
+			rn.Adopt(&rn, &current)
+
+			// get rid of RAM/ROM token, make RANGE current,
+			// lookahead is second number
+			consume()
+
+			// Next token must be a number
+			match(token.NUMBER) // TODO Testing, replace by EXPR
+			rn.Adopt(&rn, &current)
+
+		case token.COMMA:
+			// TODO must be processed as "LIST"
+			n.Adopt(&n, &current) // save number
+			match(token.COMMA)
+			match(token.NUMBER) // TODO Testing, replace by EXPR
+			n.Adopt(&n, &current)
+
+		case token.EOL:
+			n.Adopt(&n, &current)
+			consume()
+
+		default:
+			log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%d' \n",
+				current.Line, current.Index, lookahead.Type)
+		}
+
 	}
 	return n
 
@@ -190,124 +249,3 @@ func wrongToken(want int, got token.Token) {
 	log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
 		got.Line, got.Index, token.Name[want], token.Name[got.Type])
 }
-
-/*
-
-// match takes a token type and silently confirms that the current type is what
-// we want it to be -- otherwise, it fails, currently with a fatal log message.
-// For literal types, this can be quick, for composite types, we need different
-// rules
-// TODO this needs to be defined recursively
-func (p *Parser) match(want int) {
-
-	found := false
-	p.consume()
-	t := p.tokens[p.cur] // our new current token
-
-	// If this is a composite type, we have to walk through all the literal
-	// subtypes
-	if t.IsComposite(want) {
-
-		for _, got := range token.Subtypes(want) {
-
-			if got == t.Type {
-				found = true
-				break
-			}
-		}
-
-	} else {
-		// This is already a literal
-		if t.Type == want {
-			found = true
-		}
-	}
-
-	if !found {
-		log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
-			t.Line, t.Index, token.Name[want], token.Name[t.Type])
-	}
-}
-
-
-
-// ***** LITERAL FUNCTIONS*****
-
-func (p *Parser) parseString() {
-
-	t := p.lookahead
-
-	if t.Type != token.STRING {
-		wrongToken(t.Line, t.Index, token.STRING, t.Type)
-	}
-
-	p.match(token.STRING)
-
-	t := p.tokens[p.cur] // our new current token
-
-	if t.Type != token.STRING {
-
-	p.ast.Adopt(&n, &p.lookahead)
-	p.consume()
-}
-
-// Directives with parameters
-func (p *Parser) parseDirecPara() {
-
-	t := p.tokens[p.cur]
-
-	// We know that we must have a legal directive because the lexer checked
-	// for us. We store that first
-	n := node.Create(t)
-	p.ast.Add(&n)
-
-	switch t.Text {
-
-	/*
-		case ".byte":
-
-			parseExpr()
-
-				kt := match(token.DEC_NUM)
-				adopt(&n, &kt)
-
-				var nt token.Token
-
-				for {
-					nt = nextToken()
-
-					// TODO This needs to be a lot more clever
-					if nt.Type == token.DEC_NUM {
-						adopt(&n, &nt)
-					}
-
-					p.match(token.COMMA)
-
-					if nt.Type == token.EOL {
-						adopt(&n, &nt) // need final EOL
-
-	case ".include":
-		p.ast.Adopt(&n, parseString())
-
-		// p.match(token.STRING)
-		// p.ast.Adopt(&n, &p.tokens[p.cur])
-
-	case ".origin":
-		p.match(token.NUMBER)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-
-	case ".ram":
-		p.match(token.ADDRESS)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-		p.match(token.ADDRESS)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-
-	case ".rom":
-		p.match(token.ADDRESS)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-		p.match(token.ADDRESS)
-		p.ast.Adopt(&n, &p.tokens[p.cur])
-	}
-}
-
-*/
