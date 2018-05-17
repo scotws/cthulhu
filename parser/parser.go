@@ -1,12 +1,12 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 16. May 2018
+// This version: 17. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps,
-// because the initial AST is the basis of other tools such as the formatter,
-// which is why we keep otherwise useless information like the empty lines and
+// because the initial AST is the basis of other tools such as the formatter.
+// This is why we keep otherwise useless information like the empty lines and
 // comments.
 
 package parser
@@ -42,8 +42,7 @@ func Init(ts *[]token.Token, tr bool) {
 }
 
 // Parser is the actual parsing function. It takes a list of token.Tokens and
-// returns the root node.Node to the whole program. Errors
-// are handled here, currently mostly by fatal logging (for now)
+// returns the root node.Node to the whole program.
 func Parser() *node.Node {
 
 	for {
@@ -59,7 +58,7 @@ func Parser() *node.Node {
 }
 
 // consume moves the pointer to the current token up by one and retrieves the next
-// token from the token list. This could also be called next
+// token from the token list. This could also be called "next"
 func consume() {
 
 	if p+1 < len(*tokens) {
@@ -69,10 +68,28 @@ func consume() {
 		if p+1 < len(*tokens) {
 			lookahead = (*tokens)[p+1]
 		}
+
 	} else {
 		lookahead = token.Token{Type: token.EOF}
 	}
 }
+
+// matchLiteral takes a literal ("terminal") token, usually something such as
+// like ELLIPSIS or COMMA, and checks it against the next (lookahead) token. If
+// they are not the same, it throws an error. If they are the same, it consumes
+// the current token, so that the literal is the new current token.
+func matchLiteral(t token) {
+
+	if t.Type != lookahead.Type {
+		log.Fatalf("PARSER FATAL (%d, %d): Expected token '%s', got '%s'\n",
+			lookahead.Line, lookahead.Index, token.Name[s.Type],
+			token.Name[lookahead.Type])
+	}
+
+	consume()
+}
+
+// HIER HIER make matchNonTerminal
 
 // match takes a token type and checks it against the next (lookahead) token. If
 // they are a literal match -- say, a STRING and a STRING -- it consumes the
