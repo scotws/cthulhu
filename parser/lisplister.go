@@ -35,7 +35,7 @@ func Lisplister(ast *node.Node) {
 	// Some of the directors are actually operators that don't start a
 	// a new line
 	case token.DIREC, token.DIREC_PARA:
-		_, ok := data.Operators[ast.Text]
+		_, ok := data.OperatorsRPN[ast.Text]
 
 		if ok {
 			fmt.Print(ast.Text)

@@ -1,7 +1,7 @@
-Grammar for the Cthulhu Assembler
+Grammar for the Cthulhu Assemble
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 07. Mai 2018
-This version: 16. Mai 2018
+This version: 18. Mai 2018
 
 We use EBNF as used by Go (see https://golang.org/ref/spec#Notation and
 http://www.cs.sfu.ca/CourseCentral/383/tjd/ebnf_intro_in_go.html) for
@@ -15,8 +15,13 @@ comment_line = ";" { anything } <EOL>
 comment = [ label ] ( directive | instruction ) ";" { anything } <EOL>
 
 element = expr | range 
+
 range = expr ellipsis expr
-expr =  value | single_operator value | value binary_operator value [ comment ]
+
+expr =  value | 
+        unary_operator value | 
+        value binary_operator value 
+
 value = number | symbol | rpn | ".here"
 
 directive = "." ( letter | dec_digit | "!" | ".." ) { letter | dec_digit | "!" }
@@ -63,7 +68,7 @@ sym_special = "!" | "?" | "_" | "&" | "'" | "#" | "." | "~" | "^" | "&" | "=" | 
 
 instruction =  opc_0  |  opc_1 expr  | opc_2 expr "," expr
 
-single_operator = ".lsb" | ".msb" | ".bank" | ".not"
+unary_operator = ".lsb" | ".msb" | ".bank" | ".not" | ".invert"
 
 binary_operator = ".and" | ".or" | ".xor" | "+" | "-" | "/" | "*" | ".lshift" | 
         ".rshift" | "%"

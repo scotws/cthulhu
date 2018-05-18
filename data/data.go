@@ -22,7 +22,7 @@ var OpcodesSAN = map[string]map[string](Opcode){
 }
 
 // List of all directives. This map is used as a set.
-var Directives = map[string](bool){
+var Directives = map[string]bool{
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".native": true, ".emulated": true, ".end": true,
 	".a8": true, ".a16": true, ".xy8": true, ".xy16": true,
@@ -36,7 +36,7 @@ var Directives = map[string](bool){
 }
 
 // List of directives with Parameters. This map is used as a set.
-var DirectivesPara = map[string](bool){
+var DirectivesPara = map[string]bool{
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".macro": true, ".lsb": true, ".msb": true,
 	".bank": true, ".advance": true, ".skip": true,
@@ -44,11 +44,25 @@ var DirectivesPara = map[string](bool){
 	".lshift": true, ".rshift": true, ".not": true, ".invert": true,
 }
 
-// List of directives and operators that are used as operators inside 
-// of a RPN term. This map is used as a set.
-var OperatorsRPN = map[string](bool){
+// List of directives and operators that are used as operators inside
+// of a RPN term. This map is used as a set by the parser.
+var OperatorsRPN = map[string]bool{
 	".lshift": true, ".rshift": true, ".lsb": true, ".msb": true,
 	".bank": true, ".and": true, ".or": true, ".xor": true,
 	".not": true, ".dup": true, ".swap": true, ".drop": true,
-	"*": true, "+": true, "-": true, "/": true, ".invert"
+	"*": true, "+": true, "-": true, "/": true, ".invert": true,
+}
+
+// List of directives and operators that are used as binary operators in
+// simple math terms such as addresses. This map is used as a set by the parser.
+var OperatorsBinary = map[string]bool{
+	".lshift": true, ".rshift": true, ".and": true, ".or": true, ".xor": true,
+	"+": true, "-": true, "%": true, "/": true, "*": true,
+}
+
+// List of directives and operators that are used as unary (single) operators in
+// simple math terms such as addresses. This map is used as a set by the parser.
+var OperatorsUnary = map[string]bool{
+	".lshift": true, ".rshift": true, ".lsb": true, ".msb": true, ".bank": true,
+	".not": true, ".invert": true,
 }

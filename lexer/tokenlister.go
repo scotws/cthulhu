@@ -2,7 +2,7 @@
 // Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 10. May 2018
-// This version: 11. May 2018
+// This version: 18. May 2018
 
 package lexer
 
@@ -21,8 +21,8 @@ func Tokenlister(ts *[]token.Token) {
 		switch t.Type {
 
 		case token.COMMENT, token.EMPTY, token.EOL, token.EOF, token.COMMA,
-			token.MINUS, token.HASH, token.LEFT_CURLY, token.RIGHT_CURLY,
-			token.PLUS, token.LEFT_PARENS, token.RIGHT_PARENS,
+			token.MINUS, token.HASH, token.L_CURLY, token.R_CURLY,
+			token.PLUS, token.L_PARENS, token.R_PARENS,
 			token.COMMENT_LINE:
 			fmt.Printf("<%s>", token.Name[t.Type])
 

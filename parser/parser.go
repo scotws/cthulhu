@@ -14,6 +14,7 @@ package parser
 import (
 	"log"
 
+	"cthulhu/data"
 	"cthulhu/node"
 	"cthulhu/token"
 )
@@ -91,12 +92,13 @@ func matchLiteral(t token) {
 	consume()
 }
 
+*/
 
-// match takes a token type and checks it against the next (lookahead) token. If
-// they are a literal match -- say, a STRING and a STRING -- it consumes the
-// current token, making the lookahead the current one. If the token type is a
-// composite -- say, token.NUMBER, it checks to see if it is legal such as
-// token.BIN_NUM and returns that sub_type.
+// match takes a token type and checks it against the lookahead token. If they
+// are a literal match -- say, a STRING and a STRING -- it consumes the current
+// token, making the lookahead the current one. If the token type is a composite
+// -- say, token.NUMBER -- it checks to see if it is legal such as token.BIN_NUM
+// and returns that sub_type.
 func match(tt int) {
 
 	found := false
@@ -107,7 +109,6 @@ func match(tt int) {
 		sts := token.SubTypes(tt)
 
 		for _, t := range sts {
-
 			if t == lookahead.Type {
 				found = true
 				break
@@ -135,8 +136,6 @@ func match(tt int) {
 	consume()
 }
 
-*/
-
 // *** PARSING ROUTINES ***
 
 // Parsing works by calling functions that return a node that might have
@@ -148,12 +147,12 @@ func match(tt int) {
 func parseNumber() *node.Node {
 	t := current.Type
 
-	if t != token.HEX_NUM && t != token.DEC_NUM && t != BIN_NUM {
-		log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%d' \n",
-			current.Line, current.Index, lookahead.Type)
+	if t != token.HEX_NUM && t != token.DEC_NUM && t != token.BIN_NUM {
+		log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%s' \n",
+			current.Line, current.Index, token.Name[lookahead.Type])
 	}
 
-	n := node.Create(&current)
+	n := node.Create(current)
 	return &n
 }
 
@@ -167,18 +166,18 @@ func parseValue() *node.Node {
 	switch current.Type {
 
 	case token.L_CURLY:
-		n = parseRPN()
+		n = *parseRPN()
 	case token.SYMBOL:
-		n = node.Create(&current)
+		n = node.Create(current)
 	case token.DIREC:
 		if current.Text != ".here" {
 			log.Fatalf("PARSER FATAL (%d, %d): Directive '%s' is not a value",
 				current.Line, current.Index, current.Text)
 		}
 
-		n = node.Create(&current)
+		n = node.Create(current)
 	default:
-		n = parseNumber()
+		n = *parseNumber()
 	}
 
 	return &n
@@ -204,7 +203,7 @@ func parseRPN() *node.Node {
 	// We need to have at least one value -- a number, a symbol, another RPN
 	// term, or the ".here" directive -- to return
 	t := parseValue()
-	node.Adopt(&rn, &t)
+	rn.Kids = append(rn.Kids, t)
 
 	// While we've not been told to stop, add stuff to the RPN term's
 	// children
@@ -220,19 +219,60 @@ func parseRPN() *node.Node {
 		// an operator that is legal for the RPN
 		_, ok := data.OperatorsRPN[lookahead.Text]
 		if ok {
-			node.Adopt(&rn, &lookahead)
+			rn.Adopt(&rn, &lookahead)
 			consume()
 			continue
 		}
 
 		// This has to be a value then or else were in trouble
+		consume()
 		vn := parseValue()
 		rn.Kids = append(rn.Kids, vn)
-		consume()
 	}
-
 	return &rn
+}
 
+// parseExpr checks to see if the current token is an expression or a simple
+// math term. If not, it throws an error. If yes, it returns a slice of pointers
+// to pointer to new nodes node that contain the expressions. The grammar
+// specification is
+// 	expr =  value | uni_operator value | value bin_operator value
+// Note that parseExpr returns a slice of pointers, not just a pointer
+func parseExpr() []*node.Node {
+
+	var ns []*node.Node
+
+	// See if we have a unary (single) operator
+	_, ok := data.OperatorsUnary[lookahead.Text]
+	if ok {
+		// Add the unary operator to slice
+		un := node.Create(lookahead)
+		ns = append(ns, &un)
+		consume() // uniary now current, lookahead must be value
+		vn := parseValue()
+		ns = append(ns, vn)
+
+	} else {
+		// One way or another, the lookahead must be a value
+		vn := parseValue()
+		ns = append(ns, vn)
+		consume() // value now current, lookahead unknown
+
+		// We either are done or we have a binary operator
+		_, ok := data.OperatorsBinary[lookahead.Text]
+		if ok {
+			// This is a binary operation. Add the binary operator
+			// to the slice
+			consume() // current now operator, lookahead must be value
+			bn := node.Create(lookahead)
+			ns = append(ns, &bn)
+
+			// The next one must be a value or we're in trouble
+			vn := parseValue()
+			ns = append(ns, vn)
+		}
+	}
+	return ns
 }
 
 // walk
@@ -278,10 +318,12 @@ func parseDirectPara() node.Node {
 		// First token must be a symbol
 		match(token.SYMBOL)
 		n.Adopt(&n, &current)
+		consume()
 
-		// Next token must be an expression
-		match(token.NUMBER) // TODO Testing, replace by parseExpr()
-		n.Adopt(&n, &current)
+		// Next token must be an expression. Note expressions return a
+		// slice of pointers
+		ns := parseExpr()
+		n.Kids = append(n.Kids, ns...)
 
 	// TODO see if we even should have include files here anymore
 	case ".include":
@@ -294,9 +336,10 @@ func parseDirectPara() node.Node {
 		n.Adopt(&n, &current)
 
 	case ".origin":
-		// Next token must be a NUMBER
-		match(token.NUMBER)
-		n.Adopt(&n, &current)
+		// Next token must be an expression
+		consume()
+		ns := parseExpr()
+		n.Kids = append(n.Kids, ns...)
 
 	case ".ram", ".rom":
 

@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 16. May 2018
+// This version: 18. May 2018
 
 package lexer
 
@@ -33,15 +33,15 @@ var (
 		token.ANON_LABEL,
 		token.SLASH,
 		token.STAR,
-		token.LEFT_SQUARE,
-		token.RIGHT_SQUARE,
-		token.LEFT_PARENS,
-		token.RIGHT_PARENS,
+		token.L_SQUARE,
+		token.R_SQUARE,
+		token.L_PARENS,
+		token.R_PARENS,
 		token.GREATER,
 		token.LESS,
 		token.HASH,
-		token.LEFT_CURLY,
-		token.RIGHT_CURLY,
+		token.L_CURLY,
+		token.R_CURLY,
 		token.EQUAL,
 		token.AMPERSAND,
 		token.PIPE,

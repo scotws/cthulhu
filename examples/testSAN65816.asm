@@ -13,7 +13,7 @@
         .rom $FF03, $FF04 ... $FF06
 
         .equ dog %0000.1111
-        ; equ cat dog+1
+        .equ cat { dog 1000 + }
 
         .native
         .axy16

@@ -1,7 +1,7 @@
 // Display structure of the AST
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 13. May 2018
-// This version: 13. May 2018
+// This version: 18. May 2018
 
 package parser
 
@@ -22,17 +22,9 @@ func Nodelister(ast *node.Node) {
 	fmt.Print(strings.Repeat("\t", indent))
 	fmt.Print(token.Name[ast.Type])
 
-	if ast.Type != token.EOL &&
-		ast.Type != token.EMPTY {
+	if ast.Type != token.EOL && ast.Type != token.EMPTY {
 
-		// TODO clean this up with a switch once we have everything
-		// working
-
-		if ast.Type == token.DEC_NUM {
-			fmt.Printf(" (%d) ", ast.Value)
-		} else {
-			fmt.Print(" (", ast.Text, ")")
-		}
+		fmt.Print(" (", ast.Text, ")")
 
 		if ast.Done {
 			fmt.Print(" -> ", node.FormatByteSlice(ast.Code))
