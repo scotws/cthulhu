@@ -2,7 +2,7 @@
 // A lot of these are used as sets since Go (golang) doesn't
 // provide that data structure by default
 // First version: 04. May 2018 (May the Force be with you!)
-// This version: 11. May 2018
+// This version: 18. May 2018
 
 package data
 
@@ -21,7 +21,7 @@ var OpcodesSAN = map[string]map[string](Opcode){
 	"65816": Opcodes65816,
 }
 
-// List of all directives (actually used as a set)
+// List of all directives. This map is used as a set.
 var Directives = map[string](bool){
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".native": true, ".emulated": true, ".end": true,
@@ -32,22 +32,23 @@ var Directives = map[string](bool){
 	".assert": true, ".ram": true, ".rom": true,
 	".swap": true, ".drop": true, ".dup": true, ".lshift": true,
 	".rshift": true, ".not": true, ".here": true, ".include": true,
-	"...": true,
+	"...": true, ".invert": true,
 }
 
-// List of directives with Parameters
+// List of directives with Parameters. This map is used as a set.
 var DirectivesPara = map[string](bool){
 	".mpu": true, ".origin": true, ".equ": true, ".byte": true,
 	".word": true, ".macro": true, ".lsb": true, ".msb": true,
 	".bank": true, ".advance": true, ".skip": true,
 	".assert": true, ".ram": true, ".rom": true, ".include": true,
-	".lshift": true, ".rshift": true, ".not": true,
+	".lshift": true, ".rshift": true, ".not": true, ".invert": true,
 }
 
-// List of directives that are actually operators, that is, they don't start a
-// line but are part of a math term
-var Operators = map[string](bool){
+// List of directives and operators that are used as operators inside 
+// of a RPN term. This map is used as a set.
+var OperatorsRPN = map[string](bool){
 	".lshift": true, ".rshift": true, ".lsb": true, ".msb": true,
 	".bank": true, ".and": true, ".or": true, ".xor": true,
 	".not": true, ".dup": true, ".swap": true, ".drop": true,
+	"*": true, "+": true, "-": true, "/": true, ".invert"
 }

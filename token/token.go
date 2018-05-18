@@ -1,7 +1,7 @@
 // Token structure for Cthulhu Assembler
 // Scot W. Stevenson
 // First version: 02. May 2018
-// This version: 12. May 2018
+// This version: 18. May 2018
 
 // So here's a funny thing: The Go specs instist that you should always use
 // camel case, and not all caps, even for constants. However, if you take a look
@@ -39,12 +39,12 @@ const (
 	LABEL                   // absolute label (ends with ":")
 	LOCAL_LABEL             // scoped label (starts with "_")
 	ANON_LABEL              // anonymous label (starts with "@")
-	LEFT_SQUARE             // [
-	RIGHT_SQUARE            // ]
-	LEFT_PARENS             // (
-	RIGHT_PARENS            // )
-	LEFT_CURLY              // {
-	RIGHT_CURLY             // }
+	L_SQUARE                // [
+	R_SQUARE                // ]
+	L_PARENS                // (
+	R_PARENS                // )
+	L_CURLY                 // {
+	R_CURLY                 // }
 	GREATER                 // >
 	LESS                    // <
 	COMMA                   // ,
@@ -97,12 +97,12 @@ var Name = map[int](string){
 	LABEL:        "LABEL",
 	LOCAL_LABEL:  "LOCAL_LABEL",
 	ANON_LABEL:   "ANON_LABEL",
-	LEFT_SQUARE:  "LEFT_SQUARE",
-	RIGHT_SQUARE: "RIGHT_SQUARE",
-	LEFT_PARENS:  "LEFT_PARENS",
-	RIGHT_PARENS: "RIGHT_PARENS",
-	LEFT_CURLY:   "LEFT_CURLY",
-	RIGHT_CURLY:  "RIGHT_CURLY",
+	L_SQUARE:     "LEFT_SQUARE",
+	R_SQUARE:     "RIGHT_SQUARE",
+	L_PARENS:     "LEFT_PARENS",
+	R_PARENS:     "RIGHT_PARENS",
+	L_CURLY:      "LEFT_CURLY",
+	R_CURLY:      "RIGHT_CURLY",
 	GREATER:      "GREATER",
 	LESS:         "LESS",
 	COMMA:        "COMMA",

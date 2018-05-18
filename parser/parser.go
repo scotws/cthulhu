@@ -1,7 +1,7 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 17. May 2018
+// This version: 18. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps,
@@ -74,6 +74,8 @@ func consume() {
 	}
 }
 
+/*
+
 // matchLiteral takes a literal ("terminal") token, usually something such as
 // like ELLIPSIS or COMMA, and checks it against the next (lookahead) token. If
 // they are not the same, it throws an error. If they are the same, it consumes
@@ -89,7 +91,6 @@ func matchLiteral(t token) {
 	consume()
 }
 
-// HIER HIER make matchNonTerminal
 
 // match takes a token type and checks it against the next (lookahead) token. If
 // they are a literal match -- say, a STRING and a STRING -- it consumes the
@@ -132,6 +133,106 @@ func match(tt int) {
 	}
 
 	consume()
+}
+
+*/
+
+// *** PARSING ROUTINES ***
+
+// Parsing works by calling functions that return a node that might have
+// subnodes. They work by examining the current token.
+
+// parseNumber examines the current token and throws an error if it is not one
+// of the three literals  binary number, decimal number, or hex number. If the
+// token is a number, a new node is generated and a link to it returned
+func parseNumber() *node.Node {
+	t := current.Type
+
+	if t != token.HEX_NUM && t != token.DEC_NUM && t != BIN_NUM {
+		log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%d' \n",
+			current.Line, current.Index, lookahead.Type)
+	}
+
+	n := node.Create(&current)
+	return &n
+}
+
+// parseValue examines the current token and throws and error if it is not
+// a symbol, a number, a RPN term, or the ".here" directive that signals the
+// current PC counter. If it is one of those, a link to a new node is returned
+// that contains those structures
+func parseValue() *node.Node {
+	var n node.Node
+
+	switch current.Type {
+
+	case token.L_CURLY:
+		n = parseRPN()
+	case token.SYMBOL:
+		n = node.Create(&current)
+	case token.DIREC:
+		if current.Text != ".here" {
+			log.Fatalf("PARSER FATAL (%d, %d): Directive '%s' is not a value",
+				current.Line, current.Index, current.Text)
+		}
+
+		n = node.Create(&current)
+	default:
+		n = parseNumber()
+	}
+
+	return &n
+}
+
+// RPN is the complex math stuff. We come here with the left curly brace as the
+// current token. Grammar rule is
+// rpn = "{" value { value | prn_operator } "}"
+func parseRPN() *node.Node {
+
+	// create a new node of type RPN
+	rt := token.Token{
+		Type:  token.RPN,
+		Text:  "RPN",
+		Line:  current.Line,
+		Index: current.Index,
+	}
+
+	rn := node.Create(rt)
+
+	consume() // current is now the first element, lookahead is unknown
+
+	// We need to have at least one value -- a number, a symbol, another RPN
+	// term, or the ".here" directive -- to return
+	t := parseValue()
+	node.Adopt(&rn, &t)
+
+	// While we've not been told to stop, add stuff to the RPN term's
+	// children
+	for lookahead.Type != token.R_CURLY {
+
+		// We shouldn't hit an end of line without a closing curly brace
+		if lookahead.Type == token.EOL {
+			log.Fatalf("PARSER FATAL (%d, %d): RPN term missing closing brace",
+				lookahead.Line, lookahead.Index)
+		}
+
+		// After the initial value, we can either have another value or
+		// an operator that is legal for the RPN
+		_, ok := data.OperatorsRPN[lookahead.Text]
+		if ok {
+			node.Adopt(&rn, &lookahead)
+			consume()
+			continue
+		}
+
+		// This has to be a value then or else were in trouble
+		vn := parseValue()
+		rn.Kids = append(rn.Kids, vn)
+		consume()
+	}
+
+	return &rn
+
 }
 
 // walk
