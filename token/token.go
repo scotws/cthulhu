@@ -73,6 +73,7 @@ const (
 
 	// Then we have the complex types
 	complex_begin
+	EXPR  // Expressions
 	RPN   // Reverse Polish Notation (RPN) math terms
 	RANGE // two numbers connected by an ELLIPSIS
 	complex_end
@@ -128,7 +129,8 @@ var Name = map[int](string){
 
 	// Complex types: Made up out of totally different types of tokens
 	RANGE: "RANGE", // includes ELLIPSIS "..."
-	RPN:   "RPN",   // includes complex math terms encased in "{" and "}"
+	EXPR:  "EXPR",
+	RPN:   "RPN", // includes complex math terms encased in "{" and "}"
 }
 
 // compositeTypes is a map that contains the literal subtypes that composite

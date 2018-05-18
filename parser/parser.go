@@ -9,6 +9,8 @@
 // This is why we keep otherwise useless information like the empty lines and
 // comments.
 
+// TODO convert to all working on lookahead, not current
+
 package parser
 
 import (
@@ -25,8 +27,8 @@ var (
 	current   token.Token    // current token we're examining
 	lookahead token.Token    // one token lookahead
 	ast       node.Node      // root of the Abstract Syntax Tree (AST)
-	mpu       string         // MPU type requested by the user
-	trace     bool           // User requests lots and lots of info
+	mpu       string         // MPU type requested by the user TODO see if needed
+	trace     bool           // User requests lots and lots of info TODO see if needed
 )
 
 // Init sets up the parser for the init run, haven been given the list of tokens
@@ -54,8 +56,38 @@ func Parser() *node.Node {
 			break
 		}
 	}
-
 	return &ast
+}
+
+// walk
+// TODO see if we should be working with lookahead token, not current token
+func walk() *node.Node {
+
+	var n node.Node
+
+	consume()
+
+	switch current.Type {
+
+	case token.EOL, token.EOF, token.EMPTY, token.START:
+		n = node.Create(current)
+
+	// We keep comments for the formatted output; the lexer has already done
+	// all the heavy lifting for strings
+	case token.COMMENT_LINE, token.COMMENT, token.STRING:
+		n = node.Create(current)
+
+	case token.DIREC_PARA:
+		n = parseDirectPara()
+
+	case token.DIREC:
+		n = node.Create(current)
+
+	case token.LABEL, token.ANON_LABEL, token.LOCAL_LABEL:
+		n = node.Create(current)
+	}
+
+	return &n
 }
 
 // consume moves the pointer to the current token up by one and retrieves the next
@@ -74,25 +106,6 @@ func consume() {
 		lookahead = token.Token{Type: token.EOF}
 	}
 }
-
-/*
-
-// matchLiteral takes a literal ("terminal") token, usually something such as
-// like ELLIPSIS or COMMA, and checks it against the next (lookahead) token. If
-// they are not the same, it throws an error. If they are the same, it consumes
-// the current token, so that the literal is the new current token.
-func matchLiteral(t token) {
-
-	if t.Type != lookahead.Type {
-		log.Fatalf("PARSER FATAL (%d, %d): Expected token '%s', got '%s'\n",
-			lookahead.Line, lookahead.Index, token.Name[s.Type],
-			token.Name[lookahead.Type])
-	}
-
-	consume()
-}
-
-*/
 
 // match takes a token type and checks it against the lookahead token. If they
 // are a literal match -- say, a STRING and a STRING -- it consumes the current
@@ -183,9 +196,10 @@ func parseValue() *node.Node {
 	return &n
 }
 
-// RPN is the complex math stuff. We come here with the left curly brace as the
-// current token. Grammar rule is
-// rpn = "{" value { value | prn_operator } "}"
+// parseRPN parses the Reverse Polish Notation (RPN) math forms. We come here
+// with the left curly brace as the current token. Grammar rule is
+//	rpn = "{" value { value | prn_operator } "}"
+// Returns the RPN sequences as a node
 func parseRPN() *node.Node {
 
 	// create a new node of type RPN
@@ -232,30 +246,72 @@ func parseRPN() *node.Node {
 	return &rn
 }
 
+// parseRange creates a range node and returns it with the second expression in
+// place and the first one empty. We arrive here with the ellipsis token as
+// current.
+// TODO see if we should rewrite this with lookahead, starting on the first
+// expression
+func parseRange() *node.Node {
+
+	// We insert a RANGE token as the first child of current
+	// token and add the other children to it
+	rt := token.Token{
+		Type:  token.RANGE,
+		Line:  current.Line,
+		Index: current.Type,
+		Text:  "RANGE",
+	}
+
+	// Create a range node
+	rn := node.Create(rt)
+
+	// Now we add a dummy expression as the first element
+	// of the range
+	rn.Kids = append(rn.Kids, &node.Node{})
+
+	consume() // current is now an expression, lookahead unknown
+
+	// Get our expression
+	e2 := parseExpr()
+	rn.Kids = append(rn.Kids, e2)
+
+	return &rn
+
+}
+
 // parseExpr checks to see if the current token is an expression or a simple
-// math term. If not, it throws an error. If yes, it returns a slice of pointers
-// to pointer to new nodes node that contain the expressions. The grammar
+// math term. If not, it throws an error. If yes, it returns a pointer to a node
+// of the type expression
 // specification is
 // 	expr =  value | uni_operator value | value bin_operator value
-// Note that parseExpr returns a slice of pointers, not just a pointer
-func parseExpr() []*node.Node {
+func parseExpr() *node.Node {
 
-	var ns []*node.Node
+	// create a new node of type EXPR
+	et := token.Token{
+		Type:  token.EXPR,
+		Text:  "EXPR",
+		Line:  current.Line,
+		Index: current.Index,
+	}
+
+	en := node.Create(et)
 
 	// See if we have a unary (single) operator
 	_, ok := data.OperatorsUnary[lookahead.Text]
 	if ok {
+
 		// Add the unary operator to slice
 		un := node.Create(lookahead)
-		ns = append(ns, &un)
+		en.Kids = append(en.Kids, &un)
+
 		consume() // uniary now current, lookahead must be value
 		vn := parseValue()
-		ns = append(ns, vn)
+		en.Kids = append(en.Kids, vn)
 
 	} else {
 		// One way or another, the lookahead must be a value
 		vn := parseValue()
-		ns = append(ns, vn)
+		en.Kids = append(en.Kids, vn)
 		consume() // value now current, lookahead unknown
 
 		// We either are done or we have a binary operator
@@ -265,48 +321,19 @@ func parseExpr() []*node.Node {
 			// to the slice
 			consume() // current now operator, lookahead must be value
 			bn := node.Create(lookahead)
-			ns = append(ns, &bn)
+			en.Kids = append(en.Kids, &bn)
 
 			// The next one must be a value or we're in trouble
 			vn := parseValue()
-			ns = append(ns, vn)
+			en.Kids = append(en.Kids, vn)
 		}
 	}
-	return ns
+	return &en
 }
 
-// walk
-func walk() *node.Node {
-
-	var n node.Node
-
-	consume()
-
-	switch current.Type {
-
-	case token.EOL, token.EOF, token.EMPTY, token.START:
-		n = node.Create(current)
-
-	// We keep comments for the formatted output; the lexer has already done
-	// all the heavy lifting for strings
-	case token.COMMENT_LINE, token.COMMENT, token.STRING:
-		n = node.Create(current)
-
-	case token.DIREC_PARA:
-		n = parseDirectPara()
-
-	case token.DIREC:
-		n = node.Create(current)
-
-	case token.LABEL, token.ANON_LABEL, token.LOCAL_LABEL:
-		n = node.Create(current)
-	}
-
-	return &n
-}
-
-// Parse directive nodes with parameters. The lexer has taken care of making
-// sure that we only have legal directives at this point
+// parseDirectPara handles directive nodes that have parameters. The lexer has
+// taken care of making sure that we only have legal directives at this point.
+// We arrive here with the directive as the current token
 func parseDirectPara() node.Node {
 
 	// Save DIREC mother node
@@ -318,14 +345,11 @@ func parseDirectPara() node.Node {
 		// First token must be a symbol
 		match(token.SYMBOL)
 		n.Adopt(&n, &current)
-		consume()
+		consume() // current now expression, lookahead unknown
 
-		// Next token must be an expression. Note expressions return a
-		// slice of pointers
-		ns := parseExpr()
-		n.Kids = append(n.Kids, ns...)
+		e := parseExpr()
+		n.Kids = append(n.Kids, e)
 
-	// TODO see if we even should have include files here anymore
 	case ".include":
 		match(token.STRING)
 		n.Adopt(&n, &current)
@@ -338,65 +362,59 @@ func parseDirectPara() node.Node {
 	case ".origin":
 		// Next token must be an expression
 		consume()
-		ns := parseExpr()
-		n.Kids = append(n.Kids, ns...)
+		e := parseExpr()
+		n.Kids = append(n.Kids, e)
 
 	case ".ram", ".rom":
+		// This has a lot of overlap with .byte and friends, but we
+		// can't use the same code because .ram and .rom don't accept
+		// strings
 
-		// First token must be an expression
-		match(token.NUMBER) // TODO Testing, replace by EXPR
+		consume() // current must now be expression, lookahead unknown
+		e1 := parseExpr()
 
-		// If we survived that, the current token is a NUMBER. We don't
-		// save it quite yet, though, because we need to see if we're
-		// dealing with a range
+		// Don't save expression yet, need to see if this is a range or
+		// a list
 
-		switch lookahead.Type {
+		switch current.Type {
 
 		case token.ELLIPSIS:
 
-			// We insert a RANGE token as the first child of current
-			// token and add the other children to it
-			rt := token.Token{
-				Type:  token.RANGE,
-				Line:  current.Line,
-				Index: current.Type,
-				Text:  "RANGE",
-			}
+			rn := parseRange()
 
-			// Create a range node
-			rn := node.Create(rt)
-
-			// At this point, the current token is still the first
-			// number and the lookahead is the ellipsis. Next step
-			// is to add the range to the RAM/ROM node
-			n.Kids = append(n.Kids, &rn)
+			// Add the range to the RAM/ROM node
+			n.Kids = append(n.Kids, rn)
 
 			// Now we add the current token as the first element of
 			// the range
-			rn.Adopt(&rn, &current)
-
-			// get rid of RAM/ROM token, make RANGE current,
-			// lookahead is second number
-			consume()
-
-			// Next token must be a number
-			match(token.NUMBER) // TODO Testing, replace by EXPR
-			rn.Adopt(&rn, &current)
+			rn.Kids[0] = e1
 
 		case token.COMMA:
-			// TODO must be processed as "LIST"
-			n.Adopt(&n, &current) // save number
-			match(token.COMMA)
-			match(token.NUMBER) // TODO Testing, replace by EXPR
-			n.Adopt(&n, &current)
+			// If this is a list, we first store the entry we picked
+			// up
+
+			for current.Type != token.EOL {
+				consume() // current now expression, lookhead number
+
+				if current.Type == token.ELLIPSIS {
+					e2 := parseRange()
+					e2.Kids[0] = e1
+					n.Kids = append(n.Kids, e2)
+				} else {
+					// This is a normal entry
+					e2 := parseExpr()
+					n.Kids = append(n.Kids, e1)
+					n.Kids = append(n.Kids, e2)
+				}
+			}
 
 		case token.EOL:
-			n.Adopt(&n, &current)
-			consume()
+			// This is a single entry line
+			n.Kids = append(n.Kids, e1)
 
 		default:
-			log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%d' \n",
-				current.Line, current.Index, lookahead.Type)
+			log.Fatalf("PARSER FATAL (%d, %d): Expected \",\" or \"...\", got '%s' \n",
+				current.Line, current.Index, token.Name[current.Type])
 		}
 
 	}

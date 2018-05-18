@@ -7,10 +7,11 @@
         .origin $00:8000
 
         .ram $0000 ... $7fff
+        .ram $FF00
         .ram $FF01, $FF02   
 
         .rom $8000 ... $ffff
-        .rom $FF03, $FF04 ... $FF06
+        .rom $FF03, $FF04 ... $FF07
 
         .equ dog %0000.1111
         .equ cat { dog 1000 + }
