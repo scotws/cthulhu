@@ -1,12 +1,18 @@
 TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 12. May 2018
+This version: 19. May 2018
 
 
 TODO NEXT
 
-- Add token for whole-line comments, making life easier on everybody
+- LEXER: handle ".include" files; add filename to token information
+- PARSER: Test; make sure inline comments are honored
+- PARSER: add ".assert <string>" directive
+- PARSER: add ".macro <string>" directive
+- FORMATTER: Write; add option "format only", printing on stdout
+- CONVERTER: Write; add option "convert to WDC only"
+- OPTIZIMER: Add "purge" pass
 
 COOL STUFF TRICKS
 
@@ -31,5 +37,11 @@ COOL STUFF TRICKS
 
 DO LATER
 
-- Write external conversion program for SAN to WDC and WDC to SAN
-- Built-in pseudo-instruction / macros for movement: move count source -> destination (65816)
+- Built-in macro for movement: 
+        .move <source> <count> "to" <destination> <EOL> (65816)
+        .move <addr1> ... <addr2> "to" <destination> <EOL> 
+
+- Built-in marco for loop: 
+        .loop x <start> ... <end> <EOL>
+                <instructions>
+        .lend
