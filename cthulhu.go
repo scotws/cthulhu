@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"cthulhu/analyzer"
 	"cthulhu/data"
@@ -52,7 +53,7 @@ func main() {
 		log.Fatalf("FATAL MPU '%s' not supported", *mpu)
 	}
 
-	// ***** LOAD SOURCE FILE *****
+	// ***** LOAD MAIN SOURCE FILE *****
 
 	if *input == "" {
 		log.Fatal("FATAL No input file provided")
@@ -73,14 +74,24 @@ func main() {
 
 	verbose("Main source file loaded.")
 
+	// ***** INCLUDE FILES *****
+
+	// TODO through the include files and save them so we can load them for
+	// tolkens
+	for _, l := range raw {
+
+		if strings.Contains(l, ".include") {
+			fmt.Println(l)
+		}
+	}
+
 	// ***** LEXER *****
 
-	tokens := lexer.Lexer(raw, *mpu)
+	v := fmt.Sprintf("LEXER: Scanning %s as main source file", *input)
+	verbose(v)
+	tokens := lexer.Lexer(raw, *mpu, *input)
 
-	// TODO include .INCLUDE files and lex them
-	// Remember to add information on the file in the tokens for error
-	// purposes
-	verbose("(Includer not written yet.)")
+	// TODO merge the include files
 
 	// Part of the debugging information is a list of tokens
 	if *fDebug {

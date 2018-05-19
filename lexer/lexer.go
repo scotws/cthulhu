@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 18. May 2018
+// This version: 19. May 2018
 
 package lexer
 
@@ -53,12 +53,11 @@ var (
 // addToken takes the token identifier, the actual text of the token from the
 // source code, the row and index the token was found in, and adds it to the
 // token stream.
-// TODO add file name
-func addToken(ti int, s string, r int, i int) {
+func addToken(ti int, s string, l int, i int, f string) {
 	s0 := strings.TrimSpace(s)
-	r0 := r + 1 // computers count row from 0, humans from 1
+	l0 := l + 1 // computers count line from 0, humans from 1
 	i0 := i + 1 // computers count from column 0, humans from 1
-	tokens = append(tokens, token.Token{Type: ti, Text: s0, Line: r0, Index: i0})
+	tokens = append(tokens, token.Token{Type: ti, Text: s0, Line: l0, Index: i0, File: f})
 }
 
 // findBinEOW takes an array of runes and returns the index of the first
@@ -314,7 +313,7 @@ func whichMne(rs []rune, mpu string) (int, bool) {
 // Lexer takes a list of raw code lines and returns a list of tokens and a flag
 // indicating if the conversion was successful or not. Error are handled by the
 // main function.
-func Lexer(ls []string, mpu string) *[]token.Token {
+func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 
 	// OUTER LOOP: Proceed line-by-line
 	for ln, l := range ls {
@@ -322,15 +321,15 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 		// Check for empty lines. We add a token to allow
 		// formatting
 		if isEmpty(l) {
-			addToken(token.EMPTY, "", ln, 1)
+			addToken(token.EMPTY, "", ln, 1, filename)
 			continue
 		}
 
 		// See if this is a whole-line comment, which gets a different
 		// token than the comments in-line
 		if isCommentLine(l) {
-			addToken(token.COMMENT_LINE, l, ln, 1)
-			addToken(token.EOL, "\n", ln, 1)
+			addToken(token.COMMENT_LINE, l, ln, 1, filename)
+			addToken(token.EOL, "\n", ln, 1, filename)
 			continue
 		}
 
@@ -346,7 +345,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			// Single character tokenization (@ and friends).
 			t, got := isSingleCharToken(cs[i])
 			if got {
-				addToken(t, string(cs[i]), ln, i)
+				addToken(t, string(cs[i]), ln, i, filename)
 				continue
 			}
 
@@ -354,7 +353,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			if unicode.IsNumber(cs[i]) {
 				e := findDecEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.DEC_NUM, string(word), ln, i)
+				addToken(token.DEC_NUM, string(word), ln, i, filename)
 				i = i + e - 1 // continue adds one
 				continue
 			}
@@ -367,7 +366,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 			// In-line comments. Always run till the end of the line
 			case ';':
 				word := string(cs[i:len(cs)])
-				addToken(token.COMMENT, word, ln, i)
+				addToken(token.COMMENT, word, ln, i, filename)
 				i = len(cs)
 				continue
 
@@ -382,7 +381,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 					// can be used for various things such
 					// as listings of bytes
 					if word == "..." {
-						addToken(token.ELLIPSIS, word, ln, i)
+						addToken(token.ELLIPSIS, word, ln, i, filename)
 						i = i + e - 1 // continue adds one
 						continue
 					}
@@ -394,10 +393,10 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 					_, ok := data.DirectivesPara[word]
 
 					if ok {
-						addToken(token.DIREC_PARA, word, ln, i)
+						addToken(token.DIREC_PARA, word, ln, i, filename)
 					} else {
 
-						addToken(token.DIREC, word, ln, i)
+						addToken(token.DIREC, word, ln, i, filename)
 					}
 
 					i = i + e - 1 // continue adds one
@@ -411,7 +410,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				i++ // skip '%' symbol
 				e := findBinEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.BIN_NUM, string(word), ln, i)
+				addToken(token.BIN_NUM, string(word), ln, i, filename)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -421,7 +420,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				i++ // skip '$' symbol
 				e := findHexEOW(cs[i:len(cs)])
 				word := cs[i : i+e]
-				addToken(token.HEX_NUM, string(word), ln, i)
+				addToken(token.HEX_NUM, string(word), ln, i, filename)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -450,14 +449,14 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 					nc := cs[i+e]
 
 					if nc == ':' {
-						addToken(token.LOCAL_LABEL, string(word), ln, i)
+						addToken(token.LOCAL_LABEL, string(word), ln, i, filename)
 						i = i + e // continue adds one, but skip colon
 						continue
 					}
 				}
 
 				// Not a local label, just some sort of symbol
-				addToken(token.SYMBOL, string(word), ln, i)
+				addToken(token.SYMBOL, string(word), ln, i, filename)
 				i = i + e - 1 // continue adds one
 				continue
 
@@ -473,7 +472,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				}
 
 				word := cs[i : i+e]
-				addToken(token.STRING, string(word), ln, i)
+				addToken(token.STRING, string(word), ln, i, filename)
 				i = i + e // skip over final quote
 				continue
 			}
@@ -493,7 +492,7 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				tt, e, ok = procMne(cs[i:len(cs)], mpu)
 
 				if ok {
-					addToken(tt, string(cs[i:i+e]), ln, i)
+					addToken(tt, string(cs[i:i+e]), ln, i, filename)
 					i = i + e - 1 // continue adds one
 					continue
 				}
@@ -508,14 +507,14 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 					nc := cs[i+e]
 
 					if nc == ':' {
-						addToken(token.LABEL, string(word), ln, i)
+						addToken(token.LABEL, string(word), ln, i, filename)
 						i = i + e // continue adds one, but skip colon
 						continue
 					}
 				}
 
 				// This is just a symbol then
-				addToken(token.SYMBOL, string(word), ln, i)
+				addToken(token.SYMBOL, string(word), ln, i, filename)
 				i = i + e - 1 // continue adds one
 				continue
 			}
@@ -528,10 +527,10 @@ func Lexer(ls []string, mpu string) *[]token.Token {
 				ln, i, cs[i])
 
 		}
-		addToken(token.EOL, "\n", ln, len(cs))
+		addToken(token.EOL, "\n", ln, len(cs), filename)
 	}
 
-	addToken(token.EOF, "That's all, folks!", len(ls), 1)
+	addToken(token.EOF, "That's all, folks!", len(ls), 1, filename)
 
 	return &tokens
 }

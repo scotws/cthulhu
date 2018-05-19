@@ -13,9 +13,10 @@ package token
 
 type Token struct {
 	Type  int
-	Text  string // raw text
 	Line  int    // starts with 1
 	Index int    // starts with 1
+	File  string // name of the file the token comes from
+	Text  string // raw text
 }
 
 const (
