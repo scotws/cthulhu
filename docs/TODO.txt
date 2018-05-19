@@ -21,7 +21,7 @@ COOL STUFF TRICKS
 - Define .ram and .rom regions and make sure there are no attempts to (say)
   write outside of ROM or read outside of RAM or ROM. Formats:
 
-        .ram $0000-$7FFF
+        .ram $0000 ... $7FFF
         .ram $FF00
         .ram $FF00, $FF01
 

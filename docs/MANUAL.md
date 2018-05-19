@@ -1,13 +1,34 @@
 # Manual for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 23. Apr 2018
-This version: 14. May 2018
+This version: 19. May 2018
 
+**THIS IS JUST A COLLECTION OF NOTES AT THE MOMENT**
 
 ## Introduction 
 
-*Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn ...*
+There are various assemblers for the 6502 and 65c02, but very few for the 65816.
 
+
+
+## Philosophy
+
+Cthulhu does not try to rewrite your code, even for optimization. It tries to
+give you as much control as possible -- if you wanted the machine to do it for
+you, you probably wouldn't be programming in assembler in the first place.  It
+will make suggestions about code optimization if asked, however. 
+
+Instead, it tries to check for as many errors as possible. 
+
+
+
+## Forget all of that. What's with the name?
+
+The assembler was originally called "go65816". But then I opened my first book
+on compilers, FEHLT, and what I found was a horror beyond human comprehension.
+The sentiment instantly reminded me of the works of H.P. Lovecraft, and so there
+was a name change. Since then, I have found more accessible books on compilers
+and feel much better.
 
 
 ## Command Line Options
@@ -16,9 +37,11 @@ This version: 14. May 2018
 - **-f** Format output. 
 - **-i <FILE>** Input file (required).
 - **-l** Generate listing file.
-- **-m <STRING>** MPU. Currently supported are `6502`, `65c02`, and `65816`
+- **-m <STRING>** MPU. Currently supported are `6502`, `65c02`, and `65816`,
+  default is `65c02`. 
 - **-s** Generate symbol table.
 - **-v** Verbose mode. 
+- **-w** Generate formatted source file with WDC opcodes.
 
 
 ## Assembler Syntax
@@ -68,7 +91,7 @@ grammar can be found in /docs/grammar.txt
   notation (RPN). See below for a further description.
 
 
-## Indentation
+### Indentation
 
 The assembler can provide automatically formatted code following the model of
 the `gofmt` tool. Simplified, **labels** should start at the beginning of the
@@ -76,11 +99,11 @@ line and by on a line by themselves, **directives** should be indented by eight
 spaces (one tab), and **mnenomics** by 16 spaces (two tabs). Though there is no
 artificial limit to the line length, lines beyond 80 characters are discouraged.
 
-### Example Code (SAN)
+### Example Code
 
 ```
-        .ram $0000-$7FFF
-        .rom $8000-$FFFF
+        .ram $0000 ... $7FFF
+        .rom $8000 ... $FFFF
 
         .mpu "65816"
         .org $00:8000
@@ -156,12 +179,14 @@ that this word is not yet available.
 - **.a16** (n/a) No parameters.
 
 - **.a8** (n/a)
+- **.!a8** (n/a)
 - **.advance** (n/a) 
 - **.and **
 - **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
   assembly to make sure that the given parameter is true. Aborts with an error
   message if not. 
 
+- **.!axy16** (n/a) 
 - **.axy16** (n/a) 
 - **.axy8** (n/a) 
 - **.bank** ADDRESS (n/a) 
@@ -212,17 +237,31 @@ that this word is not yet available.
 - **.scope** (n/a) 
 - **.scend** (n/a) 
 
-## PSEUDOINSTRUCTIONS
+## Pseudoinstructions
 
 - **move** <NUMBER> <SOURCE> <DESTINATION> For non-overlapping moves, this
   will generate the MVP/MVN code
 
+- **.loop** (X|Y) <value1> ... <value2>
+
+## Error handling
+
+Cthulhu tries to report as many errors as possible at once.
+
 ## Literature and Websites
+
+
+[1] Cooper, Keith D. and Torczon, Linda *Engineering a Compiler*, 2nd edition
+Elsevier Inc 2012.
 
 For literature on the Cthulhu Mythos and H.P. Lovecraft, 
 
 The Super Tiny Compiler
 https://github.com/hazbo/the-super-tiny-compiler/blob/master/compiler.go
+
+## And finally
+
+*Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn*
 
 
 

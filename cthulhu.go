@@ -1,7 +1,7 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 15. May 2018
+// This version: 19. May 2018
 
 package main
 
@@ -71,7 +71,7 @@ func main() {
 		raw = append(raw, scanner.Text())
 	}
 
-	verbose("=== Source file loaded ===")
+	verbose("Main source file loaded.")
 
 	// ***** LEXER *****
 
@@ -89,7 +89,7 @@ func main() {
 		lexer.Tokenlister(tokens)
 	}
 
-	verbose("Lexer run.")
+	verbose("Lexer done.")
 
 	// ***** PARSER *****
 
