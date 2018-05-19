@@ -132,6 +132,11 @@ func main() {
 	// greater values
 	machine := data.Machine{MPU: *mpu, AST: ast}
 
+	// *** OPTIMIZER ***
+
+	// First step: PURGE AST of whitespaces, EOL notes etc; flatten tree as
+	// much as possible.
+
 	// *** ANALYZER ***
 
 	// The analyzer examens the AST provided by the parser and runs various
@@ -153,6 +158,8 @@ func main() {
 		parser.Nodelister(machine.AST)
 		fmt.Println()
 	}
+
+	// *** TRANSFORMER ***
 
 	// *** GENERATOR ***
 
