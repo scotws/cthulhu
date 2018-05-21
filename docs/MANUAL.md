@@ -7,7 +7,8 @@ This version: 19. May 2018
 
 ## Introduction 
 
-There are various assemblers for the 6502 and 65c02, but very few for the 65816.
+There are various very good assemblers for the 6502 and 65c02, but very few for
+the 65816.
 
 
 
@@ -18,17 +19,15 @@ give you as much control as possible -- if you wanted the machine to do it for
 you, you probably wouldn't be programming in assembler in the first place.  It
 will make suggestions about code optimization if asked, however. 
 
-Instead, it tries to check for as many errors as possible. 
+What it tries to do is check for as many errors as possible. 
 
-
-
-## Forget all of that. What's with the name?
+## Yeah, whatever. What's with the name?
 
 The assembler was originally called "go65816". But then I opened my first book
-on compilers, FEHLT, and what I found was a horror beyond human comprehension.
-The sentiment instantly reminded me of the works of H.P. Lovecraft, and so there
-was a name change. Since then, I have found more accessible books on compilers
-and feel much better.
+on compilers, *Übersetzerbau* [2], and what I found was a horror beyond human
+comprehension. That feeling of dread instantly reminded me of the works of H.P.
+Lovecraft, and so there was a name change. Since then, I have found more
+accessible books on compilers and very rarely wake up screaming anymore.
 
 
 ## Command Line Options
@@ -248,27 +247,26 @@ that this word is not yet available.
 - **.scope** (n/a) 
 - **.scend** (n/a) 
 
-## Pseudoinstructions
+### Pseudoinstructions
 
 - **move** <NUMBER> <SOURCE> <DESTINATION> For non-overlapping moves, this
   will generate the MVP/MVN code
 
 - **.loop** (X|Y) <value1> ... <value2>
 
-## Error handling
-
-Cthulhu tries to report as many errors as possible at once.
-
 ## Literature and Websites
 
+### Books 
 
-[1] Cooper, Keith D. and Torczon, Linda *Engineering a Compiler*, 2nd edition
+- [1] Cooper, Keith D. and Torczon, Linda *Engineering a Compiler*, 2nd edition
 Elsevier Inc 2012.
+- [2] Wilhelm, Reinhard and Maurer, Deter, *Übersetzerbau*, Springer Verlag 1992
+- [3] Parr, Terence *Language Implementation Patterns*, Pragmatic Bookshelf 2010
 
-For literature on the Cthulhu Mythos and H.P. Lovecraft, 
+For literature on the Cthulhu Mythos and H.P. Lovecraft, see 
 
-The Super Tiny Compiler
-https://github.com/hazbo/the-super-tiny-compiler/blob/master/compiler.go
+### Websites 
+- The Super Tiny Compiler https://github.com/hazbo/the-super-tiny-compiler/blob/master/compiler.go
 
 ## And finally
 

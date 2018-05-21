@@ -1,28 +1,38 @@
-# Cthulhu - An assembler for the 6502, 65c02, and 65816 MPU in Go (golang)
+# Cthulhu - An assembler for the 6502, 65c02, and 65816 MPU
 Scot W. Stevenson <scot.stevenson@gmail.com> 
 First version: 21. April 2018 
-This version: 19. May 2018 
+This version: 21. May 2018 
 
-**THIS IS PRE-ALPHA SOFTWARE. IT DOESN'T WORK YET. GO AWAY.**
+**THIS IS PRE-ALPHA SOFTWARE. IT DOESN'T WORK (YET). GO AWAY.**
 
-## No, seriously, how far along are you?
+## No, seriously, what's this here now?
 
-As of May 19, 2018 the lexer and parser (the front end) together produce
-something that is not completely unlike the Immediated Representation (IR). 
+I'm writing a powerful assembler for the 6502, 65c02, and 65816 MPUs that does
+extensive checks and accepts the Simpler Assembler Notation (SAN). The 65816
+will receive special focus, as there are already quite a number of very good
+assemblers for the 6502/65c02. 
 
-## Goals
+## Just how far along are you?
 
-Create a powerful assembler for the 6502, 65c02, and 65816 MPUs that does
-extensive checks.  
+As of May 21, 2018 the lexer and parser (the front end) together produce
+something that is not completely unlike an Immediate Representation (IR). 
 
-## FEATURES
+## Pft. Then why is this mess already on GitHub?
 
-- Type checking for instructions
+Think of it as a backup.
+
+## I have a suggestion ...
+
+Okay, you can stay. Please open an issue with the suggestion. Thanks!
+
+## Features
+
 - Define and check RAM and ROM ranges
+- Type checking for instructions
 - Formatted output
 
 
-## DEVELOPMENT
+## Development
 
 This is a hobby program, developed in fits and starts.
 
