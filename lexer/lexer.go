@@ -1,12 +1,14 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 19. May 2018
+// This version: 21. May 2018
 
 package lexer
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -15,8 +17,13 @@ import (
 	"cthulhu/token"
 )
 
+const (
+	errTag = "LEXER"
+)
+
 var (
-	tokens []token.Token
+	tokens   []token.Token
+	errCount int
 
 	// We can handle single-character tokens with this table and a loop.
 	// DOLLAR ('$') is not included currently because it would screw up the
@@ -49,6 +56,14 @@ var (
 		token.TILDE,
 	}
 )
+
+// reportErr takes a string and a token and prints an error report to the
+// standard error output
+func reportErr(s string, fn string, l, i int) {
+	fmt.Fprintf(os.Stderr, "%s ERROR (%s, %d, %d): %s\n",
+		errTag, fn, l+1, i+1, s)
+	errCount++
+}
 
 // addToken takes the token identifier, the actual text of the token from the
 // source code, the row and index the token was found in, and adds it to the
@@ -403,7 +418,9 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 					continue
 				}
 
-				log.Fatalf("LEXER FATAL (%d,%d): Unknown directive '%s'", ln+1, i+1, word)
+				es := fmt.Sprintf("Unknown directive '%s'", word)
+				reportErr(es, filename, ln, i)
+				continue
 
 			// Binary number
 			case '%':
@@ -434,8 +451,8 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 				// upper- or lowercase letter because a label is
 				// basically just a symbol
 				if !unicode.IsLetter(cs[i]) {
-					log.Fatalf("LEXER FATAL (%d,%d): Letter required after label underscore",
-						ln+1, i+1)
+					reportErr("Letter required after initial local label underscore",
+						filename, ln, i)
 				}
 
 				e := findSymbolEOW(cs[i:len(cs)])
@@ -468,7 +485,8 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 				e, ok := findStringEOW(cs[i:len(cs)])
 
 				if !ok {
-					log.Fatal("LEXER FATAL (", ln+1, ":", i, "): No closing quote")
+					reportErr("Can't find closing quotation mark", filename, ln, i)
+					continue
 				}
 
 				word := cs[i : i+e]
@@ -519,18 +537,21 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 				continue
 			}
 
-			// We don't believe in illegal tokens -- the
-			// assembly language is so simple, if something is not
-			// right, which will be rare, we want to fail hard and
-			// fast
-			log.Fatalf("LEXER FATAL (%d,%d): Can't process char '%s'",
-				ln, i, cs[i])
+			// We don't believe in illegal tokens. If we got here,
+			// we report it immediately and attempt to continue
+			es := fmt.Sprintf("Can't process character '%s'", cs[i])
+			reportErr(es, filename, ln, i)
+			continue
 
 		}
 		addToken(token.EOL, "\n", ln, len(cs), filename)
 	}
 
-	addToken(token.EOF, "That's all, folks!", len(ls), 1, filename)
+	addToken(token.EOF, "END", len(ls), 1, filename)
+
+	if errCount != 0 {
+		log.Fatalf("LEXER FATAL: Found %d error(s).", errCount)
+	}
 
 	return &tokens
 }

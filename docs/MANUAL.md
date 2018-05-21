@@ -33,18 +33,21 @@ and feel much better.
 
 ## Command Line Options
 
-- **-d** Debugging mode.
-- **-f** Format output. 
-- **-i <FILE>** Input file (required).
-- **-l** Generate listing file.
-- **-m <STRING>** MPU. Currently supported are `6502`, `65c02`, and `65816`,
+- **-d** "debug" Debugging mode.
+- **-f** "format" Format output. 
+- **-fo** "format only" Only format the source code
+- **-ff <FILE>** "format file" Name of the file the formatted source code from
+  `-f` is saved as. If not included, output goes to standard output
+- **-i <FILE>** "input" Input file (required).
+- **-l** "listing" Generate listing file.
+- **-m <STRING>** "MPU". Target processor. Currently supported are `6502`, `65c02`, and `65816`,
   default is `65c02`. 
-- **-s** Generate symbol table.
-- **-v** Verbose mode. 
-- **-w** Generate formatted source file with WDC opcodes.
+- **-s** "symbol" Generate symbol table file.
+- **-v** "verbose" Verbose mode. 
 
+## The source code file
 
-## Assembler Syntax
+### Assembler Syntax
 
 The syntax for Cthulhu should be quick to write and easy to parse to allow
 automatic formatting. Mostly, the type of a word can be determined by its 
@@ -169,6 +172,15 @@ functions. Examples:
 It is an error if there is more than one element on the math stack when the
 operation is finished. 
 
+### Error handling
+
+Cthulhu follows the philosophy that each pass should find as many problems as
+possible. If an error is found in a module such as the lexer or parser, that
+module attempts to continue as far as possible and then stops the program.
+
+> Internally, each module handles errors with a `reportErr()` function that
+> prints an error message and increases a counter. The function `recover()`
+> attempts to find a way to continue.
 
 
 ## List of Directives
@@ -176,15 +188,14 @@ operation is finished.
 This is a complete list of available and planned directives. A "(n/a)" signals
 that this word is not yet available.
 
-- **.a16** (n/a) No parameters.
-
 - **.a8** (n/a)
+- **.a16** (n/a) No parameters.
 - **.!a8** (n/a)
 - **.advance** (n/a) 
-- **.and **
+- **.and**
 - **.assert** (n/a) Takes one of the following options: **a8 a16 xy8 xy16 native emulated**. Checks during
-  assembly to make sure that the given parameter is true. Aborts with an error
-  message if not. 
+  assembly to make sure that the given parameter is true. Aborts with an error 
+  message if not. (65816 only)
 
 - **.!axy16** (n/a) 
 - **.axy16** (n/a) 
