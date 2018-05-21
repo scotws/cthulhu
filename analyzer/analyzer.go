@@ -1,7 +1,7 @@
 // Analyzer package for the Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 12. May 2018
-// This version: 16. May 2018
+// This version: 21. May 2018
 
 // The analyzer is where the main processing happens. As the core of the back
 // end part of the assembler, it is nicknamed "Azathoth, ruler of the Outer
@@ -12,6 +12,7 @@ package analyzer
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -19,6 +20,22 @@ import (
 	"cthulhu/node"
 	"cthulhu/token"
 )
+
+const (
+	errTag = "ANALYZER"
+)
+
+var (
+	errCount int
+)
+
+// reportErr takes a string and the current node and prints an error report to the standard
+// error output
+func reportErr(s string, n *node.Node) {
+	fmt.Fprintf(os.Stderr, "%s ERROR (%s, %d, %d): %s\n",
+		errTag, n.File, n.Line, n.Index, s)
+	errCount++
+}
 
 // The analyzer walks the Abstract Syntax Tree (AST) created by the parser and
 // modifies it in various ways
@@ -29,6 +46,10 @@ func Analyzer(m *data.Machine) {
 
 	// SECOND PASS
 	// TODO
+
+	if errCount != 0 {
+		log.Fatalf("ANALYZER FATAL: Found %d error(s).", errCount)
+	}
 
 	fmt.Println()
 }
@@ -49,27 +70,24 @@ func walk(n *node.Node, mpu string) {
 		// TODO we need to figure out some way of getting rid of
 		// this node once we have harvested the MPU information
 		case ".mpu":
-			// We should have exactly one parameter of the type string
+			// We should have exactly one parameter of the type
+			// string. The parser has already taken care of the
+			// string part
 			if len(n.Kids) != 1 {
-				log.Fatalf("ANALYZER FATAL (%d,%d): MPU directive takes exactly one parameter, got %d",
-					n.Line, n.Index, len(n.Kids))
+				es := fmt.Sprintf("Directive '.mpu' takes one parameter, got %d", len(n.Kids))
+				reportErr(es, n)
 			}
-
 			k := n.Kids[0]
 
-			if k.Type != token.STRING {
-				log.Fatalf("ANALYZER FATAL (%d,%d): MPU directive takes a STRING, got %s",
-					k.Line, k.Index, token.Name[k.Type])
-			}
-
 			if k.Text != "65816" && k.Text != "65c02" && k.Text != "6502" {
-				log.Fatalf("ANALYZER FATAL (%d,%d): MPU type '%s' not supported",
-					k.Line, k.Index, k.Text)
+				es := fmt.Sprintf("MPU type '%s' not supported", k.Text)
+				reportErr(es, n)
 			}
 
 			if mpu != k.Text {
-				log.Fatalf("ANALYZER FATAL (%d,%d): Called with MPU type '%s', source says '%s'",
-					k.Line, k.Index, mpu, k.Text)
+				es := fmt.Sprintf("Requested MPU type '%s', .mpu in '%s' is '%s'",
+					mpu, k.File, k.Text)
+				reportErr(es, n)
 			}
 
 			n.Kids = nil
@@ -98,11 +116,14 @@ func walk(n *node.Node, mpu string) {
 		// actual conversion
 		fallthrough
 
+	// A lot of the following cases should have been caught by the lexer
+	// or parser already, but we'll make sure and check them again
+
 	case token.BIN_NUM:
 		n.Value, ok = convertNum(n.Text, 2)
 		if !ok {
-			log.Fatalf("ANALYZER FATAL: (%d,%d): Can't convert binary number string '%s' to int",
-				n.Line, n.Index, n.Text)
+			es := fmt.Sprintf("Can't convert binary number string '%s' to number", n.Text)
+			reportErr(es, n)
 		}
 
 		n.Type = token.DEC_NUM
@@ -112,16 +133,16 @@ func walk(n *node.Node, mpu string) {
 	case token.DEC_NUM:
 		v, err := strconv.Atoi(n.Text)
 		if err != nil {
-			log.Fatalf("ANALYZER FATAL: (%d,%d): Can't convert decimal number string '%s' to int",
-				n.Line, n.Index, n.Text)
+			es := fmt.Sprintf("Can't convert decimal number string '%s' to number", n.Text)
+			reportErr(es, n)
 		}
 		n.Value = int(v)
 
 	case token.HEX_NUM:
 		n.Value, ok = convertNum(n.Text, 16)
 		if !ok {
-			log.Fatalf("ANALYZER FATAL: (%d,%d): Can't convert hex number string '%s' to int",
-				n.Line, n.Index, n.Text)
+			es := fmt.Sprintf("Can't convert hex number string '%s' to number", n.Text)
+			reportErr(es, n)
 		}
 
 		n.Type = token.DEC_NUM
@@ -138,8 +159,8 @@ func walk(n *node.Node, mpu string) {
 	case token.OPC_0, token.OPC_1, token.OPC_2:
 		oc, ok := getOpcode(mpu, n.Text)
 		if !ok {
-			log.Fatalf("ANALYZER FATAL (%d, %d): Opcode '%s' unrecognized",
-				n.Line, n.Index, n.Text)
+			es := fmt.Sprintf("Opcode '%s' not recognized for MPU %s", n.Text, mpu)
+			reportErr(es, n)
 		}
 
 		n.Code = append(n.Code, oc)
@@ -183,7 +204,7 @@ func walk(n *node.Node, mpu string) {
 func convertNum(s string, base int) (int, bool) {
 
 	if base != 2 && base != 16 {
-		log.Fatalf("ANALYZER FATAL: Given base %d to convert, must be binary, hex or decimal",
+		log.Fatalf("ANALYZER FATAL: Internal error: Received base %d to convert, must be binary, hex or decimal",
 			base)
 	}
 

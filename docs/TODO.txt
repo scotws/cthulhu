@@ -6,13 +6,19 @@ This version: 19. May 2018
 
 TODO NEXT
 
+
 - LEXER: handle ".include" files; add filename to token information
+
 - PARSER: Test; make sure inline comments are honored
 - PARSER: add ".assert <string>" directive
+- PARSER: Throw error if extra characters in line
+- PARSER: Make sure we can handle comments at end of line
 - PARSER: add ".macro <string>" directive
+
 - FORMATTER: Write; add option "format only", printing on stdout
-- CONVERTER: Write; add option "convert to WDC only"
-- OPTIZIMER: Add "purge" pass
+
+- ANALYZER: Start with "purge" pass
+
 
 COOL STUFF TRICKS
 

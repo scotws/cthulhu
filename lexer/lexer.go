@@ -539,7 +539,7 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 
 			// We don't believe in illegal tokens. If we got here,
 			// we report it immediately and attempt to continue
-			es := fmt.Sprintf("Can't process character '%s'", cs[i])
+			es := fmt.Sprintf("Can't process character '%s'", string(cs[i]))
 			reportErr(es, filename, ln, i)
 			continue
 
