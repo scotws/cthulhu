@@ -22,10 +22,10 @@ import (
 
 // The analyzer walks the Abstract Syntax Tree (AST) created by the parser and
 // modifies it in various ways
-func Analyzer(m *data.Machine, trace bool) {
+func Analyzer(m *data.Machine) {
 
 	// FIRST PASS
-	walk(m.AST, m.MPU, trace)
+	walk(m.AST, m.MPU)
 
 	// SECOND PASS
 	// TODO
@@ -36,7 +36,7 @@ func Analyzer(m *data.Machine, trace bool) {
 // Walk is the main internal routine that visits every node and does something
 // depending on type. We break out what we do into little functions to allow
 // easier testing and possibly concurrency once we know what we are doing.
-func walk(n *node.Node, mpu string, trace bool) {
+func walk(n *node.Node, mpu string) {
 
 	var ok bool
 
@@ -105,11 +105,6 @@ func walk(n *node.Node, mpu string, trace bool) {
 				n.Line, n.Index, n.Text)
 		}
 
-		if trace {
-			fmt.Printf("ANALYZER (%d, %d): Processed BIN_NUM %s, now %d\n",
-				n.Line, n.Index, n.Text, n.Value)
-		}
-
 		n.Type = token.DEC_NUM
 
 	// Decimal numbers don't contain ":" or "." so we don't break it out
@@ -122,21 +117,11 @@ func walk(n *node.Node, mpu string, trace bool) {
 		}
 		n.Value = int(v)
 
-		if trace {
-			fmt.Printf("ANALYZER (%d, %d): Processed DEC_NUM %s, now %d\n",
-				n.Line, n.Index, n.Text, n.Value)
-		}
-
 	case token.HEX_NUM:
 		n.Value, ok = convertNum(n.Text, 16)
 		if !ok {
 			log.Fatalf("ANALYZER FATAL: (%d,%d): Can't convert hex number string '%s' to int",
 				n.Line, n.Index, n.Text)
-		}
-
-		if trace {
-			fmt.Printf("ANALYZER (%d, %d): Processed HEX_NUM %s, now %d\n",
-				n.Line, n.Index, n.Text, n.Value)
 		}
 
 		n.Type = token.DEC_NUM
@@ -149,11 +134,6 @@ func walk(n *node.Node, mpu string, trace bool) {
 		n.Code = []byte(n.Text)
 		n.Done = true
 
-		if trace {
-			fmt.Printf("ANALYZER (%d, %d): Processed STRING \"%s\", now %s\n",
-				n.Line, n.Index, n.Text, node.FormatByteSlice(n.Code))
-		}
-
 	// Convert all opcodes
 	case token.OPC_0, token.OPC_1, token.OPC_2:
 		oc, ok := getOpcode(mpu, n.Text)
@@ -165,10 +145,6 @@ func walk(n *node.Node, mpu string, trace bool) {
 		n.Code = append(n.Code, oc)
 		n.Done = true
 
-		if trace {
-			fmt.Printf("ANALYZER (%d, %d): Processed %s %s\n",
-				n.Line, n.Index, token.Name[n.Type], n.Text)
-		}
 	}
 
 	// If this node doesn't have kids, we're done. This ends the
@@ -197,7 +173,7 @@ func walk(n *node.Node, mpu string, trace bool) {
 
 	// We've got good kids now, let's walk them recursively
 	for _, k := range n.Kids {
-		walk(k, mpu, trace)
+		walk(k, mpu)
 	}
 }
 

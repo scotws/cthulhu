@@ -1,7 +1,7 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 19. May 2018
+// This version: 21. May 2018
 
 package main
 
@@ -24,15 +24,16 @@ import (
 )
 
 var (
-	fDebug   = flag.Bool("d", false, "Print lots and lots of debugging information")
-	input    = flag.String("i", "", "Input file (REQUIRED)")
-	fFormat  = flag.Bool("f", false, "Return formatted version of source")
-	fHexdump = flag.Bool("h", false, "Add hexdump of binary in text file \"cthulhu.hex\"")
-	fVerbose = flag.Bool("v", false, "Give verbose messages")
-	fListing = flag.Bool("l", false, "Generate listing file")
-	mpu      = flag.String("m", "65c02", "MPU type")
-	fSymbols = flag.Bool("s", false, "Generate symbol table file")
-	fTrace   = flag.Bool("t", false, "Print horrifying amount of debugging info")
+	fDebug      = flag.Bool("d", false, "Print lots and lots of debugging information")
+	fInput      = flag.String("i", "", "Input file (REQUIRED)")
+	fFormat     = flag.Bool("f", false, "Return formatted version of source")
+	fFormatFile = flag.String("ff", "", "File name to save formatted source")
+	fFormatOnly = flag.Bool("fo", false, "Only produce formatted source code")
+	fHexdump    = flag.Bool("h", false, "Add hexdump of binary in text file \"cthulhu.hex\"")
+	fVerbose    = flag.Bool("v", false, "Give verbose messages")
+	fListing    = flag.Bool("l", false, "Generate listing file")
+	mpu         = flag.String("m", "65c02", "MPU type")
+	fSymbols    = flag.Bool("s", false, "Generate symbol table file")
 
 	raw    []string
 	tokens []token.Token
@@ -55,11 +56,11 @@ func main() {
 
 	// ***** LOAD MAIN SOURCE FILE *****
 
-	if *input == "" {
+	if *fInput == "" {
 		log.Fatal("FATAL No input file provided")
 	}
 
-	inputFile, err := os.Open(*input)
+	inputFile, err := os.Open(*fInput)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,16 +88,18 @@ func main() {
 
 	// ***** LEXER *****
 
-	v := fmt.Sprintf("LEXER: Scanning %s as main source file", *input)
+	// The lexer takes the raw source file and splits it up into tokens.
+
+	v := fmt.Sprintf("LEXER: Scanning %s as main source file", *fInput)
 	verbose(v)
-	tokens := lexer.Lexer(raw, *mpu, *input)
+
+	tokens := lexer.Lexer(raw, *mpu, *fInput)
 
 	// TODO merge the include files
 
 	// Part of the debugging information is a list of tokens
 	if *fDebug {
-		fmt.Println("=== List of tokens after initial lexing ===")
-		fmt.Println()
+		fmt.Println("=== List of tokens after initial lexing ===\n")
 		lexer.Tokenlister(tokens)
 	}
 
@@ -106,16 +109,14 @@ func main() {
 
 	// The parser takes a slice of tokens and returns an Abstract Syntax
 	// Tree (AST) built of node.Node elements. This AST is used as the basis
-	// for all other work. The trace flag determines if we put out lots
-	// (lots!) of information for debugging, far and beyond the normal stuff
-	parser.Init(tokens, *fTrace)
+	// for all other work.
+	parser.Init(tokens)
 	ast := parser.Parser()
 
-	// Part of the debugging information is a Lisp-like list of elements of
-	// the AST
+	// Part of the debugging information is an indented list of nodes of the
+	// AST
 	if *fDebug {
-		fmt.Println("=== AST after initial parsing: ===")
-		fmt.Println()
+		fmt.Println("=== AST after initial parsing: ===\n")
 		parser.Nodelister(ast)
 	}
 
@@ -126,6 +127,7 @@ func main() {
 	// The formatter produces a cleanly indented version of the source code,
 	// much like the gofmt program included with Go. See the file itself for
 	// more detail
+
 	// TODO move from token to AST based formatting
 	// TODO Since formatting is not related to the other parsing steps,
 	//      we should be able to do this concurrently
@@ -143,18 +145,15 @@ func main() {
 	// greater values
 	machine := data.Machine{MPU: *mpu, AST: ast}
 
-	// *** OPTIMIZER ***
+	// *** ANALYZER ***
 
 	// First step: PURGE AST of whitespaces, EOL notes etc; flatten tree as
 	// much as possible.
 
-	// *** ANALYZER ***
-
 	// The analyzer examens the AST provided by the parser and runs various
-	// processes on it to convert numbers, etc. Comments and other entries
-	// are ignored
+	// processes on it to convert numbers, etc.
 	// TODO see about passing out symbol table(s)
-	analyzer.Analyzer(&machine, *fTrace)
+	analyzer.Analyzer(&machine)
 
 	if *fDebug {
 		fmt.Println("=== Completed nodes after analyzer ===")
@@ -169,8 +168,6 @@ func main() {
 		parser.Nodelister(machine.AST)
 		fmt.Println()
 	}
-
-	// *** TRANSFORMER ***
 
 	// *** GENERATOR ***
 

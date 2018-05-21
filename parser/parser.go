@@ -28,7 +28,7 @@ var (
 )
 
 // Init sets up the parser for the init run, haven been given the list of tokens
-func Init(ts *[]token.Token, tr bool) {
+func Init(ts *[]token.Token) {
 
 	if len(*ts) == 0 {
 		log.Fatal("LEXER FATAL: Received empty token list.")

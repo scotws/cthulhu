@@ -6,6 +6,9 @@
 // The formatter produces a cleanly formatted source file, following
 // the example of gofmt
 
+// TODO This version is based on the token list from the lexer. We need a
+// version baed on the node tree (AST) from the parser
+
 // TODO remove double empty lines
 // TODO print .byte, .word, .long nicely
 
