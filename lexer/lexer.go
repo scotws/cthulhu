@@ -57,8 +57,8 @@ var (
 	}
 )
 
-// reportErr takes a string and a token and prints an error report to the
-// standard error output
+// reportErr takes a string, the name of the current file, the current line and
+// character index and prints an error report to the standard error output
 func reportErr(s string, fn string, l, i int) {
 	fmt.Fprintf(os.Stderr, "%s ERROR (%s, %d, %d): %s\n",
 		errTag, fn, l+1, i+1, s)

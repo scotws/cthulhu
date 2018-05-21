@@ -1,7 +1,7 @@
 // Parser of the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 18. May 2018
+// This version: 21. May 2018
 
 // The Cthulhu parser has one job: To create an Abstract Syntax Tree (AST) out
 // of the list of tokens. All further processing is handled in later steps,
@@ -12,11 +12,17 @@
 package parser
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"cthulhu/data"
 	"cthulhu/node"
 	"cthulhu/token"
+)
+
+const (
+	errTag = "PARSER"
 )
 
 var (
@@ -25,11 +31,34 @@ var (
 	current   token.Token    // current token we're examining
 	lookahead token.Token    // one token lookahead
 	ast       node.Node      // root of the Abstract Syntax Tree (AST)
+	errCount  int
 )
+
+// reportErr takes a string and the current token and prints an error report to the standard
+// error output
+func reportErr(s string, t token.Token) {
+	fmt.Fprintf(os.Stderr, "%s ERROR (%s, %d, %d): %s\n",
+		errTag, t.File, t.Line, t.Index, s)
+	errCount++
+	rescue()
+}
+
+// rescue attempts to recover from an error by walking through the token string
+// to find the next EOL entry
+func rescue() {
+	for lookahead.Type != token.EOL {
+		consume()
+
+		if lookahead.Type == token.EOF {
+			log.Fatalf("PARSER FATAL: Reached end of file trying to recover from %d error(s)", errCount)
+		}
+	}
+}
 
 // Init sets up the parser for the init run, haven been given the list of tokens
 func Init(ts *[]token.Token) {
 
+	// We can't recover if we don't have any tokens at all
 	if len(*ts) == 0 {
 		log.Fatal("LEXER FATAL: Received empty token list.")
 	}
@@ -52,6 +81,11 @@ func Parser() *node.Node {
 			break
 		}
 	}
+
+	if errCount != 0 {
+		log.Fatalf("PARSER FATAL: Found %d error(s).", errCount)
+	}
+
 	return &ast
 }
 
@@ -126,14 +160,15 @@ func backtrack() {
 	lookahead = (*tokens)[p+1]
 }
 
-// match takes a token type and checks it against the lookahead token. If they
-// are a literal match -- say, a STRING and a STRING -- it consumes the current
-// token, making the lookahead the current one. If the token type is a composite
-// -- say, token.NUMBER -- it checks to see if it is legal such as token.BIN_NUM
-// and returns that sub_type.
-func match(tt int) {
+// match takes a token type and a success bool checks it against the lookahead
+// token. If they are a literal match -- say, a STRING and a STRING -- it
+// consumes the current token, making the lookahead the current one. If the
+// token type is a composite -- say, token.NUMBER -- it checks to see if it is
+// legal such as token.BIN_NUM and returns that sub_type.
+func match(tt int) bool {
 
 	found := false
+	err := false
 
 	// Walk through the composite types to see if this is a legal subtype
 	if token.IsComposite(tt) {
@@ -148,13 +183,18 @@ func match(tt int) {
 		}
 
 		if !found {
-			wrongToken(tt, lookahead)
+			es := fmt.Sprintf("Expected token type '%s', got '%s'",
+				token.Name[tt], token.Name[lookahead.Type])
+			reportErr(es, lookahead)
 		}
 
 	} else if lookahead.Type != tt {
-		// It looks like we got ourselves a literal, which is nice
-		wrongToken(tt, lookahead)
+		es := fmt.Sprintf("Expected token type '%s', got '%s'",
+			token.Name[tt], token.Name[lookahead.Type])
+		reportErr(es, lookahead)
 	}
+
+	return err
 }
 
 // *** PARSING ROUTINES ***
@@ -169,8 +209,8 @@ func parseNumber() *node.Node {
 	t := lookahead.Type
 
 	if t != token.HEX_NUM && t != token.DEC_NUM && t != token.BIN_NUM {
-		log.Fatalf("PARSER FATAL (%d, %d): Expected number, got '%s' \n",
-			lookahead.Line, lookahead.Index, token.Name[lookahead.Type])
+		es := fmt.Sprintf("Expected number, got '%s'", token.Name[lookahead.Type])
+		reportErr(es, lookahead)
 	}
 
 	n := node.Create(lookahead)
@@ -208,8 +248,8 @@ func parseValue() *node.Node {
 		n = node.Create(lookahead)
 	case token.DIREC:
 		if lookahead.Text != ".here" {
-			log.Fatalf("PARSER FATAL (%d, %d): Directive '%s' is not a value",
-				lookahead.Line, lookahead.Index, lookahead.Text)
+			es := fmt.Sprintf("Directive '%s' is not a value", lookahead.Text)
+			reportErr(es, lookahead)
 		}
 
 		n = node.Create(lookahead)
@@ -265,10 +305,10 @@ func parseRPN() *node.Node {
 	// children
 	for lookahead.Type != token.R_CURLY {
 
-		// We shouldn't hit an end of line without a closing curly brace
+		// We shouldn't hit an end of line without a closing curly
+		// brace
 		if lookahead.Type == token.EOL {
-			log.Fatalf("PARSER FATAL (%d, %d): RPN term missing closing brace",
-				lookahead.Line, lookahead.Index)
+			reportErr("RPN term missing closing brace", lookahead)
 		}
 
 		// After the initial value, we can either have another value or
@@ -479,11 +519,4 @@ func parseDirectPara() node.Node {
 		}
 	}
 	return n
-}
-
-// wrongToken takes the token we want, the token we got, and complains by
-// crashing that they are not the same
-func wrongToken(want int, got token.Token) {
-	log.Fatalf("PARSER FATAL (%d, %d): Expected token type '%s', got '%s'\n",
-		got.Line, got.Index, token.Name[want], token.Name[got.Type])
 }
