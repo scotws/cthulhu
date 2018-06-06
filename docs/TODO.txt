@@ -1,7 +1,7 @@
 TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 21. May 2018
+This version: 22. May 2018
 
 
 TODO NEXT
@@ -47,10 +47,21 @@ DO LATER
         .move <source> <count> "to" <destination> <EOL> (65816)
         .move <addr1> ... <addr2> "to" <destination> <EOL> 
 
-- Built-in marco for loop: 
-        .loop x <start> ... <end> <EOL>
+- Built-in macro for loop: 
+        .loop [x,y] <start> ... <end> <EOL>
                 <instructions>
         .lend
+
+- Built-in macro for split tables (6502, 65c02):
+
+        .splittable <string>
+        .word ...
+        .stend
+
+        <string>_hi:
+        .byte ...
+        <string>_lo:
+        .byte ...
 
 ======================================
 Completed major steps (add to top with date)

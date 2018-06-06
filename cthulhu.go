@@ -120,7 +120,7 @@ func main() {
 		parser.Nodelister(ast)
 	}
 
-	verbose("Parser run.")
+	verbose("Parser done.")
 
 	// ***** FORMATTER *****
 
@@ -139,16 +139,27 @@ func main() {
 		}
 	*/
 
-	// *** CONSTRUCT THE MACHINE
+	// *** CONSTRUCT THE MACHINE ***
 
 	// We are now at the point where we can construct a machine to hold the
 	// greater values
+	// TODO see if we need this
 	machine := data.Machine{MPU: *mpu, AST: ast}
 
 	// *** ANALYZER ***
 
-	// First step: PURGE AST of whitespaces, EOL notes etc; flatten tree as
-	// much as possible.
+	// The analyzer doesn't modify the AST, because that is used by the
+	// formatter and other parts. Instead, it creates a second syntax tree,
+	// the "BST" (because it comes after the AST) and modifies that step by
+	// step. PURGE handles the initial creation of the BST. As the name says, it
+	// deletes whitespace, EOL nodes, and does some easy processing of other
+	// nodes
+	bst := analyzer.Purge(*mpu, ast)
+
+	if *fDebug {
+		fmt.Println("=== BST after purge step: ===\n")
+		parser.Nodelister(bst)
+	}
 
 	// The analyzer examens the AST provided by the parser and runs various
 	// processes on it to convert numbers, etc.
