@@ -210,7 +210,11 @@ that this word is not yet available.
 - **.equ** (n/a) Required paramters: **<SYMBOL> <NUMBER>**. Defines a symbol.
 
 - **.here** Inserts current Program Counter (PC) address
-- **.include** STRING (n/a) 
+- **.include** STRING  Include the code from an external file. These external
+  files can call other external files, and so on -- but beware, Cthulhu
+  currently doesn't check for circular includes, so if a file keeps including
+  itself (for example), at some point your system will crash and burn.
+
 - **.long** (n/a) 
 - **.lsb** (n/a) 
 - **.lshift**

@@ -1,17 +1,14 @@
 // The Cthulhu Assember for the 6502/65c02/65816
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 21. May 2018
+// This version: 07. June 2018
 
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
-	"os"
-	"strings"
 
 	"cthulhu/analyzer"
 	"cthulhu/data"
@@ -35,7 +32,6 @@ var (
 	mpu         = flag.String("m", "65c02", "MPU type")
 	fSymbols    = flag.Bool("s", false, "Generate symbol table file")
 
-	raw    []string
 	tokens []token.Token
 )
 
@@ -48,52 +44,26 @@ func verbose(s string) {
 
 func main() {
 
+	// ***** CONFIRM REQUIRED FLAGS *****
+
 	flag.Parse()
 
 	if *mpu != "6502" && *mpu != "65c02" && *mpu != "65816" {
 		log.Fatalf("FATAL MPU '%s' not supported", *mpu)
 	}
-
-	// ***** LOAD MAIN SOURCE FILE *****
-
 	if *fInput == "" {
 		log.Fatal("FATAL No input file provided")
 	}
 
-	inputFile, err := os.Open(*fInput)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer inputFile.Close()
-
-	scanner := bufio.NewScanner(inputFile)
-	scanner.Split(bufio.ScanLines)
-
-	for scanner.Scan() {
-		raw = append(raw, scanner.Text())
-	}
-
-	verbose("Main source file loaded.")
-
-	// ***** INCLUDE FILES *****
-
-	// TODO through the include files and save them so we can load them for
-	// tolkens
-	for _, l := range raw {
-
-		if strings.Contains(l, ".include") {
-			fmt.Println(l)
-		}
-	}
-
 	// ***** LEXER *****
 
-	// The lexer takes the raw source file and splits it up into tokens.
+	// The lexer takes the name of the master source file and the mpu and
+	// splits up the source into tokens.
 
 	v := fmt.Sprintf("LEXER: Scanning %s as main source file", *fInput)
 	verbose(v)
 
-	tokens := lexer.Lexer(raw, *mpu, *fInput)
+	tokens := lexer.Lexer(*mpu, *fInput)
 
 	// TODO merge the include files
 

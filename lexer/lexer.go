@@ -6,6 +6,7 @@
 package lexer
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -204,18 +205,43 @@ func findSymbolEOW(rs []rune) int {
 
 // findStringEOW starts at a quote mark and searches for the next quote mark,
 // returning its last character's index. It also returns a success bool. If no
-// quote mark was found, return a zero as int and a false bool
+// quote mark was found, return a zero as int and a false bool. This can also be
+// used to find the beginning of a string
 func findStringEOW(rs []rune) (int, bool) {
 	f := false
 	t := 0
 	for i, c := range rs {
 		if c == '"' {
-			t = i // don't include the closing quote itself
+			t = i // don't include the quote itself
 			f = true
 			break
 		}
 	}
 	return t, f
+}
+
+// getIncludeFile takes an array of runes and returns a string, the number of
+// characters we've skipped, and a flag to indicated if looking for the string
+// was a success
+func getIncludeFile(rs []rune) (string, int, bool) {
+
+	start, ok := findStringEOW(rs) // get starting quote
+	if !ok {
+		return ".include needs filename string", 0, false
+	}
+
+	// We are now pointing to the character before the quotation mark, so
+	// we move up one and then try to find the end
+	start++
+
+	end, ok := findStringEOW(rs[start:len(rs)])
+	if !ok {
+		return ".include needs filename string", 0, false
+	}
+
+	fn := rs[start : start+end]
+
+	return string(fn), start + end, true
 }
 
 // isCommentLine takes a string and checks to see if it is a comment by getting
@@ -325,12 +351,27 @@ func whichMne(rs []rune, mpu string) (int, bool) {
 	return oc.Operands, ok
 }
 
-// Lexer takes a list of raw code lines and returns a list of tokens and a flag
-// indicating if the conversion was successful or not. Error are handled by the
-// main function.
-func Lexer(ls []string, mpu string, filename string) *[]token.Token {
+// Lexer takes the mpu type and the name of a file to scan and returns a list of
+// tokens. If there are .include files in the mix, it will call itself
+func Lexer(mpu string, filename string) *[]token.Token {
+
+	var ls []string
+
+	inputFile, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer inputFile.Close()
+
+	scanner := bufio.NewScanner(inputFile)
+	scanner.Split(bufio.ScanLines)
+
+	for scanner.Scan() {
+		ls = append(ls, scanner.Text())
+	}
 
 	// OUTER LOOP: Proceed line-by-line
+
 	for ln, l := range ls {
 
 		// Check for empty lines. We add a token to allow
@@ -402,11 +443,23 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 						continue
 					}
 
-					// include is a special case because it
+					// .include is a special case because it
 					// causes us to call ourselves and parse
 					// the we were given
 					if word == ".include" {
-						fmt.Println("*** FOUND .include ****")
+
+						fn, ef, ok := getIncludeFile(cs[i:len(cs)])
+						if !ok {
+							es := "Error getting .include file"
+							reportErr(es, fn, ln, i)
+							continue
+						}
+
+						inclTokens := Lexer(mpu, fn)
+						tokens = append(tokens, *inclTokens...)
+
+						i = i + ef
+						continue
 					}
 
 					// We make life easier for the parser
@@ -491,7 +544,6 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 			case '"':
 				i++ // skip leading quote
 				e, ok := findStringEOW(cs[i:len(cs)])
-
 				if !ok {
 					reportErr("Can't find closing quotation mark", filename, ln, i)
 					continue

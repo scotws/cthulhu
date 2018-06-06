@@ -1,13 +1,10 @@
 TODO for the Cthulhu Assembler
 Scot W. Stevenson <scot.stevenson@gmail.com>
 First version: 21. Apr 2018
-This version: 22. May 2018
+This version: 07. June 2018
 
 
 TODO NEXT
-
-
-- LEXER: handle ".include" files; add filename to token information
 
 - PARSER: Test; make sure inline comments are honored
 - PARSER: add ".assert <string>" directive
@@ -63,9 +60,16 @@ DO LATER
         <string>_lo:
         .byte ...
 
+- Include binary and ascii files, possibly in the form (requires 
+  rewrite of normal include directive):
+        .include-binary "filename.bin"
+        .include-ascii "filename.asc"
+        .include-code "filename.asm"
+
 ======================================
 Completed major steps (add to top with date)
 
+07. Jun 2018: Handle ".include" files
 21. May 2018: Added sane error handling
 02. May 2018: Started project
 
