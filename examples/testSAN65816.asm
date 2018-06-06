@@ -21,7 +21,7 @@
         .native
         .axy16
 
-        .include "somefile.asm"
+        .include "include_01.asm"
 
                 lda.# 0000
                 tay

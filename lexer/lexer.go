@@ -1,7 +1,7 @@
 // Lexer package for the Cthulhu assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 02. May 2018
-// This version: 21. May 2018
+// This version: 07. June 2018
 
 package lexer
 
@@ -337,6 +337,7 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 		// formatting
 		if isEmpty(l) {
 			addToken(token.EMPTY, "", ln, 1, filename)
+			addToken(token.EOL, "\n", ln, 1, filename)
 			continue
 		}
 
@@ -399,6 +400,13 @@ func Lexer(ls []string, mpu string, filename string) *[]token.Token {
 						addToken(token.ELLIPSIS, word, ln, i, filename)
 						i = i + e - 1 // continue adds one
 						continue
+					}
+
+					// include is a special case because it
+					// causes us to call ourselves and parse
+					// the we were given
+					if word == ".include" {
+						fmt.Println("*** FOUND .include ****")
 					}
 
 					// We make life easier for the parser

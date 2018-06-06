@@ -2,7 +2,7 @@
 // Cthulhu Assembler
 // Scot W. Stevenson <scot.stevenson@gmail.com>
 // First version: 10. May 2018
-// This version: 18. May 2018
+// This version: 07. June 2018
 
 package lexer
 
@@ -34,7 +34,6 @@ func Tokenlister(ts *[]token.Token) {
 		}
 
 		if t.Type == token.EOL ||
-			t.Type == token.EMPTY ||
 			t.Type == token.EOF {
 			fmt.Printf("\n")
 		}
