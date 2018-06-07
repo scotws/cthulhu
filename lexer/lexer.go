@@ -607,8 +607,6 @@ func Lexer(mpu string, filename string) *[]token.Token {
 		addToken(token.EOL, "\n", ln, len(cs), filename)
 	}
 
-	addToken(token.EOF, "END", len(ls), 1, filename)
-
 	if errCount != 0 {
 		log.Fatalf("LEXER FATAL: Found %d error(s).", errCount)
 	}

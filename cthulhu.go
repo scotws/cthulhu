@@ -65,7 +65,10 @@ func main() {
 
 	tokens := lexer.Lexer(*mpu, *fInput)
 
-	// TODO merge the include files
+	// Add a single end-of-file (EOF) token. Lexer can't do this itself
+	// because it can call itself for the include files, and that would put
+	// various EOF tokens all over the code
+	*tokens = append(*tokens, token.Token{token.EOF, len(*tokens), 0, *fInput, "EOF"})
 
 	// Part of the debugging information is a list of tokens
 	if *fDebug {
