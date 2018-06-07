@@ -200,7 +200,7 @@ func match(tt int) bool {
 // *** PARSING ROUTINES ***
 
 // Parsing works by calling functions that return a node that may have
-// subnodes. They all work by examining the loohahead token.
+// subnodes. They all work by examining the lookahead token.
 
 // parseNumber examines the lookahead token and throws an error if it is not one
 // of the three literals  binary number, decimal number, or hex number. If the
@@ -208,7 +208,9 @@ func match(tt int) bool {
 func parseNumber() *node.Node {
 	t := lookahead.Type
 
-	if t != token.HEX_NUM && t != token.DEC_NUM && t != token.BIN_NUM {
+	if t != token.HEX_NUM &&
+		t != token.DEC_NUM &&
+		t != token.BIN_NUM {
 		es := fmt.Sprintf("Expected number, got '%s'", token.Name[lookahead.Type])
 		reportErr(es, lookahead)
 	}

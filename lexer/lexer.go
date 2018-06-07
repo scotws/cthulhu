@@ -391,6 +391,7 @@ func Lexer(mpu string, filename string) *[]token.Token {
 		}
 
 		// INNER LOOP: Proceed char-by-char
+
 		cs := []rune(l)
 		for i := 0; i < len(cs); i++ {
 
@@ -445,7 +446,7 @@ func Lexer(mpu string, filename string) *[]token.Token {
 
 					// .include is a special case because it
 					// causes us to call ourselves and parse
-					// the we were given
+					// the file we were given
 					if word == ".include" {
 
 						fn, ef, ok := getIncludeFile(cs[i:len(cs)])
@@ -456,6 +457,12 @@ func Lexer(mpu string, filename string) *[]token.Token {
 						}
 
 						inclTokens := Lexer(mpu, fn)
+						fmt.Println("Tokens from", fn, ": ", *inclTokens, "\n\n") // TODO TEST
+
+						// Remove the last token, which
+						// is an EOF
+						*inclTokens = (*inclTokens)[0 : len(*inclTokens)-1]
+
 						tokens = append(tokens, *inclTokens...)
 
 						i = i + ef
@@ -540,7 +547,7 @@ func Lexer(mpu string, filename string) *[]token.Token {
 
 			// String. Use double quote instead of single quote.
 			// Note we currently don't allow backslashes to get the
-			// quotation mark itself
+			// quote character itself
 			case '"':
 				i++ // skip leading quote
 				e, ok := findStringEOW(cs[i:len(cs)])
@@ -606,6 +613,10 @@ func Lexer(mpu string, filename string) *[]token.Token {
 		}
 		addToken(token.EOL, "\n", ln, len(cs), filename)
 	}
+
+	// Add an end of file token (EOF). If this is an include file, this will
+	// be deleted by the call and only the main one will remain
+	addToken(token.EOF, "EOF", len(ls), 0, filename)
 
 	if errCount != 0 {
 		log.Fatalf("LEXER FATAL: Found %d error(s).", errCount)
